@@ -87,6 +87,68 @@ namespace PacePrototype
             return g;
         }
 
+        // one four cycle
+        public static UndirectedGraph<int, Edge<int>> TestGraph4()
+        {
+            var g = new UndirectedGraph<int, Edge<int>>();
+            g.AddVertexRange(new int[] { 0, 1, 2, 3 });
+            var edges = new List<Edge<int>>
+            {
+                new Edge<int>(0, 1),
+                new Edge<int>(0, 2),
+                new Edge<int>(1, 3),
+                new Edge<int>(2, 3),
+
+
+            };
+            g.AddEdgeRange(edges);
+
+            return g;
+        }
+
+        // two four cycles
+        public static UndirectedGraph<int, Edge<int>> TestGraph5()
+        {
+            var g = new UndirectedGraph<int, Edge<int>>();
+            g.AddVertexRange(new int[] { 0, 1, 2, 3, 4, 5 });
+            var edges = new List<Edge<int>>
+            {
+                new Edge<int>(0, 1),
+                new Edge<int>(0, 2),
+                new Edge<int>(1, 3),
+                new Edge<int>(2, 3),
+                new Edge<int>(2, 5),
+                new Edge<int>(3, 4),
+                new Edge<int>(4, 5),
+
+            };
+            g.AddEdgeRange(edges);
+
+            return g;
+        }
+
+        // one four cycle and one five cycle
+        public static UndirectedGraph<int, Edge<int>> TestGraph6()
+        {
+            var g = new UndirectedGraph<int, Edge<int>>();
+            g.AddVertexRange(new int[] { 0, 1, 2, 3, 4, 5 });
+            var edges = new List<Edge<int>>
+            {
+                new Edge<int>(0, 1),
+                new Edge<int>(0, 5),
+                new Edge<int>(0, 2),
+                new Edge<int>(1, 3),
+                new Edge<int>(2, 3),
+                new Edge<int>(3, 4),
+                new Edge<int>(4, 5),
+
+
+            };
+            g.AddEdgeRange(edges);
+
+            return g;
+        }
+
     }
 }
-}
+

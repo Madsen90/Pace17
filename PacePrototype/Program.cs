@@ -10,9 +10,13 @@ namespace PacePrototype
     {
         static void Main(string[] args)
         {
-            Faster.AnalyseGraph(TestGraphs.TestGraph1());
-            Faster.AnalyseGraph(TestGraphs.TestGraph2());
-            Faster.AnalyseGraph(TestGraphs.TestGraph3());
+            MoplexAnalysis.AnalyseGraph(TestGraphs.TestGraph1());
+            MoplexAnalysis.AnalyseGraph(TestGraphs.TestGraph2());
+            MoplexAnalysis.AnalyseGraph(TestGraphs.TestGraph3());
+            var a = Faster.FindFourCycle(TestGraphs.TestGraph2());
+            a = Faster.FindFourCycle(TestGraphs.TestGraph4());
+            a = Faster.FindFourCycle(TestGraphs.TestGraph5());
+            a = Faster.FindFourCycle(TestGraphs.TestGraph6());
         }
 
     }

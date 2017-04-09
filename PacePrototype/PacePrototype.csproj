@@ -58,8 +58,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Faster.cs" />
+    <Compile Include="MoplexAnalysis.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestGraphs.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
