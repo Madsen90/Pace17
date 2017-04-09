@@ -11,6 +11,8 @@ namespace PacePrototype
         static void Main(string[] args)
         {
             Faster.AnalyseGraph(Faster.TestGraph1());
+            Faster.AnalyseGraph(Faster.TestGraph2());
+            Faster.AnalyseGraph(Faster.TestGraph3());
         }
     }
 }

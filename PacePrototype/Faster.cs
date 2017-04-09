@@ -78,7 +78,7 @@ namespace PacePrototype
                 graph.AddVertexRange(seperator);
                 graph.AddVertexRange(potMoplex);
                 graph.AddEdgeRange(tempRemove);
-                Boolean isMoplex = true;
+                var commonComponents = new HashSet<int>(a.Components.Values);
                 foreach(var sepNode in seperator)
                 {
                     HashSet<int> connectedComponents = new HashSet<int>();
@@ -87,20 +87,17 @@ namespace PacePrototype
                         var neighbour = e.Source == sepNode ? e.Target : e.Source;
                         if (potMoplex.Contains(neighbour))
                             continue; //not a component, since it was removed at the time
-                        int c = -1;
-                        var comp = nodeToComponentDic.TryGetValue(neighbour, out c);
-                        if (c == -1)
-                            throw new Exception("Something went terribly wrong with seperator-component check, the neighbour of a seperator node was not part of moplex or other component");
-                        connectedComponents.Add(c);
+                        if (nodeToComponentDic.ContainsKey(neighbour)) //else neighbour is also neighbour of potential moplex
+                        {
+                            int c = -1;
+                            var comp = nodeToComponentDic.TryGetValue(neighbour, out c);
+                            connectedComponents.Add(c);
+                        }
                     }
-                    if(connectedComponents.Count != a.ComponentCount)
-                    {
-                        isMoplex = false;
-                        break;
-                    }
-
+                    commonComponents = new HashSet<int>(commonComponents.Intersect(connectedComponents));
                 }
-                if (isMoplex)
+                
+                if (commonComponents.Count > 0)
                     moplexes.Add(potMoplex);
                 foreach(var n in potMoplex)
                 {
@@ -174,6 +171,7 @@ namespace PacePrototype
             return l1.Count - l2.Count;
         }
 
+        //Graph from Separability Generalizes Dirac's Theorem
         public static UndirectedGraph<int, Edge<int>> TestGraph1()
         {
             var g = new UndirectedGraph<int, Edge<int>>();
@@ -197,6 +195,57 @@ namespace PacePrototype
             };
             g.AddEdgeRange(edges);
             
+            return g;
+        }
+
+        // Graph with 3-vertex moplex {0,1,2}, 6-vertex cycle, and "false" moplex triangle
+        public static UndirectedGraph<int, Edge<int>> TestGraph2()
+        {
+            var g = new UndirectedGraph<int, Edge<int>>();
+            g.AddVertexRange(new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
+            var edges = new List<Edge<int>>
+            {
+                new Edge<int>(0, 1),
+                new Edge<int>(0, 2),
+                new Edge<int>(0, 3),
+                new Edge<int>(1, 2),
+                new Edge<int>(1, 3),
+                new Edge<int>(2, 3),
+                new Edge<int>(3, 4),
+                new Edge<int>(3, 10),
+                new Edge<int>(4, 5),
+                new Edge<int>(4, 6),
+                new Edge<int>(5, 6),
+                new Edge<int>(5, 8),
+                new Edge<int>(6, 7),
+                new Edge<int>(8, 9),
+                new Edge<int>(9, 10)
+            };
+            g.AddEdgeRange(edges);
+
+            return g;
+        }
+
+        // Graph where all vertices are moplexes
+        public static UndirectedGraph<int, Edge<int>> TestGraph3()
+        {
+            var g = new UndirectedGraph<int, Edge<int>>();
+            g.AddVertexRange(new int[] { 0, 1, 2, 3, 4, 5});
+            var edges = new List<Edge<int>>
+            {
+                new Edge<int>(0, 3),
+                new Edge<int>(0, 4),
+                new Edge<int>(0, 5),
+                new Edge<int>(1, 3),
+                new Edge<int>(1, 4),
+                new Edge<int>(1, 5),
+                new Edge<int>(2, 3),
+                new Edge<int>(2, 4),
+                new Edge<int>(2, 5)
+
+            };
+            g.AddEdgeRange(edges);
+
             return g;
         }
 
