@@ -13,7 +13,7 @@ namespace PacePrototype
         public static int Run(UndirectedGraph<int, Edge<int>> graph)
         {
             int ret = -1;
-            int k = -1;
+            int k = 4;
             while (ret == -1)
             {
                 k++;
@@ -63,9 +63,111 @@ namespace PacePrototype
                     Marked2.Remove(cycle[2]);
                 else
                     r2--;
-                return Math.Max(FasterInner(graph1, k - 1, r1, Marked1), FasterInner(graph1, k - 1, r2, Marked2));
+                return Math.Max(FasterInner(graph1, k - 1, r1, Marked1), FasterInner(graph2, k - 1, r2, Marked2));
             }
+
+            //find moplex with both marked and unmarked edges
+            List<List<int>> markedAndUnmarked = analysis.Moplexes.Where(vl => vl.Exists(v => Marked.Contains(v))).Where(vl => vl.Exists(v => !Marked.Contains(v))).ToList();
             
+            if (markedAndUnmarked.Count > 0)
+            {
+                foreach (var moplex in markedAndUnmarked)
+                {
+                    foreach (var vertex in moplex)
+                    {
+                        var previousSize = Marked.Count;
+                        Marked.Add(vertex);
+                        if (previousSize < Marked.Count)
+                            r--;
+                    }
+                }
+                return FasterInner(graph, k, r, Marked);
+            }
+
+            //simplicial moplex with only unmarked vertices
+            List<List<int>> unmarkedMoplexes = analysis.Moplexes.Where(vl => vl.TrueForAll(v => !Marked.Contains(v))).ToList();
+            List<List<int>> simplicialUnmarked = unmarkedMoplexes.Where(vl =>
+            {
+                var neighbourhood = new HashSet<int>();
+
+                foreach (var v in vl)
+                {
+                    foreach (var e in graph.AdjacentEdges(v))
+                    {
+                        neighbourhood.Add(e.GetOtherVertex(v));
+                    }
+                    
+                }
+                return IsClique(neighbourhood, analysis.EleminationOrder, analysis.NeighbourLabels);
+            }).ToList();
+
+            if(simplicialUnmarked.Count > 0)
+            {
+                foreach(var neighbourhood in simplicialUnmarked)
+                {
+                    foreach (var v in neighbourhood)
+                    {
+                        graph.RemoveVertex(v);
+                    }
+                }
+                return FasterInner(graph, k, r, Marked);
+            }
+
+            // Moplex with only unmarked vertices and neighbourhood only missing one edge
+            Edge<int> missingEdge = null;
+            HashSet<int> moplexNeighbourhood;
+            int m = -1;
+            foreach (var moplex in unmarkedMoplexes)
+            {
+                m++;
+                moplexNeighbourhood = new HashSet<int>(moplex.SelectMany(v => graph.AdjacentEdges(v).Select(e => e.GetOtherVertex(v))));
+                var missingEdges = MissingEdges(moplexNeighbourhood, analysis.NeighbourLabels);
+                if(missingEdges.Count == 1)
+                {
+                    missingEdge = missingEdges.First();
+                    break;
+                }
+            }
+            if(missingEdge != null)
+            {
+                //TODO: find v* if exists and remove marking if it has one
+                graph.AddEdge(missingEdge);
+                return FasterInner(graph, k - 1, r, Marked); //TODO: fix r and Marked
+            }
+
+            var markedMoplexes = analysis.Moplexes.Where(vl => vl.TrueForAll(v => Marked.Contains(v))).ToList();
+            if(markedMoplexes.Count == analysis.Moplexes.Count)
+                return -1;
+            
+            if(unmarkedMoplexes.Count > 0)
+            {
+                var moplex = unmarkedMoplexes.First();
+                //branch 1:
+                var Marked1 = new HashSet<int>(Marked);
+                moplex.ForEach(v => Marked1.Add(v));
+                var r1 = r - (Marked1.Count - Marked.Count);
+                var b1 = FasterInner(graph, k, r1, Marked1);
+
+                //branch 2:
+                var graph2 = CloneGraph(graph);
+                var neighbourhood = new HashSet<int>();
+                foreach (var v in moplex)
+                {
+                    var vAdj = graph.AdjacentEdges(v);
+                    foreach (var e in vAdj)
+                    {
+                        neighbourhood.Add(e.GetOtherVertex(v));
+                    }
+                }
+                var missingEdges = MissingEdges(neighbourhood, analysis.NeighbourLabels);
+                graph2.AddEdgeRange(missingEdges);
+                var k2 = k - (missingEdges.Count);
+                var b2 = FasterInner(graph2, k2, r, Marked);
+                return Math.Max(b1, b2);
+                
+            }
+
+
 
             return -1;
         }
@@ -121,7 +223,7 @@ namespace PacePrototype
 
 
         // These two (ischordal + isclique) could probably be done a lot faster and better. See https://github.com/omid69/PEO-Verification
-        private static bool IsChordal(MoplexAnalysis analysis)
+        public static bool IsChordal(MoplexAnalysis analysis)
         {
             var ordering = analysis.EleminationOrder;
             var labels = analysis.NeighbourLabels;
@@ -129,16 +231,33 @@ namespace PacePrototype
             for (int i = ordering.Length -1; i >= 0; i--)
             {
                 int v = ordering[i];
-                var clique = new HashSet<int>(labels[i].Where(j => j < i));
+                var clique = new HashSet<int>(labels[i].Where(j => j > v).Select(label => analysis.EleminationOrderRev[label]));
+                
                 clique.Add(i);
-                if (!IsClique(clique, labels))
+                if (!IsClique(clique, analysis.EleminationOrder,labels))
                     return false;
             }
 
             return true;
         }
 
-        private static bool IsClique(HashSet<int> clique, List<int>[] labels)
+        private static List<Edge<int>> MissingEdges(HashSet<int> clique, List<int>[] labels)
+        {
+            var missingEdges = new List<Edge<int>>();
+            foreach (var vertex in clique)
+            {
+                foreach (var neighbour in clique)
+                {
+                    if (vertex == neighbour)
+                        continue;
+                    if (!labels[neighbour].Contains(vertex))
+                        missingEdges.Add(new Edge<int>(Math.Min(vertex, neighbour), Math.Max(vertex, neighbour)));
+                }
+            }
+            return missingEdges;
+        }
+
+        private static bool IsClique(HashSet<int> clique, int[] order, List<int>[] labels)
         {
             foreach (var vertex in clique)
             {
@@ -146,7 +265,7 @@ namespace PacePrototype
                 {
                     if (vertex == neighbour)
                         continue;
-                    if (!labels[neighbour].Contains(vertex))
+                    if (!labels[neighbour].Contains(order[vertex]))
                         return false;
                 }
             }

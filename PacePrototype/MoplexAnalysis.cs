@@ -11,12 +11,18 @@ namespace PacePrototype
     {
         public List<List<int>> Moplexes { get; }
         public int[] EleminationOrder { get; }
+        public int[] EleminationOrderRev { get; }
         public List<int>[] NeighbourLabels { get; }
 
         private MoplexAnalysis(List<List<int>> moplexList, int[] order, List<int>[] labels)
         {
             Moplexes = moplexList;
             EleminationOrder = order;
+            EleminationOrderRev = new int[order.Length+1];
+            for(int i = 0; i < order.Length; i++)
+            {
+                EleminationOrderRev[order[i]] = i;
+            }
             NeighbourLabels = labels;
         }
 
@@ -144,7 +150,7 @@ namespace PacePrototype
             return moplex;
         }
 
-        private static (int[], List<int>[]) LexBFS(UndirectedGraph<int, Edge<int>> graph, int start)
+        public static (int[], List<int>[]) LexBFS(UndirectedGraph<int, Edge<int>> graph, int start)
         {
             List<int>[] labels = new List<int>[graph.VertexCount];
             int[] indeces = new int[graph.VertexCount];

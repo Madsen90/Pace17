@@ -131,7 +131,7 @@ namespace PacePrototype
         public static UndirectedGraph<int, Edge<int>> TestGraph6()
         {
             var g = new UndirectedGraph<int, Edge<int>>();
-            g.AddVertexRange(new int[] { 0, 1, 2, 3, 4, 5 });
+            g.AddVertexRange(new int[] {  0, 1, 2, 3, 4, 5 });
             var edges = new List<Edge<int>>
             {
                 new Edge<int>(0, 1),
@@ -149,6 +149,66 @@ namespace PacePrototype
             return g;
         }
 
+        //chordal graph
+        public static UndirectedGraph<int, Edge<int>> TestGraph7()
+        {
+            var g = new UndirectedGraph<int, Edge<int>>();
+            g.AddVertexRange(new int[] { 0, 1, 2});
+            var edges = new List<Edge<int>>
+            {
+                new Edge<int>(0, 1),
+                new Edge<int>(0, 2),
+                new Edge<int>(1, 2),
+
+
+            };
+            g.AddEdgeRange(edges);
+
+            return g;
+        }
+
+        // letter graph missing two diagonal edges
+        public static UndirectedGraph<int, Edge<int>> TestGraph8()
+        {
+            var g = new UndirectedGraph<int, Edge<int>>();
+            g.AddVertexRange(new int[] { 0, 1, 2, 3, 4 });
+            var edges = new List<Edge<int>>
+            {
+                new Edge<int>(0, 1),
+                new Edge<int>(0, 2),
+                new Edge<int>(0, 3),
+                new Edge<int>(1, 4),
+                new Edge<int>(2, 4),
+                new Edge<int>(3, 4),
+
+
+            };
+            g.AddEdgeRange(edges);
+
+            return g;
+        }
+
+        // Graph 8 as chordal
+        public static UndirectedGraph<int, Edge<int>> TestGraph9()
+        {
+            var g = new UndirectedGraph<int, Edge<int>>();
+            g.AddVertexRange(new int[] { 0, 1, 2, 3, 4 });
+            var edges = new List<Edge<int>>
+            {
+                new Edge<int>(0, 1),
+                new Edge<int>(0, 2),
+                new Edge<int>(0, 3),
+                new Edge<int>(0, 4),
+                new Edge<int>(1, 4),
+                new Edge<int>(2, 4),
+                new Edge<int>(3, 4),
+
+
+            };
+            g.AddEdgeRange(edges);
+
+            return g;
+        }
     }
 }
 
