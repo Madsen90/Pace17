@@ -56,11 +56,11 @@ namespace PacePrototype
                 else
                     r1--;
                 if (Marked.Contains(cycle[1]))
-                    Marked1.Remove(cycle[1]);
+                    Marked2.Remove(cycle[1]);
                 else
                     r2--;
                 if (Marked.Contains(cycle[2]))
-                    Marked1.Remove(cycle[2]);
+                    Marked2.Remove(cycle[2]);
                 else
                     r2--;
                 return Math.Max(FasterInner(graph1, k - 1, r1, Marked1), FasterInner(graph1, k - 1, r2, Marked2));
