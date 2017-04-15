@@ -12,12 +12,19 @@ namespace PacePrototype
     {
         public static int Run(UndirectedGraph<int, Edge<int>> graph)
         {
+            var time = DateTime.Now;
+
             int ret = -1;
-            int k = 4;
+            int k = -1;
             while (ret == -1)
             {
-                k++;
+                var time1 = DateTime.Now;
+
+                Console.WriteLine(++k);
                 ret = FasterInner(graph, k, k * 2, new HashSet<int>());
+
+                Console.WriteLine($"Took {(DateTime.Now - time1).ToString("c")}");
+                Console.WriteLine($"Cumulated {(DateTime.Now - time).ToString("c")}");
             }
 
 
@@ -35,7 +42,7 @@ namespace PacePrototype
                 return k;
 
             // Find four cycle
-            List<int> cycle = FindFourCycle(graph);
+            List<int> cycle = FindFourCycle2(graph);
             if(cycle != null)
             {
                 var graph1 = CloneGraph(graph);
@@ -286,7 +293,7 @@ namespace PacePrototype
         }
 
         // Dumb n^4 four-cycle finder
-        public static List<int> FindFourCycle(UndirectedGraph<int, Edge<int>> graph)
+        public static List<int> FindFourCycle1(UndirectedGraph<int, Edge<int>> graph)
         {
             foreach (var v in graph.Vertices)
             {
@@ -314,6 +321,46 @@ namespace PacePrototype
                         if (common.Count > 0)
                             return new List<int> { v, vi, vj, common.First() };
                         
+                    }
+                }
+            }
+            return null;
+        }
+
+        // More memory intensive (and faster??) cycle finder
+        public static List<int> FindFourCycle2(UndirectedGraph<int, Edge<int>> graph)
+        {
+            var matrix = new int[graph.VertexCount, graph.VertexCount];
+            matrix.Initialize();
+            for (int i = 0; i < graph.VertexCount; i++) //Assumes that vertex set is of format {0, 1, ... n-1}
+            {
+                foreach(var e1 in graph.AdjacentEdges(i))
+                {
+                    var n1 = e1.GetOtherVertex(i);
+                    foreach (var e2 in graph.AdjacentEdges(i))
+                    {
+                        var n2 = e2.GetOtherVertex(i);
+                        if (n1 == n2)
+                            continue;
+                        var temp = Math.Max(n1, n2);
+                        n1 = Math.Min(n1, n2);
+                        n2 = temp;
+                        if (matrix[n1, n2] == 1 )
+                        {
+                            if (graph.ContainsEdge(n1, n2) || graph.ContainsEdge(n2, n1))
+                                continue;
+                            // find the vertice that set matrix[n1, n2] == 1
+                            for (int j = 0; j < i; j++)
+                            {
+                                if((graph.ContainsEdge(j,n1) || graph.ContainsEdge(n1,j)) && (graph.ContainsEdge(j, n2) || graph.ContainsEdge(n2, j)))
+                                {
+                                    if (graph.ContainsEdge(i, j) || graph.ContainsEdge(j, i))
+                                        continue;
+                                    return new List<int> { i, j, n1, n2 };
+                                }
+                            }
+                        }
+                        matrix[n1, n2] = 1;
                     }
                 }
             }
