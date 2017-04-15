@@ -96,8 +96,8 @@ namespace PacePrototype
                     {
                         neighbourhood.Add(e.GetOtherVertex(v));
                     }
-                    
                 }
+
                 return IsClique(neighbourhood, analysis.EleminationOrder, analysis.NeighbourLabels);
             }).ToList();
 
@@ -115,12 +115,16 @@ namespace PacePrototype
 
             // Moplex with only unmarked vertices and neighbourhood only missing one edge
             Edge<int> missingEdge = null;
-            HashSet<int> moplexNeighbourhood;
+            HashSet<int> moplexNeighbourhood = null;
             int m = -1;
             foreach (var moplex in unmarkedMoplexes)
             {
                 m++;
-                moplexNeighbourhood = new HashSet<int>(moplex.SelectMany(v => graph.AdjacentEdges(v).Select(e => e.GetOtherVertex(v))));
+                moplexNeighbourhood = new HashSet<int>(moplex.SelectMany(v => graph.AdjacentEdges(v).Select(e => e.GetOtherVertex(v)))); //this includes the moplex - perhaps it shouldn't
+                foreach (var v in moplex)
+                {
+                    moplexNeighbourhood.Remove(v);
+                }
                 var missingEdges = MissingEdges(moplexNeighbourhood, analysis.NeighbourLabels);
                 if(missingEdges.Count == 1)
                 {
@@ -130,9 +134,26 @@ namespace PacePrototype
             }
             if(missingEdge != null)
             {
-                //TODO: find v* if exists and remove marking if it has one
+                HashSet<int> moplexNeighbourhoodMarked = CloneSet(moplexNeighbourhood);
+                moplexNeighbourhoodMarked.RemoveWhere(v => !Marked.Contains(v));
+
+                var vStar = FindVStar(missingEdge, moplexNeighbourhoodMarked, graph);
+                if(vStar == -1)
+                {
+                    vStar = FindVStar(new Edge<int>(missingEdge.Target, missingEdge.Source), moplexNeighbourhoodMarked, graph);
+                }
+                if (Marked.Contains(missingEdge.Source))
+                {
+                    Marked.Remove(missingEdge.Source);
+                }
+                else r--;
+                if (Marked.Contains(missingEdge.Target))
+                {
+                    Marked.Remove(missingEdge.Target);
+                }
+                else r--;
                 graph.AddEdge(missingEdge);
-                return FasterInner(graph, k - 1, r, Marked); //TODO: fix r and Marked
+                return FasterInner(graph, k - 1, r, Marked);
             }
 
             var markedMoplexes = analysis.Moplexes.Where(vl => vl.TrueForAll(v => Marked.Contains(v))).ToList();
@@ -170,6 +191,84 @@ namespace PacePrototype
 
 
             return -1;
+        }
+
+        private static HashSet<int> CloneSet(HashSet<int> org)
+        {
+            var clone = new HashSet<int>();
+            foreach (var i in org)
+            {
+                clone.Add(i);
+            }
+            return clone;
+            
+        }
+
+        public static int FindVStar(Edge<int> missingEdge, HashSet<int> neighbourhood, UndirectedGraph<int, Edge<int>> graph)
+        {
+            var x = missingEdge.Source;
+            var y = missingEdge.Target;
+            var component = new UndirectedGraph<int, Edge<int>>();
+            var visited = new HashSet<int> { x };
+            var complete = new List<List<int>>();
+            component.AddVertexRange(neighbourhood);
+            foreach (var v in neighbourhood)
+            {
+                component.AddEdgeRange(graph.AdjacentEdges(v)); //adds edges not in component, however, since no target vertices will exist if not in the component, these edges will be ignored by QuickGraph
+            }
+            Queue<List<int>> q = new Queue<List<int>>();
+            foreach (var e in component.AdjacentEdges(x))
+            {
+                var n = e.GetOtherVertex(x);
+                var l = new List<int> { x, n };
+                q.Enqueue(l);
+            }
+            while(q.Count > 0)
+            {
+                var l = q.Dequeue();
+                var n = l.Last();
+                if (visited.Contains(n)) // What if they have same iteration number?
+                {
+                    continue; // l is not cordless.
+                }
+                if(n == y)
+                {
+                    complete.Add(l); // The coordless path is complete 
+                    continue;
+                }
+                visited.Add(n);
+
+                foreach(var e in graph.AdjacentEdges(n))
+                {
+                    var v = e.GetOtherVertex(n);
+                    if (visited.Contains(v))
+                        continue;
+                    var l2 = CloneList(l);
+                    l2.Add(v);
+                    q.Enqueue(l2);
+                }
+
+            }
+            complete.ForEach(l => l.Remove(y));
+            List<int> vStars = complete.Select(l => l.Last()).ToList();
+            int vStar = vStars.First();
+            if (vStars.TrueForAll(v => v == vStar))
+            {
+                return vStar;
+            }
+
+            return -1;
+            
+        }
+
+        private static List<int> CloneList(List<int> l)
+        {
+            var clone = new List<int>();
+            foreach (var i in l)
+            {
+                clone.Add(i);
+            }
+            return clone;
         }
 
         private static UndirectedGraph<int, Edge<int>> CloneGraph(UndirectedGraph<int, Edge<int>> graph)

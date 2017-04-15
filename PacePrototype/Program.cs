@@ -1,4 +1,5 @@
-﻿using System;
+﻿using QuickGraph;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,9 +11,11 @@ namespace PacePrototype
     {
         static void Main(string[] args)
         {
-            var analysis = MoplexAnalysis.AnalyseGraph(TestGraphs.TestGraph9());
-            var ch = Faster.IsChordal(analysis);
+            var analysis = MoplexAnalysis.AnalyseGraph(TestGraphs.TestGraph2());
+            var vStar = Faster.FindVStar(new Edge<int>(0, 7), new HashSet<int>(TestGraphs.TestGraph2().Vertices), TestGraphs.TestGraph2());
             var k = Faster.Run(TestGraphs.TestGraph8());
+
+            
 
             MoplexAnalysis.AnalyseGraph(TestGraphs.TestGraph1());
             MoplexAnalysis.AnalyseGraph(TestGraphs.TestGraph2());
