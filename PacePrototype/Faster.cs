@@ -12,19 +12,19 @@ namespace PacePrototype
     {
         public static int Run(UndirectedGraph<int, Edge<int>> graph)
         {
-            var time = DateTime.Now;
+            //var time = DateTime.Now;
 
             int ret = -1;
             int k = -1;
             while (ret == -1)
             {
-                var time1 = DateTime.Now;
+                //var time1 = DateTime.Now;
 
                 Console.WriteLine(++k);
                 ret = FasterInner(graph, k, k * 2, new HashSet<int>());
 
-                Console.WriteLine($"Took {(DateTime.Now - time1).ToString("c")}");
-                Console.WriteLine($"Cumulated {(DateTime.Now - time).ToString("c")}");
+                //Console.WriteLine($"Took {(DateTime.Now - time1).ToString("c")}");
+                //Console.WriteLine($"Cumulated {(DateTime.Now - time).ToString("c")}");
             }
 
 
@@ -327,7 +327,7 @@ namespace PacePrototype
             return null;
         }
 
-        // More memory intensive (and faster??) cycle finder
+        // More memory intensive (and faster!!) cycle finder
         public static List<int> FindFourCycle2(UndirectedGraph<int, Edge<int>> graph)
         {
             var matrix = new int[graph.VertexCount, graph.VertexCount];

@@ -152,6 +152,8 @@ namespace PacePrototype
 
         public static (int[], List<int>[]) LexBFS(UndirectedGraph<int, Edge<int>> graph, int start)
         {
+            if (!graph.ContainsVertex(start))
+                start = graph.Vertices.Min();
             List<int>[] labels = new List<int>[graph.VertexCount];
             int[] indeces = new int[graph.VertexCount];
 
@@ -165,6 +167,7 @@ namespace PacePrototype
             {
                 indeces[next] = i;
                 labels[next].Add(i);
+                Console.WriteLine($"next: {next}");
                 foreach (Edge<int> outEdge in graph.AdjacentEdges(next))
                 {
                     var neighbour = outEdge.Source == next ? outEdge.Target : outEdge.Source;
