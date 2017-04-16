@@ -19,9 +19,10 @@ namespace PacePrototype
             while (ret == -1)
             {
                 //var time1 = DateTime.Now;
+                var graph1 = CloneGraph(graph);
 
                 Console.WriteLine(++k);
-                ret = FasterInner(graph, k, k * 2, new HashSet<int>());
+                ret = FasterInner(graph1, k, k * 2, new HashSet<int>());
 
                 //Console.WriteLine($"Took {(DateTime.Now - time1).ToString("c")}");
                 //Console.WriteLine($"Cumulated {(DateTime.Now - time).ToString("c")}");
