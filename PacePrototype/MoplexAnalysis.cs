@@ -13,6 +13,7 @@ namespace PacePrototype
         public int[] EleminationOrder { get; }
         public int[] EleminationOrderRev { get; }
         public List<int>[] NeighbourLabels { get; }
+        public static int rounds = 0;
 
         private MoplexAnalysis(List<List<int>> moplexList, int[] order, List<int>[] labels)
         {
@@ -28,6 +29,7 @@ namespace PacePrototype
 
         public static MoplexAnalysis AnalyseGraph(UndirectedGraph<int, Edge<int>> graph)
         {
+            rounds++;
 
             (int[] ordering, List<int>[] labels) = LexBFS(graph, 0);
             var moplex = FindLexMoplex(ordering, labels);
@@ -155,6 +157,7 @@ namespace PacePrototype
             if (!graph.ContainsVertex(start))
                 start = graph.Vertices.Min();
             List<int>[] labels = new List<int>[graph.VertexCount];
+            //Console.WriteLine($"New lables list of size {labels.Length}");
             int[] indeces = new int[graph.VertexCount];
 
             for (int i = 0; i < graph.VertexCount; i++)
@@ -167,10 +170,11 @@ namespace PacePrototype
             {
                 indeces[next] = i;
                 labels[next].Add(i);
-                Console.WriteLine($"next: {next}");
+                //Console.WriteLine($"next: {next}");
                 foreach (Edge<int> outEdge in graph.AdjacentEdges(next))
                 {
                     var neighbour = outEdge.Source == next ? outEdge.Target : outEdge.Source;
+                    //Console.WriteLine($"Neighbour: {neighbour}, Labels.length: {labels.Length}, rounds: {rounds}, graph.containsVertex(neighbour): {graph.ContainsVertex(neighbour)}");
                     labels[neighbour].Add(i);
                 }
 
