@@ -12,11 +12,11 @@ namespace PacePrototype
     {
         static void Main(string[] args)
         {
-            testAllGraphs();
+            //testAllGraphs();
             //Tests();
-            //var graph = parse(args[0]);
+            var graph = parse(args[0]);
             //var graph = TestGraphs.TestGraph6();
-            //var k = Faster.Run(graph);
+            var k = Faster.Run(graph);
             //Console.WriteLine($"Graph: {args[0].Split('\\').Last()} has k={k}");
             //Console.ReadLine();
         }
