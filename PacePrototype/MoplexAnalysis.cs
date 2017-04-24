@@ -99,7 +99,7 @@ namespace PacePrototype
                         var neighbour = e.GetOtherVertex(sepNode);
                         if (potMoplex.Contains(neighbour))
                             continue; //not a component, since it was removed at the time
-                        if (nodeToComponentDic.ContainsKey(neighbour)) //else neighbour is also seperator
+                        if (nodeToComponentDic.ContainsKey(neighbour)) //else neighbour is also seperator TODO: error here, 
                         {
                             int c = -1;
                             nodeToComponentDic.TryGetValue(neighbour, out c);

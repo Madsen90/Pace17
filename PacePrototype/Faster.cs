@@ -29,8 +29,7 @@ namespace PacePrototype
                 Console.WriteLine($"Took {(DateTime.Now - time1).ToString("c")}");
                 Console.WriteLine($"Cumulated {(DateTime.Now - time).ToString("c")}");
             }
-            var edgeSet1 = new HashSet<Edge<int>>(retGraph.Edges);
-            var edgeSet = new HashSet<Edge<int>>(edgeSet1.Where(e => !graph.ContainsEdge(e.Source, e.Target)));
+            var edgeSet = new HashSet<Edge<int>>(retGraph.Edges.Where(e => !graph.ContainsEdge(e.Source, e.Target)));
             drawGraph(retGraph, edgeSet, @"C:\Users\Frederik\Desktop\a.dot");
             
             return (k - ret, edgeSet);
@@ -54,7 +53,7 @@ namespace PacePrototype
                 return (-1, graph);
 
             var analysis = MoplexAnalysis.AnalyseGraph(graph);
-            if (IsChordal(analysis))
+            if (IsChordal2(analysis, graph))
                 return (k, graph);
 
             // Find four cycle
@@ -88,7 +87,7 @@ namespace PacePrototype
                     r2--;
                 var (k1, g1) = FasterInner(graph1, k - 1, r1, Marked1);
                 var (k2, g2) = FasterInner(graph2, k - 1, r2, Marked2);
-                if (k1 > -1 && k1 < k2)
+                if (k1 > -1 && (k1 < k2 || k2 < 0))
                     return (k1, g1);
                 return (k2, g2);
             }
@@ -317,7 +316,7 @@ namespace PacePrototype
         }
 
         // Dumb n^4 four-cycle finder
-        public static List<int> FindFourCycle2(UndirectedGraph<int, Edge<int>> graph)
+        public static List<int> FindFourCycle1(UndirectedGraph<int, Edge<int>> graph)
         {
             foreach (var v in graph.Vertices)
             {
@@ -352,7 +351,7 @@ namespace PacePrototype
         }
 
         // More memory intensive (and faster!!) cycle finder
-        public static List<int> FindFourCycle1(UndirectedGraph<int, Edge<int>> graph)
+        public static List<int> FindFourCycle2(UndirectedGraph<int, Edge<int>> graph)
         {
             var matrix = new int[graph.VertexCount, graph.VertexCount];
             matrix.Initialize();
@@ -389,6 +388,45 @@ namespace PacePrototype
                 }
             }
             return null;
+        }
+
+        public static bool IsChordal2(MoplexAnalysis analysis, UndirectedGraph<int, Edge<int>> graph)
+        {
+            var ordering = analysis.EleminationOrder;
+            var labels = analysis.NeighbourLabels;
+
+            foreach(int v in ordering.Keys)
+            {
+                int o = ordering[v];
+                var clique = new HashSet<int>(labels[v].Where(j => j > o).Select(j => analysis.EleminationOrderRev[j]));
+                clique.Add(v);
+                if(!IsClique2(clique, graph))
+                {
+                    return false;
+                }
+
+            }
+
+
+            return true;
+        }
+
+        private static bool IsClique2(HashSet<int> clique, UndirectedGraph<int, Edge<int>> graph)
+        {
+            foreach (int v1 in clique)
+            {
+                foreach (int v2 in clique)
+                {
+                    if (v1 == v2)
+                        continue;
+                    if(!graph.ContainsEdge(v1, v2))
+                    {
+                        return false;
+                    }
+                }
+
+            }
+            return true;
         }
 
 

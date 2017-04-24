@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace PacePrototype
 {
-    class TestGraphs
+    public class TestGraphs
     {
         //Graph from Separability Generalizes Dirac's Theorem
         public static UndirectedGraph<int, Edge<int>> TestGraph1()
