@@ -65,7 +65,7 @@ namespace PacePrototype
                 var seperator = labels[v].Select(l => revOrdering[l]).Except(potMoplex).ToList();
 
                 
-                // Check that the seperator is minimal - i.e. check all vertices in the seperator is connected at least one common component??
+                // Check that the seperator is minimal - i.e. check all vertices in the seperator is connected to all components
                 // First: Remove seperator and moplex from graph (temporarily)
                 var tempRemove = new List<Edge<int>>();
                 foreach (int mv in potMoplex)
@@ -90,30 +90,34 @@ namespace PacePrototype
                 graph.AddVertexRange(potMoplex);
                 graph.AddEdgeRange(tempRemove);
 
-
-                var commonComponents = new HashSet<int>(a.Components.Values);
+                var isMoplex = true;
                 foreach (var sepNode in seperator) // Find the components connected to each of the seperator vertices
                 {
                     HashSet<int> connectedComponents = new HashSet<int>();
                     foreach (var e in graph.AdjacentEdges(sepNode))
                     {
-                        var neighbour = e.Source == sepNode ? e.Target : e.Source;
+                        var neighbour = e.GetOtherVertex(sepNode);
                         if (potMoplex.Contains(neighbour))
                             continue; //not a component, since it was removed at the time
-                        if (nodeToComponentDic.ContainsKey(neighbour)) //else neighbour is also neighbour of potential moplex
+                        if (nodeToComponentDic.ContainsKey(neighbour)) //else neighbour is also seperator
                         {
                             int c = -1;
-                            var comp = nodeToComponentDic.TryGetValue(neighbour, out c);
+                            nodeToComponentDic.TryGetValue(neighbour, out c);
                             connectedComponents.Add(c);
                         }
                     }
-                    // N[sep1] intersect N[sep2] ... intersect { all components } = common components of all seperators.
-                    commonComponents = new HashSet<int>(commonComponents.Intersect(connectedComponents));
+                    if (connectedComponents.Count < a.ComponentCount)
+                    {
+                        isMoplex = false;
+                        break;
+                    }
                 }
 
-                // if seperators share at least one component, the seperator is minimal (intuition), and potMoplex is a moplex.
-                if (commonComponents.Count > 0)
+                if (isMoplex)
+                {
                     moplexes.Add(potMoplex);
+                }
+                
 
                 // To ensure no dublicates
                 foreach (var n in potMoplex)
