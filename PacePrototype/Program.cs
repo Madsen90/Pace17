@@ -13,11 +13,11 @@ namespace PacePrototype
         static void Main(string[] args)
         {
             //Tests();
-            var graph = parse(args[0]);
-            //var graph = TestGraphs.TestGraph2();
+            //var graph = parse(args[0]);
+            var graph = TestGraphs.TestGraph6();
             var k = Faster.Run(graph);
-            Console.WriteLine($"Graph: {args[0].Split('\\').Last()} has k={k}");
-            Console.ReadLine();
+            //Console.WriteLine($"Graph: {args[0].Split('\\').Last()} has k={k}");
+            //Console.ReadLine();
         }
 
         public static UndirectedGraph<int, Edge<int>> parse(string path)
@@ -40,7 +40,7 @@ namespace PacePrototype
         {
             var analysis = MoplexAnalysis.AnalyseGraph(TestGraphs.TestGraph2());
             var vStar = Faster.FindVStar(new Edge<int>(0, 7), new HashSet<int>(TestGraphs.TestGraph2().Vertices), TestGraphs.TestGraph2());
-            var k = Faster.Run(TestGraphs.TestGraph8());
+            var k = Faster.Run(TestGraphs.TestGraph1());
 
 
 
@@ -50,12 +50,24 @@ namespace PacePrototype
             MoplexAnalysis.AnalyseGraph(TestGraphs.TestGraph4());
             var a = Faster.FindFourCycle1(TestGraphs.TestGraph2());
             var b = Faster.FindFourCycle2(TestGraphs.TestGraph2());
+            if (a != b && !a.SequenceEqual(b))
+                throw new Exception();
             a = Faster.FindFourCycle1(TestGraphs.TestGraph4());
             b = Faster.FindFourCycle2(TestGraphs.TestGraph4());
+            if (a != b && !a.SequenceEqual(b))
+                throw new Exception();
             a = Faster.FindFourCycle1(TestGraphs.TestGraph5());
             b = Faster.FindFourCycle2(TestGraphs.TestGraph5());
+            if (a != b && !a.SequenceEqual(b))
+                throw new Exception();
             a = Faster.FindFourCycle1(TestGraphs.TestGraph6());
             b = Faster.FindFourCycle2(TestGraphs.TestGraph6());
+            if (a != b && !a.SequenceEqual(b))
+                throw new Exception();
+            a = Faster.FindFourCycle1(TestGraphs.TestGraph8());
+            b = Faster.FindFourCycle2(TestGraphs.TestGraph8());
+            if (a != b && !a.SequenceEqual(b))
+                throw new Exception();
         }
 
     }

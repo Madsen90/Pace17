@@ -127,7 +127,7 @@ namespace PacePrototype
             return g;
         }
 
-        // one four cycle and one five cycle
+        // two four cycles and one five cycle
         public static UndirectedGraph<int, Edge<int>> TestGraph6()
         {
             var g = new UndirectedGraph<int, Edge<int>>();

@@ -5,45 +5,60 @@ using System.Text;
 using System.Threading.Tasks;
 using QuickGraph;
 using QuickGraph.Graphviz.Dot;
+using QuickGraph.Graphviz;
+using System.IO;
 
 namespace PacePrototype
 {
     class Faster
     {
-        public static int Run(UndirectedGraph<int, Edge<int>> graph)
+        public static (int, HashSet<Edge<int>>) Run(UndirectedGraph<int, Edge<int>> graph)
         {
-            //var time = DateTime.Now;
-
+            var time = DateTime.Now;
             int ret = -1;
-            int k = -1;
+            int k = 1;
+            UndirectedGraph<int, Edge<int>> retGraph = null;
             while (ret == -1)
             {
-                //var time1 = DateTime.Now;
-                var graph1 = CloneGraph(graph);
+                var time1 = DateTime.Now;
 
                 Console.WriteLine(++k);
-                ret = FasterInner(graph1, k, k * 2, new HashSet<int>());
-
-                //Console.WriteLine($"Took {(DateTime.Now - time1).ToString("c")}");
-                //Console.WriteLine($"Cumulated {(DateTime.Now - time).ToString("c")}");
+                (int ret1, UndirectedGraph<int, Edge<int>> graph1) = FasterInner(graph, k, k * 2, new HashSet<int>());
+                ret = ret1;
+                retGraph = graph1;
+                Console.WriteLine($"Took {(DateTime.Now - time1).ToString("c")}");
+                Console.WriteLine($"Cumulated {(DateTime.Now - time).ToString("c")}");
             }
-
-
-            return k - ret;
+            var edgeSet1 = new HashSet<Edge<int>>(retGraph.Edges);
+            var edgeSet = new HashSet<Edge<int>>(edgeSet1.Where(e => !graph.ContainsEdge(e.Source, e.Target)));
+            drawGraph(retGraph, edgeSet, @"C:\Users\Frederik\Desktop\a.dot");
+            
+            return (k - ret, edgeSet);
         }
 
-        private static int FasterInner(UndirectedGraph<int, Edge<int>> graph, int k, int r, HashSet<int> Marked)
+        private static void drawGraph(UndirectedGraph<int, Edge<int>> retGraph, HashSet<Edge<int>> edgeSet, string v)
+        {
+            var a = new UndirectedGraph<int, Edge<int>>();
+            var b = retGraph.Vertices.ToList();
+            b.Sort();
+            a.AddVertexRange(b);
+            a.AddEdgeRange(retGraph.Edges);
+            var c = new GraphvizAlgorithm<int, Edge<int>>(a);
+            c.Generate(new FileDotEngine(edgeSet), @"C:\Users\Frederik\Desktop\a.dot");
+        }
+
+        private static (int, UndirectedGraph<int, Edge<int>>) FasterInner(UndirectedGraph<int, Edge<int>> graph, int k, int r, HashSet<int> Marked)
         {
             // Trivial cases
             if (k < 0 || r < -1)
-                return -1;
+                return (-1, graph);
 
             var analysis = MoplexAnalysis.AnalyseGraph(graph);
             if (IsChordal(analysis))
-                return k;
+                return (k, graph);
 
             // Find four cycle
-            List<int> cycle = FindFourCycle2(graph);
+            List<int> cycle = FindFourCycle2(graph); //has to return topological four cycle
             if(cycle != null)
             {
                 var graph1 = CloneGraph(graph);
@@ -71,7 +86,11 @@ namespace PacePrototype
                     Marked2.Remove(cycle[2]);
                 else
                     r2--;
-                return Math.Max(FasterInner(graph1, k - 1, r1, Marked1), FasterInner(graph2, k - 1, r2, Marked2));
+                var (k1, g1) = FasterInner(graph1, k - 1, r1, Marked1);
+                var (k2, g2) = FasterInner(graph2, k - 1, r2, Marked2);
+                if (k1 > -1 && k1 < k2)
+                    return (k1, g1);
+                return (k2, g2);
             }
 
             //find moplex with both marked and unmarked edges
@@ -83,9 +102,7 @@ namespace PacePrototype
                 {
                     foreach (var vertex in moplex)
                     {
-                        var previousSize = Marked.Count;
-                        Marked.Add(vertex);
-                        if (previousSize < Marked.Count)
+                        if (Marked.Add(vertex))
                             r--;
                     }
                 }
@@ -128,7 +145,7 @@ namespace PacePrototype
             foreach (var moplex in unmarkedMoplexes)
             {
                 m++;
-                moplexNeighbourhood = new HashSet<int>(moplex.SelectMany(v => graph.AdjacentEdges(v).Select(e => e.GetOtherVertex(v)))); //this includes the moplex - perhaps it shouldn't
+                moplexNeighbourhood = new HashSet<int>(moplex.SelectMany(v => graph.AdjacentEdges(v).Select(e => e.GetOtherVertex(v)))); 
                 foreach (var v in moplex)
                 {
                     moplexNeighbourhood.Remove(v);
@@ -143,7 +160,7 @@ namespace PacePrototype
             if(missingEdge != null)
             {
                 HashSet<int> moplexNeighbourhoodMarked = CloneSet(moplexNeighbourhood);
-                moplexNeighbourhoodMarked.RemoveWhere(v => !Marked.Contains(v));
+                //moplexNeighbourhoodMarked.RemoveWhere(v => !Marked.Contains(v));
 
                 var vStar = FindVStar(missingEdge, moplexNeighbourhoodMarked, graph);
                 if(vStar == -1)
@@ -166,7 +183,7 @@ namespace PacePrototype
 
             var markedMoplexes = analysis.Moplexes.Where(vl => vl.TrueForAll(v => Marked.Contains(v))).ToList();
             if(markedMoplexes.Count == analysis.Moplexes.Count)
-                return -1;
+                return (-1, null);
             
             if(unmarkedMoplexes.Count > 0)
             {
@@ -175,7 +192,7 @@ namespace PacePrototype
                 var Marked1 = new HashSet<int>(Marked);
                 moplex.ForEach(v => Marked1.Add(v));
                 var r1 = r - (Marked1.Count - Marked.Count);
-                var b1 = FasterInner(graph, k, r1, Marked1);
+                var (b1, g1) = FasterInner(graph, k, r1, Marked1);
 
                 //branch 2:
                 var graph2 = CloneGraph(graph);
@@ -191,14 +208,17 @@ namespace PacePrototype
                 var missingEdges = MissingEdges(neighbourhood, analysis.NeighbourLabels);
                 graph2.AddEdgeRange(missingEdges);
                 var k2 = k - (missingEdges.Count);
-                var b2 = FasterInner(graph2, k2, r, Marked);
-                return Math.Max(b1, b2);
+                var (b2, g2) = FasterInner(graph2, k2, r, Marked);
+
+                if (b1 > -1 && b1 < b2)
+                    return (b1, g1);
+                return (b2, g2);
                 
             }
 
 
 
-            return -1;
+            return (-1, null);
         }
 
         private static HashSet<int> CloneSet(HashSet<int> org)
@@ -222,7 +242,7 @@ namespace PacePrototype
             component.AddVertexRange(neighbourhood);
             foreach (var v in neighbourhood)
             {
-                component.AddEdgeRange(graph.AdjacentEdges(v)); //adds edges not in component, however, since no target vertices will exist if not in the component, these edges will be ignored by QuickGraph
+                component.AddEdgeRange(graph.AdjacentEdges(v).Where(e => component.ContainsVertex(e.GetOtherVertex(v)))); //adds edges not in component, however, since no target vertices will exist if not in the component, these edges will be ignored by QuickGraph
             }
             Queue<List<int>> q = new Queue<List<int>>();
             foreach (var e in component.AdjacentEdges(x))
@@ -259,10 +279,13 @@ namespace PacePrototype
             }
             complete.ForEach(l => l.Remove(y));
             List<int> vStars = complete.Select(l => l.Last()).ToList();
-            int vStar = vStars.First();
-            if (vStars.TrueForAll(v => v == vStar))
+            if (vStars.Any())
             {
-                return vStar;
+                int vStar = vStars.First();
+                if (vStars.TrueForAll(v => v == vStar))
+                {
+                    return vStar;
+                }
             }
 
             return -1;
@@ -294,7 +317,7 @@ namespace PacePrototype
         }
 
         // Dumb n^4 four-cycle finder
-        public static List<int> FindFourCycle1(UndirectedGraph<int, Edge<int>> graph)
+        public static List<int> FindFourCycle2(UndirectedGraph<int, Edge<int>> graph)
         {
             foreach (var v in graph.Vertices)
             {
@@ -329,7 +352,7 @@ namespace PacePrototype
         }
 
         // More memory intensive (and faster!!) cycle finder
-        public static List<int> FindFourCycle2(UndirectedGraph<int, Edge<int>> graph)
+        public static List<int> FindFourCycle1(UndirectedGraph<int, Edge<int>> graph)
         {
             var matrix = new int[graph.VertexCount, graph.VertexCount];
             matrix.Initialize();
@@ -357,7 +380,7 @@ namespace PacePrototype
                                 {
                                     if (graph.ContainsEdge(i, j) || graph.ContainsEdge(j, i))
                                         continue;
-                                    return new List<int> { i, j, n1, n2 };
+                                    return new List<int> { n1, j, i, n2 };
                                 }
                             }
                         }
@@ -375,7 +398,7 @@ namespace PacePrototype
             var ordering = analysis.EleminationOrder;
             var labels = analysis.NeighbourLabels;
 
-            for (int i = ordering.Length -1; i >= 0; i--)
+            foreach(int i in ordering.Keys)
             {
                 int v = ordering[i];
                 var clique = new HashSet<int>(labels[i].Where(j => j > v).Select(label => analysis.EleminationOrderRev[label]));
@@ -388,7 +411,7 @@ namespace PacePrototype
             return true;
         }
 
-        private static List<Edge<int>> MissingEdges(HashSet<int> clique, List<int>[] labels)
+        private static List<Edge<int>> MissingEdges(HashSet<int> clique, Dictionary<int, List<int>> labels)
         {
             var missingEdges = new List<Edge<int>>();
             foreach (var vertex in clique)
@@ -404,7 +427,7 @@ namespace PacePrototype
             return missingEdges;
         }
 
-        private static bool IsClique(HashSet<int> clique, int[] order, List<int>[] labels)
+        private static bool IsClique(HashSet<int> clique, Dictionary<int, int> order, Dictionary<int, List<int>> labels)
         {
             foreach (var vertex in clique)
             {
@@ -419,5 +442,34 @@ namespace PacePrototype
             return true;
         }
     }
+    
+    public class FileDotEngine : IDotEngine
+    {
+        HashSet<string> added;
+        public FileDotEngine(HashSet<Edge<int>> add)
+        {
+            added = new HashSet<string>(add.Select(e => $"{e.Source} -> {e.Target} [];"));
+            foreach (var e in add)
+            {
+                added.Add($"{e.Target} -> {e.Source} [];");
+            }
+        }
+        public string Run(GraphvizImageType imageType, string dot, string outputFileName)
+        {
+            using (var writer = new StreamWriter(outputFileName))
+            {
 
+                foreach (var s in added)
+                {
+                    var s1 = s.Replace("[];", "[color=\"red\"];");
+                    dot = dot.Replace(s, s1);
+                }
+                dot = dot.Replace("->", "--");
+                writer.Write(dot);
+            }
+
+            return System.IO.Path.GetFileName(outputFileName);
+        }
+        
+    }
 }
