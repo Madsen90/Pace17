@@ -16,14 +16,14 @@ namespace PacePrototype
         {
             var time = DateTime.Now;
             int ret = -1;
-            int k = 1;
+            int k = -1;
             UndirectedGraph<int, Edge<int>> retGraph = null;
             while (ret == -1)
             {
                 var time1 = DateTime.Now;
 
                 Console.WriteLine(++k);
-                (int ret1, UndirectedGraph<int, Edge<int>> graph1) = FasterInner(graph, k, k * 2, new HashSet<int>());
+                (int ret1, UndirectedGraph<int, Edge<int>> graph1) = FasterInner(graph, k, k * 2, new HashSet<int>(), null, null);
                 ret = ret1;
                 retGraph = graph1;
                 Console.WriteLine($"Took {(DateTime.Now - time1).ToString("c")}");
@@ -46,13 +46,13 @@ namespace PacePrototype
             c.Generate(new FileDotEngine(edgeSet), @"C:\Users\Frederik\Desktop\a.dot");
         }
 
-        private static (int, UndirectedGraph<int, Edge<int>>) FasterInner(UndirectedGraph<int, Edge<int>> graph, int k, int r, HashSet<int> Marked)
+        private static (int, UndirectedGraph<int, Edge<int>>) FasterInner(UndirectedGraph<int, Edge<int>> graph, int k, int r, HashSet<int> Marked, List<Edge<int>> newlyAddedEdges, List<List<int>> prevMoplexes)
         {
             // Trivial cases
             if (k < 0 || r < -1)
                 return (-1, graph);
 
-            var analysis = MoplexAnalysis.AnalyseGraph(graph);
+            var analysis = MoplexAnalysis.AnalyseGraph(graph, newlyAddedEdges, prevMoplexes);
             if (IsChordal2(analysis, graph))
                 return (k, graph);
 
@@ -62,8 +62,10 @@ namespace PacePrototype
             {
                 var graph1 = CloneGraph(graph);
                 var graph2 = CloneGraph(graph);
-                graph1.AddEdge(new Edge<int>(cycle[0], cycle[3]));
-                graph2.AddEdge(new Edge<int>(cycle[1], cycle[2]));
+                var newEdge1 = new Edge<int>(cycle[0], cycle[3]);
+                var newEdge2 = new Edge<int>(cycle[1], cycle[2]);
+                graph1.AddEdge(newEdge1);
+                graph2.AddEdge(newEdge2);
                 var Marked1 = new HashSet<int>(Marked);
                 var Marked2 = new HashSet<int>(Marked);
                 var r1 = r;
@@ -85,8 +87,8 @@ namespace PacePrototype
                     Marked2.Remove(cycle[2]);
                 else
                     r2--;
-                var (k1, g1) = FasterInner(graph1, k - 1, r1, Marked1);
-                var (k2, g2) = FasterInner(graph2, k - 1, r2, Marked2);
+                var (k1, g1) = FasterInner(graph1, k - 1, r1, Marked1, new List<Edge<int>> { newEdge1 }, analysis.Moplexes);
+                var (k2, g2) = FasterInner(graph2, k - 1, r2, Marked2, new List<Edge<int>> { newEdge2 }, analysis.Moplexes);
                 if (k1 > -1 && (k1 < k2 || k2 < 0))
                     return (k1, g1);
                 return (k2, g2);
@@ -105,7 +107,7 @@ namespace PacePrototype
                             r--;
                     }
                 }
-                return FasterInner(graph, k, r, Marked);
+                return FasterInner(graph, k, r, Marked, null, analysis.Moplexes);
             }
 
             //simplicial moplex with only unmarked vertices
@@ -127,14 +129,15 @@ namespace PacePrototype
 
             if(simplicialUnmarked.Count > 0)
             {
+                var graph1 = CloneGraph(graph);
                 foreach(var neighbourhood in simplicialUnmarked)
                 {
                     foreach (var v in neighbourhood)
                     {
-                        graph.RemoveVertex(v);
+                        graph1.RemoveVertex(v);
                     }
                 }
-                return FasterInner(graph, k, r, Marked);
+                return FasterInner(graph1, k, r, Marked, null, analysis.Moplexes.Except(simplicialUnmarked).ToList());
             }
 
             // Moplex with only unmarked vertices and neighbourhood only missing one edge
@@ -177,7 +180,7 @@ namespace PacePrototype
                 }
                 else r--;
                 graph.AddEdge(missingEdge);
-                return FasterInner(graph, k - 1, r, Marked);
+                return FasterInner(graph, k - 1, r, Marked, new List<Edge<int>> { missingEdge }, analysis.Moplexes);
             }
 
             var markedMoplexes = analysis.Moplexes.Where(vl => vl.TrueForAll(v => Marked.Contains(v))).ToList();
@@ -191,7 +194,7 @@ namespace PacePrototype
                 var Marked1 = new HashSet<int>(Marked);
                 moplex.ForEach(v => Marked1.Add(v));
                 var r1 = r - (Marked1.Count - Marked.Count);
-                var (b1, g1) = FasterInner(graph, k, r1, Marked1);
+                var (b1, g1) = FasterInner(graph, k, r1, Marked1, null, analysis.Moplexes);
 
                 //branch 2:
                 var graph2 = CloneGraph(graph);
@@ -207,7 +210,7 @@ namespace PacePrototype
                 var missingEdges = MissingEdges(neighbourhood, analysis.NeighbourLabels);
                 graph2.AddEdgeRange(missingEdges);
                 var k2 = k - (missingEdges.Count);
-                var (b2, g2) = FasterInner(graph2, k2, r, Marked);
+                var (b2, g2) = FasterInner(graph2, k2, r, Marked, missingEdges, analysis.Moplexes);
 
                 if (b1 > -1 && b1 < b2)
                     return (b1, g1);
@@ -353,37 +356,45 @@ namespace PacePrototype
         // More memory intensive (and faster!!) cycle finder
         public static List<int> FindFourCycle2(UndirectedGraph<int, Edge<int>> graph)
         {
+            var idTable = new int[graph.VertexCount];
+            var idTableRev = new Dictionary<int, int>();
+            int i = 0;
+            foreach(int v in graph.Vertices)
+            {
+                idTable[i] = v;
+                idTableRev[v] = i++;
+            }
             var matrix = new int[graph.VertexCount, graph.VertexCount];
             matrix.Initialize();
-            for (int i = 0; i < graph.VertexCount; i++) //Assumes that vertex set is of format {0, 1, ... n-1}
+            for (i = 0; i < graph.VertexCount; i++) //Assumes that vertex set is of format {0, 1, ... n-1}
             {
-                foreach(var e1 in graph.AdjacentEdges(i))
+                foreach(var e1 in graph.AdjacentEdges(idTable[i]))
                 {
-                    var n1 = e1.GetOtherVertex(i);
-                    foreach (var e2 in graph.AdjacentEdges(i))
+                    var n1 = e1.GetOtherVertex(idTable[i]);
+                    foreach (var e2 in graph.AdjacentEdges(idTable[i]))
                     {
-                        var n2 = e2.GetOtherVertex(i);
+                        var n2 = e2.GetOtherVertex(idTable[i]);
                         if (n1 == n2)
                             continue;
                         var temp = Math.Max(n1, n2);
                         n1 = Math.Min(n1, n2);
                         n2 = temp;
-                        if (matrix[n1, n2] == 1 )
+                        if (matrix[idTableRev[n1], idTableRev[n2]] == 1 )
                         {
-                            if (graph.ContainsEdge(n1, n2) || graph.ContainsEdge(n2, n1))
+                            if (graph.ContainsEdge(n1, n2))
                                 continue;
                             // find the vertice that set matrix[n1, n2] == 1
                             for (int j = 0; j < i; j++)
                             {
-                                if((graph.ContainsEdge(j,n1) || graph.ContainsEdge(n1,j)) && (graph.ContainsEdge(j, n2) || graph.ContainsEdge(n2, j)))
+                                if(graph.ContainsEdge(idTable[j],n1) && graph.ContainsEdge(idTable[j], n2))
                                 {
-                                    if (graph.ContainsEdge(i, j) || graph.ContainsEdge(j, i))
+                                    if (graph.ContainsEdge(idTable[i], idTable[j]))
                                         continue;
-                                    return new List<int> { n1, j, i, n2 };
+                                    return new List<int> { n1, idTable[j], idTable[i], n2 };
                                 }
                             }
                         }
-                        matrix[n1, n2] = 1;
+                        matrix[idTableRev[n1], idTableRev[n2]] = 1;
                     }
                 }
             }

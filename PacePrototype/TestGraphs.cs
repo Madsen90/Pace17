@@ -87,7 +87,7 @@ namespace PacePrototype
             return g;
         }
 
-        // one four cycle
+        // one four cycle, k = 1
         public static UndirectedGraph<int, Edge<int>> TestGraph4()
         {
             var g = new UndirectedGraph<int, Edge<int>>();
@@ -106,7 +106,7 @@ namespace PacePrototype
             return g;
         }
 
-        // two four cycles
+        // two four cycles, k = 2
         public static UndirectedGraph<int, Edge<int>> TestGraph5()
         {
             var g = new UndirectedGraph<int, Edge<int>>();
@@ -127,7 +127,7 @@ namespace PacePrototype
             return g;
         }
 
-        // two four cycles and one five cycle
+        // two four cycles and one five cycle, k = 2
         public static UndirectedGraph<int, Edge<int>> TestGraph6()
         {
             var g = new UndirectedGraph<int, Edge<int>>();
@@ -149,7 +149,7 @@ namespace PacePrototype
             return g;
         }
 
-        //chordal graph
+        //chordal graph, k = 0
         public static UndirectedGraph<int, Edge<int>> TestGraph7()
         {
             var g = new UndirectedGraph<int, Edge<int>>();
@@ -167,7 +167,7 @@ namespace PacePrototype
             return g;
         }
 
-        // letter graph missing two diagonal edges
+        // letter graph missing two diagonal edges, k = 1
         public static UndirectedGraph<int, Edge<int>> TestGraph8()
         {
             var g = new UndirectedGraph<int, Edge<int>>();
@@ -188,7 +188,7 @@ namespace PacePrototype
             return g;
         }
 
-        // Graph 8 as chordal
+        // Graph 8 as chordal, k = 0
         public static UndirectedGraph<int, Edge<int>> TestGraph9()
         {
             var g = new UndirectedGraph<int, Edge<int>>();

@@ -12,12 +12,64 @@ namespace PacePrototype
     {
         static void Main(string[] args)
         {
+            testAllGraphs();
             //Tests();
             //var graph = parse(args[0]);
-            var graph = TestGraphs.TestGraph6();
-            var k = Faster.Run(graph);
+            //var graph = TestGraphs.TestGraph6();
+            //var k = Faster.Run(graph);
             //Console.WriteLine($"Graph: {args[0].Split('\\').Last()} has k={k}");
             //Console.ReadLine();
+        }
+
+        public static void testAllGraphs()
+        {
+            (var k, var edgeSet) = Faster.Run(TestGraphs.TestGraph1());
+            if (edgeSet.Count != k)
+                throw new Exception("edge set error on graph1");
+
+            (k, edgeSet) = Faster.Run(TestGraphs.TestGraph2());
+            if (edgeSet.Count != k)
+                throw new Exception("edge set error on graph2");
+
+            (k, edgeSet) = Faster.Run(TestGraphs.TestGraph3());
+            if (edgeSet.Count != k)
+                throw new Exception("edge set error on graph3");
+
+            (k, edgeSet) = Faster.Run(TestGraphs.TestGraph4());
+            if (k != 1)
+                throw new Exception("k error on graph4");
+            if (edgeSet.Count != k)
+                throw new Exception("edge set error on graph4");
+
+            (k, edgeSet) = Faster.Run(TestGraphs.TestGraph5());
+            if (k != 2)
+                throw new Exception("k error on graph5");
+            if (edgeSet.Count != k)
+                throw new Exception("edge set error on graph5");
+
+            (k, edgeSet) = Faster.Run(TestGraphs.TestGraph6());
+            if (k != 2)
+                throw new Exception("k error on graph6");
+            if (edgeSet.Count != k)
+                throw new Exception("edge set error on graph6");
+
+            (k, edgeSet) = Faster.Run(TestGraphs.TestGraph7());
+            if (k != 0)
+                throw new Exception("k error on graph7");
+            if (edgeSet.Count != k)
+                throw new Exception("edge set error on graph7");
+
+            (k, edgeSet) = Faster.Run(TestGraphs.TestGraph8());
+            if (k != 1)
+                throw new Exception("k error on graph8");
+            if (edgeSet.Count != k)
+                throw new Exception("edge set error on graph8");
+
+            (k, edgeSet) = Faster.Run(TestGraphs.TestGraph9());
+            if (k != 0)
+                throw new Exception("k error on graph9");
+            if (edgeSet.Count != k)
+                throw new Exception("edge set error on graph9");
         }
 
         public static UndirectedGraph<int, Edge<int>> parse(string path)
@@ -38,16 +90,16 @@ namespace PacePrototype
 
         public static void Tests()
         {
-            var analysis = MoplexAnalysis.AnalyseGraph(TestGraphs.TestGraph2());
+            var analysis = MoplexAnalysis.AnalyseGraph(TestGraphs.TestGraph2(), null, null);
             var vStar = Faster.FindVStar(new Edge<int>(0, 7), new HashSet<int>(TestGraphs.TestGraph2().Vertices), TestGraphs.TestGraph2());
             var k = Faster.Run(TestGraphs.TestGraph1());
 
 
 
-            MoplexAnalysis.AnalyseGraph(TestGraphs.TestGraph1());
-            MoplexAnalysis.AnalyseGraph(TestGraphs.TestGraph2());
-            MoplexAnalysis.AnalyseGraph(TestGraphs.TestGraph3());
-            MoplexAnalysis.AnalyseGraph(TestGraphs.TestGraph4());
+            MoplexAnalysis.AnalyseGraph(TestGraphs.TestGraph1(), null, null);
+            MoplexAnalysis.AnalyseGraph(TestGraphs.TestGraph2(), null, null);
+            MoplexAnalysis.AnalyseGraph(TestGraphs.TestGraph3(), null, null);
+            MoplexAnalysis.AnalyseGraph(TestGraphs.TestGraph4(), null, null);
             var a = Faster.FindFourCycle1(TestGraphs.TestGraph2());
             var b = Faster.FindFourCycle2(TestGraphs.TestGraph2());
             if (a != b && !a.SequenceEqual(b))

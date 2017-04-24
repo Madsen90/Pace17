@@ -23,10 +23,8 @@ namespace PacePrototype
             NeighbourLabels = labels;
         }
 
-        public static MoplexAnalysis AnalyseGraph(UndirectedGraph<int, Edge<int>> graph)
+        public static MoplexAnalysis AnalyseGraph(UndirectedGraph<int, Edge<int>> graph, List<Edge<int>> newlyAddedEdges, List<List<int>> prevMoplexes)
         {
-            rounds++;
-            
             (Dictionary<int, int> ordering, Dictionary<int, List<int>> labels) = LexBFS(graph, 0);
             var revOrder = new Dictionary<int, int>();
             foreach (int i in ordering.Keys)
@@ -34,16 +32,28 @@ namespace PacePrototype
                 revOrder[ordering[i]] = i;
             }
 
-            var moplexes = FindMoplexes(graph, revOrder, ordering, labels);
+            var moplexes = FindMoplexes(graph, revOrder, ordering, labels, newlyAddedEdges, prevMoplexes);
 
             return new MoplexAnalysis(moplexes, revOrder, ordering, labels);
         }
 
-        private static List<List<int>> FindMoplexes(UndirectedGraph<int, Edge<int>> graph, Dictionary<int, int> revOrdering, Dictionary<int, int> ordering, Dictionary<int, List<int>> labels)
+        private static List<List<int>> FindMoplexes(UndirectedGraph<int, Edge<int>> graph, Dictionary<int, int> revOrdering, Dictionary<int, int> ordering, Dictionary<int, List<int>> labels, List<Edge<int>> newlyAddedEdges, List<List<int>> prevMoplexes)
         {
             var moplexes = new List<List<int>>();
 
             var hasBeenChecked = new List<int>();
+
+            if(newlyAddedEdges != null) //newly added edge means that the moplexes effected must be recalculated.
+            {
+                foreach(var e in newlyAddedEdges)
+                {
+                    hasBeenChecked.AddRange(prevMoplexes.Where(l => (!l.Contains(e.Source) && !l.Contains(e.Target))).SelectMany(i => i).Distinct());
+                }
+               
+            } else if(prevMoplexes != null) // no newly added edge, so previously calculated moplex must still be relevant.
+            {
+                return prevMoplexes;
+            }
             
 
             // Start finding new moplexes
