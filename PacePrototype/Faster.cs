@@ -57,7 +57,7 @@ namespace PacePrototype
                 return (k, graph);
 
             // Find four cycle
-            List<int> cycle = FindFourCycle2(graph); //has to return topological four cycle
+            List<int> cycle = FindFourCycle3(graph); //has to return topological four cycle
             if(cycle != null)
             {
                 var graph1 = CloneGraph(graph);
@@ -353,6 +353,7 @@ namespace PacePrototype
             return null;
         }
 
+
         // More memory intensive (and faster!!) cycle finder
         public static List<int> FindFourCycle2(UndirectedGraph<int, Edge<int>> graph)
         {
@@ -396,6 +397,49 @@ namespace PacePrototype
                         }
                         matrix[idTableRev[n1], idTableRev[n2]] = 1;
                     }
+                }
+            }
+            return null;
+        }
+
+        // DFS based four-cycle-finder
+        public static List<int> FindFourCycle3(UndirectedGraph<int, Edge<int>> graph)
+        {
+            foreach(var v in graph.Vertices)
+            {
+                var cycle = FindFourCycle3Inner(graph, new List<int>(), v, 3, v);
+                if (cycle != null)
+                {
+                    var tmp = cycle[2];
+                    cycle[2] = cycle[3];
+                    cycle[3] = tmp;
+                    return cycle;
+                }
+            }
+            return null;
+        }
+        private static List<int> FindFourCycle3Inner(UndirectedGraph<int, Edge<int>> graph, List<int> path, int start, int depth, int goal)
+        {
+            path.Add(start);
+            foreach(var e in graph.AdjacentEdges(start))
+            {
+                var n = e.GetOtherVertex(start);
+                if (path.Contains(n) && depth != 0)
+                    continue;
+                if (depth == 0)
+                {
+                    if (goal == n)
+                        return path;
+                    else
+                        return null;
+                }
+                var newPath = CloneList(path);
+                var cycle = FindFourCycle3Inner(graph, newPath, n, depth - 1, goal);
+                if(cycle != null)
+                {
+                    if (graph.ContainsEdge(cycle[0], cycle[2]) || graph.ContainsEdge(cycle[1], cycle[3])) //not chordless
+                        continue;
+                    return cycle;
                 }
             }
             return null;

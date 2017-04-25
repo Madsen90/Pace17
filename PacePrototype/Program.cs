@@ -102,24 +102,39 @@ namespace PacePrototype
             MoplexAnalysis.AnalyseGraph(TestGraphs.TestGraph4(), null, null);
             var a = Faster.FindFourCycle1(TestGraphs.TestGraph2());
             var b = Faster.FindFourCycle2(TestGraphs.TestGraph2());
+            var c = Faster.FindFourCycle3(TestGraphs.TestGraph2());
             if (a != b && !a.SequenceEqual(b))
-                throw new Exception();
+                throw new Exception("difference between findFourCycle1 & 2");
+            if (a != c && !a.SequenceEqual(c))
+                throw new Exception("difference between findFourCycle1 & 3");
             a = Faster.FindFourCycle1(TestGraphs.TestGraph4());
             b = Faster.FindFourCycle2(TestGraphs.TestGraph4());
+            c = Faster.FindFourCycle3(TestGraphs.TestGraph4());
             if (a != b && !a.SequenceEqual(b))
-                throw new Exception();
+                throw new Exception("difference between findFourCycle1 & 2");
+            if (a != c && !a.SequenceEqual(c))
+                throw new Exception("difference between findFourCycle1 & 3");
             a = Faster.FindFourCycle1(TestGraphs.TestGraph5());
             b = Faster.FindFourCycle2(TestGraphs.TestGraph5());
+            c = Faster.FindFourCycle3(TestGraphs.TestGraph5());
             if (a != b && !a.SequenceEqual(b))
-                throw new Exception();
+                throw new Exception("difference between findFourCycle1 & 2");
+            if (a != c && !a.SequenceEqual(c))
+                throw new Exception("difference between findFourCycle1 & 3");
             a = Faster.FindFourCycle1(TestGraphs.TestGraph6());
             b = Faster.FindFourCycle2(TestGraphs.TestGraph6());
+            c = Faster.FindFourCycle3(TestGraphs.TestGraph6());
             if (a != b && !a.SequenceEqual(b))
-                throw new Exception();
+                throw new Exception("difference between findFourCycle1 & 2");
+            if (a != c && !a.SequenceEqual(c))
+                throw new Exception("difference between findFourCycle1 & 3");
             a = Faster.FindFourCycle1(TestGraphs.TestGraph8());
             b = Faster.FindFourCycle2(TestGraphs.TestGraph8());
+            c = Faster.FindFourCycle3(TestGraphs.TestGraph8());
             if (a != b && !a.SequenceEqual(b))
-                throw new Exception();
+                throw new Exception("difference between findFourCycle1 & 2");
+            if (a != c && !a.SequenceEqual(c))
+                throw new Exception("difference between findFourCycle1 & 3");
         }
 
     }
