@@ -10,62 +10,76 @@ namespace PacePrototype
     class MoplexAnalysis
     {
         public List<List<int>> Moplexes { get; }
-        public int[] EleminationOrder { get; }
-        public int[] EleminationOrderRev { get; }
-        public List<int>[] NeighbourLabels { get; }
+        public Dictionary<int, int> EleminationOrder { get; }
+        public Dictionary<int, int> EleminationOrderRev { get; }
+        public Dictionary<int, List<int>> NeighbourLabels { get; }
+        public static int rounds = 0;
 
-        private MoplexAnalysis(List<List<int>> moplexList, int[] order, List<int>[] labels)
+        private MoplexAnalysis(List<List<int>> moplexList, Dictionary<int, int> revOrder, Dictionary<int, int> order, Dictionary<int, List<int>> labels)
         {
             Moplexes = moplexList;
             EleminationOrder = order;
-            EleminationOrderRev = new int[order.Length+1];
-            for(int i = 0; i < order.Length; i++)
-            {
-                EleminationOrderRev[order[i]] = i;
-            }
+            EleminationOrderRev = revOrder;
             NeighbourLabels = labels;
         }
 
-        public static MoplexAnalysis AnalyseGraph(UndirectedGraph<int, Edge<int>> graph)
+        public static MoplexAnalysis AnalyseGraph(UndirectedGraph<int, Edge<int>> graph, List<Edge<int>> newlyAddedEdges, List<List<int>> prevMoplexes)
         {
+            (Dictionary<int, int> ordering, Dictionary<int, List<int>> labels) = LexBFS(graph, 0);
+            var revOrder = new Dictionary<int, int>();
+            foreach (int i in ordering.Keys)
+            {
+                revOrder[ordering[i]] = i;
+            }
 
-            (int[] ordering, List<int>[] labels) = LexBFS(graph, 0);
-            var moplex = FindLexMoplex(ordering, labels);
+            var moplexes = FindMoplexes(graph, revOrder, ordering, labels, newlyAddedEdges, prevMoplexes);
 
-            var moplexes = FindMoplexes(graph, moplex, ordering, labels);
-
-            return new MoplexAnalysis(moplexes, ordering, labels);
+            return new MoplexAnalysis(moplexes, revOrder, ordering, labels);
         }
 
-        private static List<List<int>> FindMoplexes(UndirectedGraph<int, Edge<int>> graph, List<int> moplex, int[] ordering, List<int>[] labels)
+        private static List<List<int>> FindMoplexes(
+            UndirectedGraph<int, Edge<int>> graph,
+            Dictionary<int, int> revOrdering, 
+            Dictionary<int, int> ordering, 
+            Dictionary<int, List<int>> labels, 
+            List<Edge<int>> newlyAddedEdges, 
+            List<List<int>> prevMoplexes)
         {
             var moplexes = new List<List<int>>();
-            moplexes.Add(moplex); //first: add already known moplex
 
             var hasBeenChecked = new List<int>();
 
-            // construct reverse lookup in ordering
-            int[] revOrdering = new int[ordering.Length + 1]; 
-            for (int i = 0; i < ordering.Length; i++)
+            if(newlyAddedEdges != null) //newly added edge means that the moplexes effected must be recalculated.
             {
-                revOrdering[ordering[i]] = i;
-            }
+                foreach(var e in newlyAddedEdges)
+                {
+                    var validMoplexes = prevMoplexes.Where(moplex =>
+                        e.Source != moplex.First()
+                        && e.Target != moplex.First()
+                        && graph.AdjacentEdges(moplex.First())
+                            .Select(edge => edge.GetOtherVertex(moplex.First()))
+                            .All(v => v != e.Source && v != e.Target)
+                        );
+                    moplexes.AddRange(validMoplexes);
+                    hasBeenChecked.AddRange(validMoplexes.SelectMany(i => i).Distinct());
+                }
 
-            //no need to look at previously found moplex
-            foreach (int v in moplex) 
+               
+            } else if(prevMoplexes != null) // no newly added edge, so previously calculated moplex must still be relevant.
             {
-                hasBeenChecked.Add(v);
+                return prevMoplexes;
             }
+            
 
             // Start finding new moplexes
-            for (int v = 0; v < labels.Length; v++)
+            foreach(var v in labels.Keys)
             {
                 if (hasBeenChecked.Contains(v)) // no vertex can be part of multiple moplexes
                     continue;
 
                 //equal neighbourhood check
                 var potMoplex = new List<int>();
-                for (int i = 0; i < labels.Length; i++)
+                foreach (var i in labels.Keys)
                 {
                     if (labels[i] != null && labels[i].SequenceEqual(labels[v]))
                         potMoplex.Add(i);
@@ -76,7 +90,7 @@ namespace PacePrototype
                 var seperator = labels[v].Select(l => revOrdering[l]).Except(potMoplex).ToList();
 
                 
-                // Check that the seperator is minimal - i.e. check all vertices in the seperator is connected at least one common component??
+                // Check that the seperator is minimal - i.e. check all vertices in the seperator is connected to all components
                 // First: Remove seperator and moplex from graph (temporarily)
                 var tempRemove = new List<Edge<int>>();
                 foreach (int mv in potMoplex)
@@ -101,30 +115,35 @@ namespace PacePrototype
                 graph.AddVertexRange(potMoplex);
                 graph.AddEdgeRange(tempRemove);
 
-
-                var commonComponents = new HashSet<int>(a.Components.Values);
+                var isMoplex = false;
                 foreach (var sepNode in seperator) // Find the components connected to each of the seperator vertices
                 {
                     HashSet<int> connectedComponents = new HashSet<int>();
                     foreach (var e in graph.AdjacentEdges(sepNode))
                     {
-                        var neighbour = e.Source == sepNode ? e.Target : e.Source;
+                        var neighbour = e.GetOtherVertex(sepNode);
                         if (potMoplex.Contains(neighbour))
                             continue; //not a component, since it was removed at the time
-                        if (nodeToComponentDic.ContainsKey(neighbour)) //else neighbour is also neighbour of potential moplex
-                        {
+                        if (nodeToComponentDic.ContainsKey(neighbour)) //else neighbour is also seperator TODO: error here, Not anymore I think
+                        { 
                             int c = -1;
-                            var comp = nodeToComponentDic.TryGetValue(neighbour, out c);
+                            nodeToComponentDic.TryGetValue(neighbour, out c);
                             connectedComponents.Add(c);
                         }
                     }
-                    // N[sep1] intersect N[sep2] ... intersect { all components } = common components of all seperators.
-                    commonComponents = new HashSet<int>(commonComponents.Intersect(connectedComponents));
+                    if (connectedComponents.Count < a.ComponentCount || a.ComponentCount == 0)
+                    {
+                        isMoplex = false;
+                        break;
+                    }
+                    isMoplex = true;
                 }
 
-                // if seperators share at least one component, the seperator is minimal (intuition), and potMoplex is a moplex.
-                if (commonComponents.Count > 0)
+                if (isMoplex)
+                {
                     moplexes.Add(potMoplex);
+                }
+                
 
                 // To ensure no dublicates
                 foreach (var n in potMoplex)
@@ -132,6 +151,7 @@ namespace PacePrototype
                     hasBeenChecked.Add(n);
                 }
             }
+            var x = moplexes.Distinct().Count();
             return moplexes;
         }
 
@@ -150,11 +170,12 @@ namespace PacePrototype
             return moplex;
         }
 
-        public static (int[], List<int>[]) LexBFS(UndirectedGraph<int, Edge<int>> graph, int start)
+        public static (int[], List<int>[]) LexBFS2(UndirectedGraph<int, Edge<int>> graph, int start)
         {
             if (!graph.ContainsVertex(start))
                 start = graph.Vertices.Min();
             List<int>[] labels = new List<int>[graph.VertexCount];
+            //Console.WriteLine($"New lables list of size {labels.Length}");
             int[] indeces = new int[graph.VertexCount];
 
             for (int i = 0; i < graph.VertexCount; i++)
@@ -167,10 +188,11 @@ namespace PacePrototype
             {
                 indeces[next] = i;
                 labels[next].Add(i);
-                Console.WriteLine($"next: {next}");
+                //Console.WriteLine($"next: {next}");
                 foreach (Edge<int> outEdge in graph.AdjacentEdges(next))
                 {
-                    var neighbour = outEdge.Source == next ? outEdge.Target : outEdge.Source;
+                    var neighbour = outEdge.GetOtherVertex(next);
+                    //Console.WriteLine($"Neighbour: {neighbour}, Labels.length: {labels.Length}, rounds: {rounds}, graph.containsVertex(neighbour): {graph.ContainsVertex(neighbour)}");
                     labels[neighbour].Add(i);
                 }
 
@@ -185,6 +207,47 @@ namespace PacePrototype
                 next = max;
             }
             return (indeces, labels);
+        }
+
+        public static (Dictionary<int, int>, Dictionary<int, List<int>>) LexBFS(UndirectedGraph<int, Edge<int>> graph, int start)
+        {
+            if (!graph.ContainsVertex(start))
+                start = graph.Vertices.Min();
+            var labels = new Dictionary<int, List<int>>(); 
+            var indeces = new Dictionary<int, int>();
+
+            foreach (var v in graph.Vertices)
+            {
+                labels[v] = new List<int>();
+                indeces[v] = -1;
+            }
+
+            int next = start;
+
+            for (int i = graph.VertexCount; i > 0; i--)
+            {
+                indeces[next] = i;
+                labels[next].Add(i);
+                //Console.WriteLine($"next: {next}");
+                foreach (Edge<int> outEdge in graph.AdjacentEdges(next))
+                {
+                    var neighbour = outEdge.GetOtherVertex(next);
+                    //Console.WriteLine($"Neighbour: {neighbour}, Labels.length: {labels.Length}, rounds: {rounds}, graph.containsVertex(neighbour): {graph.ContainsVertex(neighbour)}");
+                    labels[neighbour].Add(i);
+                }
+
+                int max = -1;
+                foreach(int j in labels.Keys)
+                {
+                    if (indeces[j] == -1 && (max == -1 || LexComp(labels[j], labels[max]) > 0))
+                    {
+                        max = j;
+                    }
+                }
+                next = max;
+            }
+            return (indeces, labels);
+
         }
 
         private static int LexComp(List<int> l1, List<int> l2)

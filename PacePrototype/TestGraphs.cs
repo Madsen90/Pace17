@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace PacePrototype
 {
-    class TestGraphs
+    public class TestGraphs
     {
         //Graph from Separability Generalizes Dirac's Theorem
         public static UndirectedGraph<int, Edge<int>> TestGraph1()
@@ -87,7 +87,7 @@ namespace PacePrototype
             return g;
         }
 
-        // one four cycle
+        // one four cycle, k = 1
         public static UndirectedGraph<int, Edge<int>> TestGraph4()
         {
             var g = new UndirectedGraph<int, Edge<int>>();
@@ -106,7 +106,7 @@ namespace PacePrototype
             return g;
         }
 
-        // two four cycles
+        // two four cycles, k = 2
         public static UndirectedGraph<int, Edge<int>> TestGraph5()
         {
             var g = new UndirectedGraph<int, Edge<int>>();
@@ -127,7 +127,7 @@ namespace PacePrototype
             return g;
         }
 
-        // one four cycle and one five cycle
+        // two four cycles and one five cycle, k = 2
         public static UndirectedGraph<int, Edge<int>> TestGraph6()
         {
             var g = new UndirectedGraph<int, Edge<int>>();
@@ -149,7 +149,7 @@ namespace PacePrototype
             return g;
         }
 
-        //chordal graph
+        //chordal graph, k = 0
         public static UndirectedGraph<int, Edge<int>> TestGraph7()
         {
             var g = new UndirectedGraph<int, Edge<int>>();
@@ -167,7 +167,7 @@ namespace PacePrototype
             return g;
         }
 
-        // letter graph missing two diagonal edges
+        // letter graph missing two diagonal edges, k = 1
         public static UndirectedGraph<int, Edge<int>> TestGraph8()
         {
             var g = new UndirectedGraph<int, Edge<int>>();
@@ -188,7 +188,7 @@ namespace PacePrototype
             return g;
         }
 
-        // Graph 8 as chordal
+        // Graph 8 as chordal, k = 0
         public static UndirectedGraph<int, Edge<int>> TestGraph9()
         {
             var g = new UndirectedGraph<int, Edge<int>>();
@@ -209,6 +209,71 @@ namespace PacePrototype
 
             return g;
         }
+
+        // Testgraph 5 with missing edge between 2 and 5
+        public static UndirectedGraph<int, Edge<int>> TestGraph10()
+        {
+            var g = new UndirectedGraph<int, Edge<int>>();
+            g.AddVertexRange(new int[] { 0, 1, 2, 3, 4, 5 });
+            var edges = new List<Edge<int>>
+            {
+                new Edge<int>(0, 1),
+                new Edge<int>(0, 2),
+                new Edge<int>(1, 3),
+                new Edge<int>(2, 3),
+                new Edge<int>(3, 4),
+                new Edge<int>(4, 5),
+
+            };
+            g.AddEdgeRange(edges);
+
+            return g;
+        }
+
+        // Testgraph 5 with extra edge between 2 and 4
+        public static UndirectedGraph<int, Edge<int>> TestGraph11()
+        {
+            var g = new UndirectedGraph<int, Edge<int>>();
+            g.AddVertexRange(new int[] { 0, 1, 2, 3, 4, 5 });
+            var edges = new List<Edge<int>>
+            {
+                new Edge<int>(0, 1),
+                new Edge<int>(0, 2),
+                new Edge<int>(1, 3),
+                new Edge<int>(2, 3),
+                new Edge<int>(2, 4),
+                new Edge<int>(2, 5),
+                new Edge<int>(3, 4),
+                new Edge<int>(4, 5),
+
+            };
+            g.AddEdgeRange(edges);
+
+            return g;
+        }
+
+        // two disjoint four cycles
+        public static UndirectedGraph<int, Edge<int>> TestGraph12()
+        {
+            var g = new UndirectedGraph<int, Edge<int>>();
+            g.AddVertexRange(new int[] { 0, 1, 2, 3, 4, 5, 6, 7 });
+            var edges = new List<Edge<int>>
+            {
+                new Edge<int>(0, 1),
+                new Edge<int>(0, 2),
+                new Edge<int>(1, 3),
+                new Edge<int>(2, 3),
+
+                new Edge<int>(4, 5),
+                new Edge<int>(4, 6),
+                new Edge<int>(5, 7),
+                new Edge<int>(6, 7)
+            };
+            g.AddEdgeRange(edges);
+
+            return g;
+        }
+
     }
 }
 
