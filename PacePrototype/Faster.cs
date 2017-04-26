@@ -35,7 +35,7 @@ namespace PacePrototype
             return (k - ret, edgeSet);
         }
 
-        private static void drawGraph(UndirectedGraph<int, Edge<int>> retGraph, HashSet<Edge<int>> edgeSet, string v)
+        private static void drawGraph(UndirectedGraph<int, Edge<int>> retGraph, HashSet<Edge<int>> edgeSet, string path)
         {
             var a = new UndirectedGraph<int, Edge<int>>();
             var b = retGraph.Vertices.ToList();
@@ -43,10 +43,17 @@ namespace PacePrototype
             a.AddVertexRange(b);
             a.AddEdgeRange(retGraph.Edges);
             var c = new GraphvizAlgorithm<int, Edge<int>>(a);
-            c.Generate(new FileDotEngine(edgeSet), @"C:\Users\Frederik\Desktop\a.dot");
+            c.Generate(new FileDotEngine(edgeSet), path);
         }
 
-        private static (int, UndirectedGraph<int, Edge<int>>) FasterInner(UndirectedGraph<int, Edge<int>> graph, int k, int r, HashSet<int> Marked, List<Edge<int>> newlyAddedEdges, List<List<int>> prevMoplexes)
+        public static (int, UndirectedGraph<int, Edge<int>>) FasterInner(
+            UndirectedGraph<int, Edge<int>> graph,
+            int k,
+            int r,
+            HashSet<int> Marked,
+            List<Edge<int>> newlyAddedEdges,
+            List<List<int>> prevMoplexes
+            )
         {
             // Trivial cases
             if (k < 0 || r < -1)
@@ -60,7 +67,7 @@ namespace PacePrototype
             List<int> cycle = FindFourCycle3(graph); //has to return topological four cycle
             if(cycle != null)
             {
-                var graph1 = CloneGraph(graph);
+                var graph1 = CloneGraph(graph); // maybe only clone once
                 var graph2 = CloneGraph(graph);
                 var newEdge1 = new Edge<int>(cycle[0], cycle[3]);
                 var newEdge2 = new Edge<int>(cycle[1], cycle[2]);
@@ -89,7 +96,7 @@ namespace PacePrototype
                     r2--;
                 var (k1, g1) = FasterInner(graph1, k - 1, r1, Marked1, new List<Edge<int>> { newEdge1 }, analysis.Moplexes);
                 var (k2, g2) = FasterInner(graph2, k - 1, r2, Marked2, new List<Edge<int>> { newEdge2 }, analysis.Moplexes);
-                if (k1 > -1 && (k1 < k2 || k2 < 0))
+                if (k1 > k2)
                     return (k1, g1);
                 return (k2, g2);
             }

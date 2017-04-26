@@ -209,6 +209,49 @@ namespace PacePrototype
 
             return g;
         }
+
+        // Testgraph 5 with missing edge between 2 and 5
+        public static UndirectedGraph<int, Edge<int>> TestGraph10()
+        {
+            var g = new UndirectedGraph<int, Edge<int>>();
+            g.AddVertexRange(new int[] { 0, 1, 2, 3, 4, 5 });
+            var edges = new List<Edge<int>>
+            {
+                new Edge<int>(0, 1),
+                new Edge<int>(0, 2),
+                new Edge<int>(1, 3),
+                new Edge<int>(2, 3),
+                new Edge<int>(3, 4),
+                new Edge<int>(4, 5),
+
+            };
+            g.AddEdgeRange(edges);
+
+            return g;
+        }
+
+        // Testgraph 5 with extra edge between 2 and 4
+        public static UndirectedGraph<int, Edge<int>> TestGraph11()
+        {
+            var g = new UndirectedGraph<int, Edge<int>>();
+            g.AddVertexRange(new int[] { 0, 1, 2, 3, 4, 5 });
+            var edges = new List<Edge<int>>
+            {
+                new Edge<int>(0, 1),
+                new Edge<int>(0, 2),
+                new Edge<int>(1, 3),
+                new Edge<int>(2, 3),
+                new Edge<int>(2, 4),
+                new Edge<int>(2, 5),
+                new Edge<int>(3, 4),
+                new Edge<int>(4, 5),
+
+            };
+            g.AddEdgeRange(edges);
+
+            return g;
+        }
+
     }
 }
 

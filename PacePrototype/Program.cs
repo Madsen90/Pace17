@@ -12,11 +12,11 @@ namespace PacePrototype
     {
         static void Main(string[] args)
         {
-            //testAllGraphs();
-            //Tests();
-            var graph = parse(args[0]);
-            //var graph = TestGraphs.TestGraph6();
-            var k = Faster.Run(graph);
+            testAllGraphs();
+            Tests();
+            //var graph = parse(args[0]);
+            //var graph = TestGraphs.TestGraph8();
+            //var k = Faster.Run(graph);
             //Console.WriteLine($"Graph: {args[0].Split('\\').Last()} has k={k}");
             //Console.ReadLine();
         }
@@ -70,6 +70,18 @@ namespace PacePrototype
                 throw new Exception("k error on graph9");
             if (edgeSet.Count != k)
                 throw new Exception("edge set error on graph9");
+
+            (k, edgeSet) = Faster.Run(TestGraphs.TestGraph10());
+            if (k != 1)
+                throw new Exception("k error on graph10");
+            if (edgeSet.Count != k)
+                throw new Exception("edge set error on graph10");
+
+            (k, edgeSet) = Faster.Run(TestGraphs.TestGraph11());
+            if (k != 1)
+                throw new Exception("k error on graph11");
+            if (edgeSet.Count != k)
+                throw new Exception("edge set error on graph11");
         }
 
         public static UndirectedGraph<int, Edge<int>> parse(string path)
@@ -92,14 +104,30 @@ namespace PacePrototype
         {
             var analysis = MoplexAnalysis.AnalyseGraph(TestGraphs.TestGraph2(), null, null);
             var vStar = Faster.FindVStar(new Edge<int>(0, 7), new HashSet<int>(TestGraphs.TestGraph2().Vertices), TestGraphs.TestGraph2());
-            var k = Faster.Run(TestGraphs.TestGraph1());
+            if (vStar != 6)
+                throw new Exception("Error in VStar");
+
+            analysis = MoplexAnalysis.AnalyseGraph(TestGraphs.TestGraph8(), null, null);
+            if(analysis.Moplexes.Count != 5)
+                throw new Exception("Error in findmoplex without previous");
+
+            analysis = MoplexAnalysis.AnalyseGraph(TestGraphs.TestGraph9(), new List<Edge<int>> { new Edge<int>(0, 4) }, analysis.Moplexes);
+            if (analysis.Moplexes.Count != 3)
+                throw new Exception("Error in findmoplex with previous");
 
 
+            analysis = MoplexAnalysis.AnalyseGraph(TestGraphs.TestGraph10(), null, null);
+            if (analysis.Moplexes.Count != 2)
+                throw new Exception("Error in findmoplex without previous");
 
-            MoplexAnalysis.AnalyseGraph(TestGraphs.TestGraph1(), null, null);
-            MoplexAnalysis.AnalyseGraph(TestGraphs.TestGraph2(), null, null);
-            MoplexAnalysis.AnalyseGraph(TestGraphs.TestGraph3(), null, null);
-            MoplexAnalysis.AnalyseGraph(TestGraphs.TestGraph4(), null, null);
+            analysis = MoplexAnalysis.AnalyseGraph(TestGraphs.TestGraph5(), null, null);
+            if (analysis.Moplexes.Count != 4)
+                throw new Exception("Error in findmoplex without previous");
+
+            analysis = MoplexAnalysis.AnalyseGraph(TestGraphs.TestGraph11(), new List<Edge<int>> { new Edge<int>(0,4) }, analysis.Moplexes);
+            if (analysis.Moplexes.Count != 3)
+                throw new Exception("Error in findmoplex without previous");
+
             var a = Faster.FindFourCycle1(TestGraphs.TestGraph2());
             var b = Faster.FindFourCycle2(TestGraphs.TestGraph2());
             var c = Faster.FindFourCycle3(TestGraphs.TestGraph2());
@@ -135,6 +163,13 @@ namespace PacePrototype
                 throw new Exception("difference between findFourCycle1 & 2");
             if (a != c && !a.SequenceEqual(c))
                 throw new Exception("difference between findFourCycle1 & 3");
+
+
+            // Too big k test
+            (var k1, var ret1) = Faster.FasterInner(TestGraphs.TestGraph8(), 8, 16, new HashSet<int>(), null, null);
+            (var k2, var ret2) = Faster.Run(TestGraphs.TestGraph8());
+            if ((8 - k1) != k2)
+                throw new Exception("Wrong result if k is started too big");
         }
 
     }

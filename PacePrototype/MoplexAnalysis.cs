@@ -37,7 +37,13 @@ namespace PacePrototype
             return new MoplexAnalysis(moplexes, revOrder, ordering, labels);
         }
 
-        private static List<List<int>> FindMoplexes(UndirectedGraph<int, Edge<int>> graph, Dictionary<int, int> revOrdering, Dictionary<int, int> ordering, Dictionary<int, List<int>> labels, List<Edge<int>> newlyAddedEdges, List<List<int>> prevMoplexes)
+        private static List<List<int>> FindMoplexes(
+            UndirectedGraph<int, Edge<int>> graph,
+            Dictionary<int, int> revOrdering, 
+            Dictionary<int, int> ordering, 
+            Dictionary<int, List<int>> labels, 
+            List<Edge<int>> newlyAddedEdges, 
+            List<List<int>> prevMoplexes)
         {
             var moplexes = new List<List<int>>();
 
@@ -47,8 +53,17 @@ namespace PacePrototype
             {
                 foreach(var e in newlyAddedEdges)
                 {
-                    hasBeenChecked.AddRange(prevMoplexes.Where(l => (!l.Contains(e.Source) && !l.Contains(e.Target))).SelectMany(i => i).Distinct());
+                    var validMoplexes = prevMoplexes.Where(moplex =>
+                        e.Source != moplex.First()
+                        && e.Target != moplex.First()
+                        && graph.AdjacentEdges(moplex.First())
+                            .Select(edge => edge.GetOtherVertex(moplex.First()))
+                            .All(v => v != e.Source && v != e.Target)
+                        );
+                    moplexes.AddRange(validMoplexes);
+                    hasBeenChecked.AddRange(validMoplexes.SelectMany(i => i).Distinct());
                 }
+
                
             } else if(prevMoplexes != null) // no newly added edge, so previously calculated moplex must still be relevant.
             {
@@ -100,7 +115,7 @@ namespace PacePrototype
                 graph.AddVertexRange(potMoplex);
                 graph.AddEdgeRange(tempRemove);
 
-                var isMoplex = true;
+                var isMoplex = false;
                 foreach (var sepNode in seperator) // Find the components connected to each of the seperator vertices
                 {
                     HashSet<int> connectedComponents = new HashSet<int>();
@@ -109,18 +124,19 @@ namespace PacePrototype
                         var neighbour = e.GetOtherVertex(sepNode);
                         if (potMoplex.Contains(neighbour))
                             continue; //not a component, since it was removed at the time
-                        if (nodeToComponentDic.ContainsKey(neighbour)) //else neighbour is also seperator TODO: error here, 
-                        {
+                        if (nodeToComponentDic.ContainsKey(neighbour)) //else neighbour is also seperator TODO: error here, Not anymore I think
+                        { 
                             int c = -1;
                             nodeToComponentDic.TryGetValue(neighbour, out c);
                             connectedComponents.Add(c);
                         }
                     }
-                    if (connectedComponents.Count < a.ComponentCount)
+                    if (connectedComponents.Count < a.ComponentCount || a.ComponentCount == 0)
                     {
                         isMoplex = false;
                         break;
                     }
+                    isMoplex = true;
                 }
 
                 if (isMoplex)
@@ -135,6 +151,7 @@ namespace PacePrototype
                     hasBeenChecked.Add(n);
                 }
             }
+            var x = moplexes.Distinct().Count();
             return moplexes;
         }
 
