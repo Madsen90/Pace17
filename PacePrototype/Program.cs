@@ -14,11 +14,52 @@ namespace PacePrototype
         {
             //testAllGraphs();
             //Tests();
-            var graph = parse(args[0]);
+            //var graph1 = parse(args[0], true);
+            var graph2 = parse(args[0], false);
             //var graph = TestGraphs.TestGraph8();
-            var k = Faster.Run(graph);
+            //var k1 = Faster.Run(graph1);
+            var k2 = Faster.Run(graph2);
             //Console.WriteLine($"Graph: {args[0].Split('\\').Last()} has k={k}");
             //Console.ReadLine();
+        }
+
+        
+
+        public static UndirectedGraph<int, Edge<int>> parse(string path, bool kernelize)
+        {
+            var g = new UndirectedGraph<int, Edge<int>>();
+            StreamReader sr = new StreamReader(new BufferedStream(File.OpenRead(path)));
+            var verticeSet = new HashSet<int>();
+            while (!sr.EndOfStream)
+            {
+                string line = sr.ReadLine();
+                var edge = line.Split(' ').Select(s => int.Parse(s)).ToList();
+                g.AddVertexRange(edge);
+                g.AddEdge(new Edge<int>(edge[0], edge[1]));
+
+            }
+            if (kernelize && File.Exists(path + "kernel"))
+            {
+                sr = new StreamReader(new BufferedStream(File.OpenRead(path+"kernel")));
+                while (!sr.EndOfStream)
+                {
+                    string line = sr.ReadLine();
+                    var v = int.Parse(line);
+                    verticeSet.Add(v);
+                }
+            }
+            var g2 = Faster.CloneGraph(g);
+
+            if(verticeSet.Count > 0)
+            {
+                foreach(int v in g.Vertices)
+                {
+                    if (!verticeSet.Contains(v))
+                        g2.RemoveVertex(v);
+;                }
+            }
+
+            return g2;
         }
 
         public static void testAllGraphs()
@@ -88,22 +129,6 @@ namespace PacePrototype
                 throw new Exception("k error on graph11");
             if (edgeSet.Count != k)
                 throw new Exception("edge set error on graph11");
-        }
-
-        public static UndirectedGraph<int, Edge<int>> parse(string path)
-        {
-            var g = new UndirectedGraph<int, Edge<int>>();
-            StreamReader sr = new StreamReader(new BufferedStream(File.OpenRead(path)));
-            while (!sr.EndOfStream)
-            {
-                string line = sr.ReadLine();
-                var edge = line.Split(' ').Select(s => int.Parse(s)).ToList();
-                g.AddVertexRange(edge);
-                g.AddEdge(new Edge<int>(edge[0], edge[1]));
-
-            }
-
-            return g;
         }
 
         public static void Tests()

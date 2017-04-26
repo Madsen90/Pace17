@@ -58,6 +58,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Faster.cs" />
+    <Compile Include="MinFillKernelizer.cs" />
     <Compile Include="MoplexAnalysis.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

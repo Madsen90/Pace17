@@ -42,6 +42,9 @@ namespace PacePrototype
                 retk += k;
                 foreach (var e in edges) retEdges.Add(e);
             }
+            var clone2 = CloneGraph(graph);
+            clone2.AddEdgeRange(retEdges);
+            //drawGraph(clone2, retEdges, @"C:\Users\Frederik\Desktop\a.dot");
             return (retk, retEdges);
         }
 
@@ -63,7 +66,6 @@ namespace PacePrototype
                 Console.WriteLine($"Cumulated {(DateTime.Now - timeOfInit).ToString("c")}");
             }
             var edgeSet = new HashSet<Edge<int>>(retGraph.Edges.Where(e => !graph.ContainsEdge(e.Source, e.Target)));
-            drawGraph(retGraph, edgeSet, @"C:\Users\Frederik\Desktop\a.dot");
             
             return (k - ret, edgeSet);
         }
@@ -345,7 +347,7 @@ namespace PacePrototype
             return clone;
         }
 
-        private static UndirectedGraph<int, Edge<int>> CloneGraph(UndirectedGraph<int, Edge<int>> graph)
+        public static UndirectedGraph<int, Edge<int>> CloneGraph(UndirectedGraph<int, Edge<int>> graph)
         {
             var clone = new UndirectedGraph<int, Edge<int>>();
             foreach (var v in graph.Vertices)
