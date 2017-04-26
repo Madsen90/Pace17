@@ -252,6 +252,28 @@ namespace PacePrototype
             return g;
         }
 
+        // two disjoint four cycles
+        public static UndirectedGraph<int, Edge<int>> TestGraph12()
+        {
+            var g = new UndirectedGraph<int, Edge<int>>();
+            g.AddVertexRange(new int[] { 0, 1, 2, 3, 4, 5, 6, 7 });
+            var edges = new List<Edge<int>>
+            {
+                new Edge<int>(0, 1),
+                new Edge<int>(0, 2),
+                new Edge<int>(1, 3),
+                new Edge<int>(2, 3),
+
+                new Edge<int>(4, 5),
+                new Edge<int>(4, 6),
+                new Edge<int>(5, 7),
+                new Edge<int>(6, 7)
+            };
+            g.AddEdgeRange(edges);
+
+            return g;
+        }
+
     }
 }
 

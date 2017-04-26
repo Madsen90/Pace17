@@ -12,11 +12,11 @@ namespace PacePrototype
     {
         static void Main(string[] args)
         {
-            testAllGraphs();
-            Tests();
-            //var graph = parse(args[0]);
+            //testAllGraphs();
+            //Tests();
+            var graph = parse(args[0]);
             //var graph = TestGraphs.TestGraph8();
-            //var k = Faster.Run(graph);
+            var k = Faster.Run(graph);
             //Console.WriteLine($"Graph: {args[0].Split('\\').Last()} has k={k}");
             //Console.ReadLine();
         }
@@ -79,6 +79,12 @@ namespace PacePrototype
 
             (k, edgeSet) = Faster.Run(TestGraphs.TestGraph11());
             if (k != 1)
+                throw new Exception("k error on graph11");
+            if (edgeSet.Count != k)
+                throw new Exception("edge set error on graph11");
+
+            (k, edgeSet) = Faster.Run(TestGraphs.TestGraph12());
+            if (k != 2)
                 throw new Exception("k error on graph11");
             if (edgeSet.Count != k)
                 throw new Exception("edge set error on graph11");

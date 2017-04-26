@@ -12,28 +12,63 @@ namespace PacePrototype
 {
     class Faster
     {
+
         public static (int, HashSet<Edge<int>>) Run(UndirectedGraph<int, Edge<int>> graph)
         {
+            var componentAlgorithm = new QuickGraph.Algorithms.ConnectedComponents.ConnectedComponentsAlgorithm<int, Edge<int>>(graph);
+            componentAlgorithm.Compute();
+            var nodeToComponent = componentAlgorithm.Components;
             var time = DateTime.Now;
+            var retk = 0;
+            var retEdges = new HashSet<Edge<int>>();
+            for(int i = 0; i < componentAlgorithm.ComponentCount; i++)
+            {
+                var g = new UndirectedGraph<int, Edge<int>>();
+                foreach (var v in graph.Vertices)
+                {
+                    if(nodeToComponent[v] == i)
+                    {
+                        g.AddVertex(v);
+                    }
+                }
+                foreach(var v in g.Vertices)
+                {
+                    foreach(var e in graph.AdjacentEdges(v))
+                    {
+                        if (g.ContainsVertex(e.GetOtherVertex(v))) g.AddEdge(e);
+                    }
+                }
+                (var k, var edges) = FindK(g, time);
+                retk += k;
+                foreach (var e in edges) retEdges.Add(e);
+            }
+            return (retk, retEdges);
+        }
+
+
+        public static (int, HashSet<Edge<int>>) FindK(UndirectedGraph<int, Edge<int>> graph, DateTime timeOfInit)
+        {
             int ret = -1;
             int k = -1;
             UndirectedGraph<int, Edge<int>> retGraph = null;
             while (ret == -1)
             {
                 var time1 = DateTime.Now;
-
+                var clone = CloneGraph(graph);
                 Console.WriteLine(++k);
-                (int ret1, UndirectedGraph<int, Edge<int>> graph1) = FasterInner(graph, k, k * 2, new HashSet<int>(), null, null);
+                (int ret1, UndirectedGraph<int, Edge<int>> graph1) = FasterInner(clone, k, k * 2, new HashSet<int>(), null, null);
                 ret = ret1;
                 retGraph = graph1;
                 Console.WriteLine($"Took {(DateTime.Now - time1).ToString("c")}");
-                Console.WriteLine($"Cumulated {(DateTime.Now - time).ToString("c")}");
+                Console.WriteLine($"Cumulated {(DateTime.Now - timeOfInit).ToString("c")}");
             }
             var edgeSet = new HashSet<Edge<int>>(retGraph.Edges.Where(e => !graph.ContainsEdge(e.Source, e.Target)));
             drawGraph(retGraph, edgeSet, @"C:\Users\Frederik\Desktop\a.dot");
             
             return (k - ret, edgeSet);
         }
+
+
 
         private static void drawGraph(UndirectedGraph<int, Edge<int>> retGraph, HashSet<Edge<int>> edgeSet, string path)
         {
@@ -67,12 +102,12 @@ namespace PacePrototype
             List<int> cycle = FindFourCycle3(graph); //has to return topological four cycle
             if(cycle != null)
             {
-                var graph1 = CloneGraph(graph); // maybe only clone once
-                var graph2 = CloneGraph(graph);
+                //var graph1 = CloneGraph(graph); // maybe only clone once
+                var clone = CloneGraph(graph);
                 var newEdge1 = new Edge<int>(cycle[0], cycle[3]);
                 var newEdge2 = new Edge<int>(cycle[1], cycle[2]);
-                graph1.AddEdge(newEdge1);
-                graph2.AddEdge(newEdge2);
+                graph.AddEdge(newEdge1);
+                clone.AddEdge(newEdge2);
                 var Marked1 = new HashSet<int>(Marked);
                 var Marked2 = new HashSet<int>(Marked);
                 var r1 = r;
@@ -94,8 +129,8 @@ namespace PacePrototype
                     Marked2.Remove(cycle[2]);
                 else
                     r2--;
-                var (k1, g1) = FasterInner(graph1, k - 1, r1, Marked1, new List<Edge<int>> { newEdge1 }, analysis.Moplexes);
-                var (k2, g2) = FasterInner(graph2, k - 1, r2, Marked2, new List<Edge<int>> { newEdge2 }, analysis.Moplexes);
+                var (k1, g1) = FasterInner(graph, k - 1, r1, Marked1, new List<Edge<int>> { newEdge1 }, analysis.Moplexes);
+                var (k2, g2) = FasterInner(clone, k - 1, r2, Marked2, new List<Edge<int>> { newEdge2 }, analysis.Moplexes);
                 if (k1 > k2)
                     return (k1, g1);
                 return (k2, g2);
@@ -136,15 +171,14 @@ namespace PacePrototype
 
             if(simplicialUnmarked.Count > 0)
             {
-                var graph1 = CloneGraph(graph);
                 foreach(var neighbourhood in simplicialUnmarked)
                 {
                     foreach (var v in neighbourhood)
                     {
-                        graph1.RemoveVertex(v);
+                        graph.RemoveVertex(v);
                     }
                 }
-                return FasterInner(graph1, k, r, Marked, null, analysis.Moplexes.Except(simplicialUnmarked).ToList());
+                return FasterInner(graph, k, r, Marked, null, analysis.Moplexes.Except(simplicialUnmarked).ToList());
             }
 
             // Moplex with only unmarked vertices and neighbourhood only missing one edge
