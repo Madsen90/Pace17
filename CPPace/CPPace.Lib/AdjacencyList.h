@@ -8,6 +8,7 @@
 
 #include <set>
 #include "DisjointSet.h"
+#include <vector>
 
 using namespace std;
 
@@ -33,5 +34,9 @@ public:
   void add_edge(int u, int v);
   void remove_edge(int u, int v);
   bool connected(int u, int v);
+  bool clique(set<int>& vertices);
+  vector<pair<int, int>> all_edges();
+
+private:
   void regenerate_connectivity();
 };

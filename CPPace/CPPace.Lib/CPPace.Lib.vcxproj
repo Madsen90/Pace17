@@ -141,14 +141,16 @@
   <ItemGroup>
     <ClInclude Include="AdjacencyList.h" />
     <ClInclude Include="DisjointSet.h" />
-    <ClInclude Include="DotConvert.h" />
     <ClInclude Include="GraphGenerator.h" />
+    <ClInclude Include="GraphIO.h" />
+    <ClInclude Include="LexBFS.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AdjacencyList.cpp" />
     <ClCompile Include="DisjointSet.cpp" />
-    <ClCompile Include="DotConvert.cpp" />
     <ClCompile Include="GraphGenerator.cpp" />
+    <ClCompile Include="GraphIO.cpp" />
+    <ClCompile Include="LexBFS.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

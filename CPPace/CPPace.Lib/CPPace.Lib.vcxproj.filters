@@ -18,13 +18,16 @@
     <ClInclude Include="AdjacencyList.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DotConvert.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="GraphGenerator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DisjointSet.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LexBFS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphIO.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -32,13 +35,16 @@
     <ClCompile Include="AdjacencyList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DotConvert.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GraphGenerator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DisjointSet.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LexBFS.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphIO.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

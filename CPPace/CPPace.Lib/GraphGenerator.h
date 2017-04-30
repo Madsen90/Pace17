@@ -12,5 +12,5 @@ using namespace std;
 
 class GRAPHGENERATOR_API GraphGenerator {
 public:
-  static AdjacencyList *random(int num_vertices, int num_edges);
+  static AdjacencyList random(int num_vertices, int num_edges);
 };

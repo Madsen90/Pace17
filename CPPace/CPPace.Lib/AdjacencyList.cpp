@@ -71,3 +71,25 @@ void AdjacencyList::regenerate_connectivity() {
 
   connectivity_dirty = false;
 }
+
+bool AdjacencyList::clique(set<int>& vertices) {
+  for (int v : vertices) {
+    set<int> adjacency = edges(v);
+    adjacency.emplace(v);
+    bool same = vertices == adjacency;
+    adjacency.erase(v);
+    if (!same) return false;
+  }
+  return true;
+}
+
+vector<pair<int, int>> AdjacencyList::all_edges() {
+  vector<pair<int, int>> result(num_edges);
+  for (int u = 0; u < num_vertices; u++) {
+    for (int v : edges(u)) {
+      if (v < u) continue;
+      result.emplace_back(u, v);
+    }
+  }
+  return result;
+}
