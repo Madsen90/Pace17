@@ -67,12 +67,14 @@ namespace PacePrototype
                
             } else if(prevMoplexes != null) // no newly added edge, so previously calculated moplex must still be relevant.
             {
-                return prevMoplexes;
+                moplexes.AddRange(prevMoplexes);
+                hasBeenChecked.AddRange(prevMoplexes.SelectMany(m => m).ToList());
+
             }
-            
+
 
             // Start finding new moplexes
-            foreach(var v in labels.Keys)
+            foreach (var v in labels.Keys)
             {
                 if (hasBeenChecked.Contains(v)) // no vertex can be part of multiple moplexes
                     continue;
