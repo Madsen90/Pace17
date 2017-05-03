@@ -18,23 +18,7 @@ bool AdjacencyList::has_edge(int u, int v) {
   return adjacency_list[u].find(v) != adjacency_list[u].end();
 }
 
-void AdjacencyList::add_edge(int u, int v) {
-  if (has_edge(u, v)) return;
-  adjacency_list[u].emplace(v);
-  adjacency_list[v].emplace(u);
-  num_edges++;
-  connectivity_dirty = true;
-}
-
-void AdjacencyList::remove_edge(int u, int v) {
-  if (!has_edge(u, v)) return;
-  adjacency_list[u].erase(v);
-  adjacency_list[v].erase(u);
-  num_edges--;
-  connectivity_dirty = true;
-}
-
-bool AdjacencyList::connected(int u, int v) {
+bool AdjacencyList::is_connected(int u, int v) {
   // Regenerate connectivity labels only when needed
   if (connectivity_dirty)
     regenerate_connectivity();
@@ -72,7 +56,7 @@ void AdjacencyList::regenerate_connectivity() {
   connectivity_dirty = false;
 }
 
-bool AdjacencyList::clique(set<int>& vertices) {
+bool AdjacencyList::is_clique(set<int>& vertices) {
   for (int u : vertices)
     for (int v : vertices)
       if (!has_edge(u, v) && u != v)
@@ -93,7 +77,7 @@ vector<pair<int, int>> AdjacencyList::all_edges() {
   return result;
 }
 
-bool AdjacencyList::chordless_path(vector<int>& path) {
+bool AdjacencyList::is_path_chordless(vector<int>& path) {
   set<int> path_set;
   for (int u : path) path_set.emplace(u);
 
@@ -108,6 +92,22 @@ bool AdjacencyList::chordless_path(vector<int>& path) {
   }
 
   return true;
+}
+
+void AdjacencyList::add_edge(int u, int v) {
+  if (has_edge(u, v)) return;
+  adjacency_list[u].emplace(v);
+  adjacency_list[v].emplace(u);
+  num_edges++;
+  connectivity_dirty = true;
+}
+
+void AdjacencyList::remove_edge(int u, int v) {
+  if (!has_edge(u, v)) return;
+  adjacency_list[u].erase(v);
+  adjacency_list[v].erase(u);
+  num_edges--;
+  connectivity_dirty = true;
 }
 
 void AdjacencyList::make_clique(set<int>& vertices) {

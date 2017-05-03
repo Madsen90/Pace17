@@ -8,25 +8,6 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 namespace CPPaceTests {
   TEST_CLASS(AdjacencyListTests) {
   public:
-    AdjacencyList* berry_bordat_graph;
-
-    TEST_METHOD_INITIALIZE(method_name) {
-      berry_bordat_graph = new AdjacencyList(8);
-      berry_bordat_graph->add_edge(0, 1);
-      berry_bordat_graph->add_edge(0, 2);
-      berry_bordat_graph->add_edge(0, 4);
-      berry_bordat_graph->add_edge(0, 5);
-      berry_bordat_graph->add_edge(1, 2);
-      berry_bordat_graph->add_edge(1, 4);
-      berry_bordat_graph->add_edge(1, 5);
-      berry_bordat_graph->add_edge(2, 5);
-      berry_bordat_graph->add_edge(2, 6);
-      berry_bordat_graph->add_edge(3, 5);
-      berry_bordat_graph->add_edge(3, 6);
-      berry_bordat_graph->add_edge(4, 7);
-      berry_bordat_graph->add_edge(5, 7);
-      berry_bordat_graph->add_edge(6, 7);
-    }
 
     TEST_METHOD(Constructor) {
       const int n = 5;
@@ -76,79 +57,79 @@ namespace CPPaceTests {
       // Second component
       graph.add_edge(3, 4);
 
-      Assert::IsTrue(graph.connected(0, 1));
-      Assert::IsTrue(graph.connected(1, 0));
-      Assert::IsTrue(graph.connected(0, 2));
-      Assert::IsTrue(graph.connected(3, 4));
+      Assert::IsTrue(graph.is_connected(0, 1));
+      Assert::IsTrue(graph.is_connected(1, 0));
+      Assert::IsTrue(graph.is_connected(0, 2));
+      Assert::IsTrue(graph.is_connected(3, 4));
 
-      Assert::IsFalse(graph.connected(0, 4));
-      Assert::IsFalse(graph.connected(3, 2));
+      Assert::IsFalse(graph.is_connected(0, 4));
+      Assert::IsFalse(graph.is_connected(3, 2));
     }
 
     TEST_METHOD(Clique) {
       AdjacencyList graph(4);
-      Assert::IsTrue(graph.clique(set<int> { 0 }));
+      Assert::IsTrue(graph.is_clique(set<int> { 0 }));
 
       graph.add_edge(0, 1);
-      Assert::IsTrue(graph.clique(set<int> { 0 }));
-      Assert::IsTrue(graph.clique(set<int> { 0, 1 }));
-      Assert::IsTrue(graph.clique(set<int> { 2 }));
-      Assert::IsFalse(graph.clique(set<int> { 0, 2 }));
+      Assert::IsTrue(graph.is_clique(set<int> { 0 }));
+      Assert::IsTrue(graph.is_clique(set<int> { 0, 1 }));
+      Assert::IsTrue(graph.is_clique(set<int> { 2 }));
+      Assert::IsFalse(graph.is_clique(set<int> { 0, 2 }));
 
       graph.add_edge(0, 2);
-      Assert::IsTrue(graph.clique(set<int> { 0, 2 }));
-      Assert::IsFalse(graph.clique(set<int> { 0, 1, 2 }));
+      Assert::IsTrue(graph.is_clique(set<int> { 0, 2 }));
+      Assert::IsFalse(graph.is_clique(set<int> { 0, 1, 2 }));
 
       graph.add_edge(1, 2);
-      Assert::IsTrue(graph.clique(set<int> { 0, 1, 2 }));
-      Assert::IsFalse(graph.clique(set<int> { 0, 1, 2, 3 }));
+      Assert::IsTrue(graph.is_clique(set<int> { 0, 1, 2 }));
+      Assert::IsFalse(graph.is_clique(set<int> { 0, 1, 2, 3 }));
 
       graph.add_edge(0, 3);
-      Assert::IsTrue(graph.clique(set<int> { 0, 3 }));
-      Assert::IsFalse(graph.clique(set<int> { 0, 1, 2, 3 }));
+      Assert::IsTrue(graph.is_clique(set<int> { 0, 3 }));
+      Assert::IsFalse(graph.is_clique(set<int> { 0, 1, 2, 3 }));
 
       graph.add_edge(3, 1);
       graph.add_edge(2, 3);
-      Assert::IsTrue(graph.clique(set<int> { 0, 1, 2, 3 }));
-      Assert::IsTrue(graph.clique(set<int> { 0, 1, 2 }));
-      Assert::IsTrue(graph.clique(set<int> { 0, 1 }));
-      Assert::IsTrue(graph.clique(set<int> { 0 }));
+      Assert::IsTrue(graph.is_clique(set<int> { 0, 1, 2, 3 }));
+      Assert::IsTrue(graph.is_clique(set<int> { 0, 1, 2 }));
+      Assert::IsTrue(graph.is_clique(set<int> { 0, 1 }));
+      Assert::IsTrue(graph.is_clique(set<int> { 0 }));
     }
 
     TEST_METHOD(ChordlessPath) {
       AdjacencyList graph(5);
-      Assert::IsTrue(graph.chordless_path(vector<int> { 0 }));
+      Assert::IsTrue(graph.is_path_chordless(vector<int> { 0 }));
 
       // 0-1 2 3 4
       graph.add_edge(0, 1);
-      Assert::IsTrue(graph.chordless_path(vector<int> { 0 }));
-      Assert::IsTrue(graph.chordless_path(vector<int> { 0, 1 }));
+      Assert::IsTrue(graph.is_path_chordless(vector<int> { 0 }));
+      Assert::IsTrue(graph.is_path_chordless(vector<int> { 0, 1 }));
 
       // 0-1-2-3-4
       graph.add_edge(1, 2);
       graph.add_edge(3, 4);
       graph.add_edge(2, 3);
-      Assert::IsTrue(graph.chordless_path(vector<int> { 0, 1, 2, 3, 4 }));
-      Assert::IsTrue(graph.chordless_path(vector<int> { 4, 3, 2, 1, 0 }));
+      Assert::IsTrue(graph.is_path_chordless(vector<int> { 0, 1, 2, 3, 4 }));
+      Assert::IsTrue(graph.is_path_chordless(vector<int> { 4, 3, 2, 1, 0 }));
       
       // 0-1-2-3-4
       //    \_/
       graph.add_edge(1, 3);
-      Assert::IsFalse(graph.chordless_path(vector<int> { 0, 1, 2, 3, 4 }));
-      Assert::IsFalse(graph.chordless_path(vector<int> { 4, 3, 2, 1, 0 }));
+      Assert::IsFalse(graph.is_path_chordless(vector<int> { 0, 1, 2, 3, 4 }));
+      Assert::IsFalse(graph.is_path_chordless(vector<int> { 4, 3, 2, 1, 0 }));
     }
 
     TEST_METHOD(MakeClique) {
       AdjacencyList graph(5);
-      Assert::IsFalse(graph.clique(set<int> { 0, 1, 2, 3, 4 }));
+      Assert::IsFalse(graph.is_clique(set<int> { 0, 1, 2, 3, 4 }));
 
       graph.make_clique(set<int> { 0, 1, 4 });
-      Assert::IsTrue(graph.clique(set<int> { 0, 1, 4 }));
-      Assert::IsFalse(graph.clique(set<int> { 0, 1, 2, 3, 4 }));
+      Assert::IsTrue(graph.is_clique(set<int> { 0, 1, 4 }));
+      Assert::IsFalse(graph.is_clique(set<int> { 0, 1, 2, 3, 4 }));
 
       graph.make_clique(set<int> { 0, 1, 2, 3, 4 });
-      Assert::IsTrue(graph.clique(set<int> { 0, 1, 2, 3, 4 }));
-      Assert::IsTrue(graph.clique(set<int> { 0, 1, 4 }));
+      Assert::IsTrue(graph.is_clique(set<int> { 0, 1, 2, 3, 4 }));
+      Assert::IsTrue(graph.is_clique(set<int> { 0, 1, 4 }));
     }
   };
 

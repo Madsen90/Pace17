@@ -71,7 +71,7 @@ bool LexBFS::is_chordal(AdjacencyList& graph) {
           visited_graph.add_edge(u, v);
       }
       
-      if (!graph.clique(adjacency)) {
+      if (!graph.is_clique(adjacency)) {
         chordal = Chordal::False;
         return false;
       }

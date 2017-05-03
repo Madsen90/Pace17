@@ -18,6 +18,20 @@ public:
   int num_vertices;
   set<int>* adjacency_list;
 
+  AdjacencyList(int num_vertices);
+
+  set<int> edges(int v);
+  bool has_edge(int u, int v);
+  bool is_connected(int u, int v);
+  bool is_clique(set<int>& vertices);
+  vector<pair<int, int>> all_edges();
+  bool is_path_chordless(vector<int>& path);
+
+  void add_edge(int u, int v);
+  void remove_edge(int u, int v);
+  void make_clique(set<int>& vertices);
+
+private:
   // Useful array for marking vertices.
   // Zero-out before use - leave dirty after use.
   bool* visited;
@@ -27,18 +41,5 @@ public:
   int* connectivity_labels;
   bool connectivity_dirty;
 
-  AdjacencyList(int num_vertices);
-
-  set<int> edges(int v);
-  bool has_edge(int u, int v);
-  void add_edge(int u, int v);
-  void remove_edge(int u, int v);
-  bool connected(int u, int v);
-  bool clique(set<int>& vertices);
-  vector<pair<int, int>> all_edges();
-  bool chordless_path(vector<int>& path);
-  void make_clique(set<int>& vertices);
-
-private:
   void regenerate_connectivity();
 };
