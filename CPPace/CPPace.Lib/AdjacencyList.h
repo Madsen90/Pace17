@@ -36,6 +36,8 @@ public:
   bool connected(int u, int v);
   bool clique(set<int>& vertices);
   vector<pair<int, int>> all_edges();
+  bool chordless_path(vector<int>& path);
+  void make_clique(set<int>& vertices);
 
 private:
   void regenerate_connectivity();

@@ -73,13 +73,11 @@ void AdjacencyList::regenerate_connectivity() {
 }
 
 bool AdjacencyList::clique(set<int>& vertices) {
-  for (int v : vertices) {
-    set<int> adjacency = edges(v);
-    adjacency.emplace(v);
-    bool same = vertices == adjacency;
-    adjacency.erase(v);
-    if (!same) return false;
-  }
+  for (int u : vertices)
+    for (int v : vertices)
+      if (!has_edge(u, v) && u != v)
+        return false;
+
   return true;
 }
 
@@ -93,4 +91,28 @@ vector<pair<int, int>> AdjacencyList::all_edges() {
     }
   }
   return result;
+}
+
+bool AdjacencyList::chordless_path(vector<int>& path) {
+  set<int> path_set;
+  for (int u : path) path_set.emplace(u);
+
+  for (int i = 0; i < path.size() - 1; i++) {
+    int u = path[i];
+    int next = path[i + 1];
+    for (int v : edges(u)) {
+      if (path_set.find(v) != path_set.end() && v != next)
+        return false;
+    }
+    path_set.erase(u);
+  }
+
+  return true;
+}
+
+void AdjacencyList::make_clique(set<int>& vertices) {
+  for (int u : vertices)
+    for (int v : vertices)
+      if (u != v)
+        add_edge(u, v);
 }
