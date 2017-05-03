@@ -102,14 +102,14 @@ namespace PacePrototype
                 k++;
                 var time1 = DateTime.Now;
                 var clone = CloneGraph(graph);
-                //Console.WriteLine(k);
+                Console.WriteLine(k);
                 var tup = FasterInner(clone, k, k * 2, new HashSet<int>(), null, null);
                 int ret1 = tup.Item1;
                 UndirectedGraph<int, Edge<int>> graph1 = tup.Item2;
                 ret = ret1;
                 retGraph = graph1;
-                //Console.WriteLine($"Took {(DateTime.Now - time1).ToString("c")}");
-                //Console.WriteLine($"Cumulated {(DateTime.Now - timeOfInit).ToString("c")}");
+                Console.WriteLine($"Took {(DateTime.Now - time1).ToString("c")}");
+                Console.WriteLine($"Cumulated {(DateTime.Now - timeOfInit).ToString("c")}");
             }
             var edgeSet = new HashSet<Edge<int>>(retGraph.Edges.Where(e => (!graph.ContainsEdge(e.Source, e.Target) && !graph.ContainsEdge(e.Target, e.Source))));
 
@@ -240,7 +240,7 @@ namespace PacePrototype
             if (missingEdge != null)
             {
                 HashSet<int> moplexNeighbourhoodMarked = CloneSet(moplexNeighbourhood);
-
+                var clone = CloneGraph(graph);
                 var vStar = FindVStar(missingEdge, moplexNeighbourhoodMarked, graph);
                 if (vStar == -1)
                 {
@@ -257,8 +257,8 @@ namespace PacePrototype
                     marked.Remove(missingEdge.Target);
                 }
                 else r--;
-                graph.AddEdge(missingEdge);
-                return FasterInner(graph, k - 1, r, marked, new List<Edge<int>> { missingEdge }, analysis.Moplexes);
+                clone.AddEdge(missingEdge);
+                return FasterInner(clone, k - 1, r, marked, new List<Edge<int>> { missingEdge }, analysis.Moplexes);
             }
 
             var markedMoplexes = analysis.Moplexes.Where(vl => vl.TrueForAll(v => marked.Contains(v))).ToList();
@@ -268,11 +268,12 @@ namespace PacePrototype
             if (unmarkedMoplexes.Count > 0)
             {
                 var moplex = unmarkedMoplexes.First();
+                var graph1 = CloneGraph(graph);
                 //branch 1:
                 var marked1 = new HashSet<int>(marked);
                 moplex.ForEach(v => marked1.Add(v));
                 var r1 = r - (marked1.Count - marked.Count);
-                var tup1 = FasterInner(graph, k, r1, marked1, null, analysis.Moplexes);
+                var tup1 = FasterInner(graph1, k, r1, marked1, null, analysis.Moplexes);
                 var b1 = tup1.Item1;
                 var g1 = tup1.Item2;
                 //branch 2:
@@ -374,9 +375,9 @@ namespace PacePrototype
 
         }
 
-        private static List<int> CloneList(List<int> l)
+        private static List<T> CloneList<T>(List<T> l)
         {
-            var clone = new List<int>();
+            var clone = new List<T>();
             foreach (var i in l)
             {
                 clone.Add(i);
