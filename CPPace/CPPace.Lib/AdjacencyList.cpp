@@ -84,7 +84,8 @@ bool AdjacencyList::clique(set<int>& vertices) {
 }
 
 vector<pair<int, int>> AdjacencyList::all_edges() {
-  vector<pair<int, int>> result(num_edges);
+  vector<pair<int, int>> result;
+  result.reserve(num_edges);
   for (int u = 0; u < num_vertices; u++) {
     for (int v : edges(u)) {
       if (v < u) continue;
