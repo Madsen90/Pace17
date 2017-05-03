@@ -131,7 +131,7 @@ namespace PacePrototype
                 return new Tuple<int, HashSet<Edge<int>>>(k, addedEdges);
 
             // Find four cycle
-            List<int> cycle = FindFourCycle2(graph); //has to return four cycle in topological order
+            List<int> cycle = FindFourCycle3BUGGY(graph); //has to return four cycle in topological order
             if (cycle != null)
             {
                 //if (FindFourCycle3BUGGY(graph) == null) // || !FindFourCycle2(graph).SequenceEqual(FindFourCycle3BUGGY(graph))) // only for debug
@@ -184,7 +184,7 @@ namespace PacePrototype
                 var tup1 = FasterInner(graph, k - 1, r1, marked1, new List<Edge<int>> { newEdge1 }, analysis.Moplexes, addedEdges1);
                 var k1 = tup1.Item1;
                 var e1 = tup1.Item2;
-                var tup2 = FasterInner(clone, k - 1, r2, marked2, new List<Edge<int>> { newEdge2 }, analysis.Moplexes, addedEdges1);
+                var tup2 = FasterInner(clone, k - 1, r2, marked2, new List<Edge<int>> { newEdge2 }, analysis.Moplexes, addedEdges2);
                 var k2 = tup2.Item1;
                 var e2 = tup2.Item2;
                 if (k1 > k2)
@@ -210,20 +210,7 @@ namespace PacePrototype
 
             //simplicial moplex with only unmarked vertices
             List<List<int>> unmarkedMoplexes = analysis.Moplexes.Where(vl => vl.TrueForAll(v => !marked.Contains(v))).ToList();
-            List<List<int>> simplicialUnmarked = unmarkedMoplexes.Where(vl =>
-            {
-                var neighbourhood = new HashSet<int>();
-
-                foreach (var v in vl)
-                {
-                    foreach (var e in graph.AdjacentEdges(v))
-                    {
-                        neighbourhood.Add(e.GetOtherVertex(v));
-                    }
-                }
-
-                return IsClique2(neighbourhood, graph);
-            }).ToList();
+            List<List<int>> simplicialUnmarked = unmarkedMoplexes.Where(vl => IsClique2(Neighbourhood(vl, graph),graph)).ToList();
 
             if (simplicialUnmarked.Count > 0)
             {
@@ -309,6 +296,10 @@ namespace PacePrototype
                 }
                 var missingEdges = MissingEdges(neighbourhood, analysis.NeighbourLabels);
                 graph2.AddEdgeRange(missingEdges);
+                foreach (var e in missingEdges)
+                {
+                    addedEdges2.Add(e);
+                }
                 var k2 = k - (missingEdges.Count);
                 var tup2 = FasterInner(graph2, k2, r, marked, missingEdges, analysis.Moplexes, addedEdges2);
                 var b2 = tup2.Item1;
@@ -322,6 +313,21 @@ namespace PacePrototype
 
 
             return new Tuple<int, HashSet<Edge<int>>>(-1, null); //should never happen
+        }
+
+        private static HashSet<int> Neighbourhood(List<int> moplex, UndirectedGraph<int, Edge<int>> graph)
+        {
+            var neighbourhood = new HashSet<int>();
+
+            foreach (var v in moplex)
+            {
+                foreach (var e in graph.AdjacentEdges(v))
+                {
+                    neighbourhood.Add(e.GetOtherVertex(v));
+                }
+            }
+
+            return neighbourhood;
         }
 
         private static HashSet<T> CloneSet<T>(HashSet<T> org)
