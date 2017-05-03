@@ -134,13 +134,22 @@ namespace PacePrototype
             List<int> cycle = FindFourCycle2(graph); //has to return four cycle in topological order
             if (cycle != null)
             {
-                if (!FindFourCycle2(graph).SequenceEqual(FindFourCycle3(graph)))
-                {
-                    var o = FindFourCycle1(graph);
-                    var a = FindFourCycle2(graph);
-                    var b = FindFourCycle3(graph);
-                }
-             
+                //if (FindFourCycle3BUGGY(graph) == null) // || !FindFourCycle2(graph).SequenceEqual(FindFourCycle3BUGGY(graph))) // only for debug
+                //{
+                //    var o = FindFourCycle1(graph);
+                //    var a = FindFourCycle2(graph);
+                //    var b = FindFourCycle3BUGGY(graph);
+                //}
+
+                //foreach (var v in graph.Vertices)
+                //{
+                //    Console.WriteLine(v);
+                //}
+                //foreach (var e in graph.Edges)
+                //{
+                //    Console.WriteLine($"{e.Source} {e.Target}");
+                //}
+
                 //var graph1 = CloneGraph(graph); // maybe only clone once
                 var clone = CloneGraph(graph);
                 var newEdge1 = new Edge<int>(cycle[0], cycle[3]);
@@ -172,7 +181,6 @@ namespace PacePrototype
                     marked2.Remove(cycle[2]);
                 else
                     r2--;
-                                                                                                        //Her
                 var tup1 = FasterInner(graph, k - 1, r1, marked1, new List<Edge<int>> { newEdge1 }, analysis.Moplexes, addedEdges1);
                 var k1 = tup1.Item1;
                 var e1 = tup1.Item2;
@@ -214,7 +222,7 @@ namespace PacePrototype
                     }
                 }
 
-                return IsClique(neighbourhood, analysis.EleminationOrder, analysis.NeighbourLabels);
+                return IsClique2(neighbourhood, graph);
             }).ToList();
 
             if (simplicialUnmarked.Count > 0)
@@ -496,18 +504,16 @@ namespace PacePrototype
         }
 
         // DFS based four-cycle-finder
-        public static List<int> FindFourCycle3(UndirectedGraph<int, Edge<int>> graph)
+        public static List<int> FindFourCycle3BUGGY(UndirectedGraph<int, Edge<int>> graph)
         {
             foreach (var v in graph.Vertices)
             {
                 var cycle = FindFourCycle3Inner(graph, new List<int>(), v, 3, v);
-                if (cycle != null)
-                {
-                    var tmp = cycle[2];
-                    cycle[2] = cycle[3];
-                    cycle[3] = tmp;
-                    return cycle;
-                }
+                if (cycle == null) continue;
+                var tmp = cycle[2];
+                cycle[2] = cycle[3];
+                cycle[3] = tmp;
+                return cycle;
             }
             return null;
         }
@@ -524,7 +530,7 @@ namespace PacePrototype
                     if (goal == n)
                         return path;
                     else
-                        return null;
+                        continue;
                 }
                 var newPath = CloneList(path);
                 var cycle = FindFourCycle3Inner(graph, newPath, n, depth - 1, goal);
