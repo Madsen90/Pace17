@@ -51,18 +51,19 @@ namespace PacePrototype
 
             if(newlyAddedEdges != null) //newly added edge means that the moplexes effected must be recalculated.
             {
-                foreach(var e in newlyAddedEdges)
-                {
-                    var validMoplexes = prevMoplexes.Where(moplex =>
-                        e.Source != moplex.First()
-                        && e.Target != moplex.First()
-                        && graph.AdjacentEdges(moplex.First())
-                            .Select(edge => edge.GetOtherVertex(moplex.First()))
-                            .All(v => v != e.Source && v != e.Target)
-                        );
-                    moplexes.AddRange(validMoplexes);
-                    hasBeenChecked.AddRange(validMoplexes.SelectMany(i => i).Distinct());
-                }
+                if(prevMoplexes != null)
+                    foreach(var e in newlyAddedEdges)
+                    {
+                        var validMoplexes = prevMoplexes.Where(moplex =>
+                            e.Source != moplex.First()
+                            && e.Target != moplex.First()
+                            && graph.AdjacentEdges(moplex.First())
+                                .Select(edge => edge.GetOtherVertex(moplex.First()))
+                                .All(v => v != e.Source && v != e.Target)
+                            );
+                        moplexes.AddRange(validMoplexes);
+                        hasBeenChecked.AddRange(validMoplexes.SelectMany(i => i).Distinct());
+                    }
 
                
             } else if(prevMoplexes != null) // no newly added edge, so previously calculated moplex must still be relevant.

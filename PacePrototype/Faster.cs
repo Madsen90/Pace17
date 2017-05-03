@@ -19,7 +19,7 @@ namespace PacePrototype
             var retEdges = new HashSet<Edge<int>>();
             for (int i = 0; i < componentAlgorithm.ComponentCount; i++)
             {
-                var g = new UndirectedGraph<int, Edge<int>>();
+                var g = new UndirectedGraph<int, Edge<int>>(false);
                 foreach (var v in graph.Vertices)
                 {
                     if (nodeToComponent[v] == i)
@@ -96,51 +96,59 @@ namespace PacePrototype
         {
             int ret = -1;
             int k = -1;
-            UndirectedGraph<int, Edge<int>> retGraph = null;
+            HashSet<Edge<int>> retEdges = null;
             while (ret == -1)
             {
                 k++;
                 var time1 = DateTime.Now;
                 var clone = CloneGraph(graph);
                 Console.WriteLine(k);
-                var tup = FasterInner(clone, k, k * 2, new HashSet<int>(), null, null);
-                int ret1 = tup.Item1;
-                UndirectedGraph<int, Edge<int>> graph1 = tup.Item2;
-                ret = ret1;
-                retGraph = graph1;
-                Console.WriteLine($"Took {(DateTime.Now - time1).ToString("c")}");
-                Console.WriteLine($"Cumulated {(DateTime.Now - timeOfInit).ToString("c")}");
+                var tup = FasterInner(clone, k, k * 2, new HashSet<int>(), null, null, new HashSet<Edge<int>>());
+                ret = tup.Item1;
+                retEdges = tup.Item2;
+                Console.WriteLine($"Took {(DateTime.Now - time1):c}");
+                Console.WriteLine($"Cumulated {(DateTime.Now - timeOfInit):c}");
             }
-            var edgeSet = new HashSet<Edge<int>>(retGraph.Edges.Where(e => (!graph.ContainsEdge(e.Source, e.Target) && !graph.ContainsEdge(e.Target, e.Source))));
-
-            return new Tuple<int, HashSet<Edge<int>>>(k - ret, edgeSet);
+            return new Tuple<int, HashSet<Edge<int>>>(k - ret, retEdges);
         }
 
-        public static Tuple<int, UndirectedGraph<int, Edge<int>>> FasterInner(
+        public static Tuple<int, HashSet<Edge<int>>> FasterInner(
             UndirectedGraph<int, Edge<int>> graph,
             int k,
             int r,
             HashSet<int> marked,
             List<Edge<int>> newlyAddedEdges,
-            List<List<int>> prevMoplexes
+            List<List<int>> prevMoplexes,
+            HashSet<Edge<int>> addedEdges
         )
         {
             // Trivial cases
             if (k < 0 || r < -1)
-                return new Tuple<int, UndirectedGraph<int, Edge<int>>>(-1, graph);
+                return new Tuple<int, HashSet<Edge<int>>>(-1, addedEdges);
 
             var analysis = MoplexAnalysis.AnalyseGraph(graph, newlyAddedEdges, prevMoplexes);
             if (IsChordal2(analysis, graph))
-                return new Tuple<int, UndirectedGraph<int, Edge<int>>>(k, graph);
+                return new Tuple<int, HashSet<Edge<int>>>(k, addedEdges);
 
             // Find four cycle
-            List<int> cycle = FindFourCycle3(graph); //has to return topological four cycle
+            List<int> cycle = FindFourCycle2(graph); //has to return four cycle in topological order
             if (cycle != null)
             {
+                if (!FindFourCycle2(graph).SequenceEqual(FindFourCycle3(graph)))
+                {
+                    var o = FindFourCycle1(graph);
+                    var a = FindFourCycle2(graph);
+                    var b = FindFourCycle3(graph);
+                }
+             
                 //var graph1 = CloneGraph(graph); // maybe only clone once
                 var clone = CloneGraph(graph);
                 var newEdge1 = new Edge<int>(cycle[0], cycle[3]);
                 var newEdge2 = new Edge<int>(cycle[1], cycle[2]);
+                var addedEdges1 = CloneSet(addedEdges);
+                var addedEdges2 = CloneSet(addedEdges);
+                addedEdges1.Add(newEdge1);
+                addedEdges2.Add(newEdge2);
                 graph.AddEdge(newEdge1);
                 clone.AddEdge(newEdge2);
                 var marked1 = new HashSet<int>(marked);
@@ -164,15 +172,16 @@ namespace PacePrototype
                     marked2.Remove(cycle[2]);
                 else
                     r2--;
-                var tup1 = FasterInner(graph, k - 1, r1, marked1, new List<Edge<int>> { newEdge1 }, analysis.Moplexes);
+                                                                                                        //Her
+                var tup1 = FasterInner(graph, k - 1, r1, marked1, new List<Edge<int>> { newEdge1 }, analysis.Moplexes, addedEdges1);
                 var k1 = tup1.Item1;
-                var g1 = tup1.Item2;
-                var tup2 = FasterInner(clone, k - 1, r2, marked2, new List<Edge<int>> { newEdge2 }, analysis.Moplexes);
+                var e1 = tup1.Item2;
+                var tup2 = FasterInner(clone, k - 1, r2, marked2, new List<Edge<int>> { newEdge2 }, analysis.Moplexes, addedEdges1);
                 var k2 = tup2.Item1;
-                var g2 = tup2.Item2;
+                var e2 = tup2.Item2;
                 if (k1 > k2)
-                    return new Tuple<int, UndirectedGraph<int, Edge<int>>>(k1, g1);
-                return new Tuple<int, UndirectedGraph<int, Edge<int>>>(k2, g2);
+                    return new Tuple<int, HashSet<Edge<int>>>(k1, e1);
+                return new Tuple<int, HashSet<Edge<int>>>(k2, e2);
             }
 
             //find moplex with both marked and unmarked edges
@@ -188,7 +197,7 @@ namespace PacePrototype
                             r--;
                     }
                 }
-                return FasterInner(graph, k, r, marked, null, analysis.Moplexes);
+                return FasterInner(graph, k, r, marked, null, analysis.Moplexes, addedEdges);
             }
 
             //simplicial moplex with only unmarked vertices
@@ -217,7 +226,7 @@ namespace PacePrototype
                         graph.RemoveVertex(v);
                     }
                 }
-                return FasterInner(graph, k, r, marked, null, analysis.Moplexes.Except(simplicialUnmarked).ToList());
+                return FasterInner(graph, k, r, marked, null, analysis.Moplexes.Except(simplicialUnmarked).ToList(), addedEdges);
             }
 
             // Moplex with only unmarked vertices and neighbourhood only missing one edge
@@ -240,11 +249,10 @@ namespace PacePrototype
             if (missingEdge != null)
             {
                 HashSet<int> moplexNeighbourhoodMarked = CloneSet(moplexNeighbourhood);
-                var clone = CloneGraph(graph);
                 var vStar = FindVStar(missingEdge, moplexNeighbourhoodMarked, graph);
                 if (vStar == -1)
                 {
-                    vStar = FindVStar(new Edge<int>(missingEdge.Target, missingEdge.Source), moplexNeighbourhoodMarked, graph);
+                    vStar = FindVStar(new Edge<int>(missingEdge.Target, missingEdge.Source), moplexNeighbourhoodMarked, graph); //WHAt??
                     marked.Remove(vStar);
                 }
                 if (marked.Contains(missingEdge.Source))
@@ -257,27 +265,31 @@ namespace PacePrototype
                     marked.Remove(missingEdge.Target);
                 }
                 else r--;
-                clone.AddEdge(missingEdge);
-                return FasterInner(clone, k - 1, r, marked, new List<Edge<int>> { missingEdge }, analysis.Moplexes);
+                graph.AddEdge(missingEdge);
+                var addedEdges1 = CloneSet(addedEdges);
+                addedEdges1.Add(missingEdge);
+                return FasterInner(graph, k - 1, r, marked, new List<Edge<int>> { missingEdge }, analysis.Moplexes, addedEdges1);
             }
 
             var markedMoplexes = analysis.Moplexes.Where(vl => vl.TrueForAll(v => marked.Contains(v))).ToList();
             if (markedMoplexes.Count == analysis.Moplexes.Count)
-                return new Tuple<int, UndirectedGraph<int, Edge<int>>>(-1, null);
+                return new Tuple<int, HashSet<Edge<int>>>(-1, null);
 
             if (unmarkedMoplexes.Count > 0)
             {
                 var moplex = unmarkedMoplexes.First();
                 var graph1 = CloneGraph(graph);
+                var addedEdges1 = CloneSet(addedEdges);
                 //branch 1:
                 var marked1 = new HashSet<int>(marked);
                 moplex.ForEach(v => marked1.Add(v));
                 var r1 = r - (marked1.Count - marked.Count);
-                var tup1 = FasterInner(graph1, k, r1, marked1, null, analysis.Moplexes);
+                var tup1 = FasterInner(graph1, k, r1, marked1, null, analysis.Moplexes, addedEdges1);
                 var b1 = tup1.Item1;
-                var g1 = tup1.Item2;
+                var e1 = tup1.Item2;
                 //branch 2:
                 var graph2 = CloneGraph(graph);
+                var addedEdges2 = CloneSet(addedEdges);
                 var neighbourhood = new HashSet<int>();
                 foreach (var v in moplex)
                 {
@@ -290,23 +302,23 @@ namespace PacePrototype
                 var missingEdges = MissingEdges(neighbourhood, analysis.NeighbourLabels);
                 graph2.AddEdgeRange(missingEdges);
                 var k2 = k - (missingEdges.Count);
-                var tup2 = FasterInner(graph2, k2, r, marked, missingEdges, analysis.Moplexes);
+                var tup2 = FasterInner(graph2, k2, r, marked, missingEdges, analysis.Moplexes, addedEdges2);
                 var b2 = tup2.Item1;
-                var g2 = tup2.Item2;
+                var e2 = tup2.Item2;
                 if (b1 > -1 && b1 < b2)
-                    return new Tuple<int, UndirectedGraph<int, Edge<int>>>(b1, g1);
-                return new Tuple<int, UndirectedGraph<int, Edge<int>>>(b2, g2);
+                    return new Tuple<int, HashSet<Edge<int>>>(b1, e1);
+                return new Tuple<int, HashSet<Edge<int>>>(b2, e2);
 
             }
 
 
 
-            return new Tuple<int, UndirectedGraph<int, Edge<int>>>(-1, null);
+            return new Tuple<int, HashSet<Edge<int>>>(-1, null); //should never happen
         }
 
-        private static HashSet<int> CloneSet(HashSet<int> org)
+        private static HashSet<T> CloneSet<T>(HashSet<T> org)
         {
-            var clone = new HashSet<int>();
+            var clone = new HashSet<T>();
             foreach (var i in org)
             {
                 clone.Add(i);
@@ -387,7 +399,7 @@ namespace PacePrototype
 
         public static UndirectedGraph<int, Edge<int>> CloneGraph(UndirectedGraph<int, Edge<int>> graph)
         {
-            var clone = new UndirectedGraph<int, Edge<int>>();
+            var clone = new UndirectedGraph<int, Edge<int>>(false);
             foreach (var v in graph.Vertices)
             {
                 clone.AddVertex(v);

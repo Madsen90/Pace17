@@ -11,24 +11,29 @@ namespace PacePrototype
         static void Main(string[] args)
         {
             //TestGraphs.testAllGraphs();
-            //TestGraphs.Tests();
+            TestGraphs.Tests();
             //var graph1 = parse(args[0], true);
             //var graph2 = parseFile(args[0], false);
             //var graph = TestGraphs.TestGraph8();
             //var k1 = Faster.Run(graph1);
-            UndirectedGraph<int, Edge<int>> graph = null;
-            if (args.Length > 0)
-            {
-                graph = ParseFile(args[0], false);
-            }
-            else
-            {
-                graph = ReadGraph();
-            }
-            
+            UndirectedGraph<int, Edge<int>> graph = TestGraphs.TestGraph14();
+            //if (args.Length > 0)
+            //{
+            //    graph = ParseFile(args[0], false);
+            //}
+            //else
+            //{
+            //    graph = ReadGraph();
+            //}
+
             Tuple<int, HashSet<Edge<int>>> a = Faster.Run(graph);
             var k = a.Item1;
             var edgeSet = a.Item2; 
+            //Idiot check
+            graph.AddEdgeRange(edgeSet);
+            var analysis = MoplexAnalysis.AnalyseGraph(graph, null, null);
+            if (!Faster.IsChordal2(analysis, graph))
+                throw new Exception("Idiot check went terribly wrong");
             //Console.WriteLine($"Graph: {args[0].Split('\\').Last()} has k={k}");
             //Console.ReadLine();
             PrintSolution(edgeSet);
@@ -36,7 +41,7 @@ namespace PacePrototype
 
         private static UndirectedGraph<int, Edge<int>> ReadGraph()
         {
-            var g = new UndirectedGraph<int, Edge<int>>();
+            var g = new UndirectedGraph<int, Edge<int>>(false);
             string line;
 
             while ((line = Console.ReadLine()) != null && line != "")
@@ -59,7 +64,7 @@ namespace PacePrototype
 
         public static UndirectedGraph<int, Edge<int>> ParseFile(string path, bool kernelize)
         {
-            var g = new UndirectedGraph<int, Edge<int>>();
+            var g = new UndirectedGraph<int, Edge<int>>(false);
             StreamReader sr = new StreamReader(new BufferedStream(File.OpenRead(path)));
             var verticeSet = new HashSet<int>();
             while (!sr.EndOfStream)

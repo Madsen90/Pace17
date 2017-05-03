@@ -188,6 +188,27 @@ namespace PacePrototype
             return g;
         }
 
+        //reordered testgraph 8 to test for weird cycle finder behavior
+        public static UndirectedGraph<int, Edge<int>> TestGraph8reorder()
+        {
+            var g = new UndirectedGraph<int, Edge<int>>();
+            g.AddVertexRange(new int[] { 4, 1, 2, 3, 0 });
+            var edges = new List<Edge<int>>
+            {
+                new Edge<int>(3, 4),
+                new Edge<int>(2, 4),
+                new Edge<int>(1, 4),
+                new Edge<int>(0, 1),
+                new Edge<int>(0, 2),
+                new Edge<int>(0, 3),
+
+
+            };
+            g.AddEdgeRange(edges);
+
+            return g;
+        }
+
         // Graph 8 as chordal, k = 0
         public static UndirectedGraph<int, Edge<int>> TestGraph9()
         {
@@ -269,6 +290,241 @@ namespace PacePrototype
                 new Edge<int>(5, 7),
                 new Edge<int>(6, 7)
             };
+            g.AddEdgeRange(edges);
+
+            return g;
+        }
+
+        // troublesome component from instances/5.graph
+        public static UndirectedGraph<int, Edge<int>> TestGraph13()
+        {
+            var g = new UndirectedGraph<int, Edge<int>>();
+            var edges = new List<Edge<int>>
+            {
+                new Edge<int>(29, 9),
+                new Edge<int>(39, 29),
+                new Edge<int>(9, 85),
+                new Edge<int>(39, 20),
+                new Edge<int>(39, 91),
+                new Edge<int>(39, 4),
+                new Edge<int>(47, 39),
+                new Edge<int>(39, 97),
+                new Edge<int>(37, 85),
+                new Edge<int>(95, 85),
+                new Edge<int>(26, 59),
+                new Edge<int>(53, 26),
+                new Edge<int>(24, 53),
+                new Edge<int>(67, 20),
+                new Edge<int>(72, 67),
+                new Edge<int>(81, 20),
+                new Edge<int>(68, 72),
+                new Edge<int>(81, 30),
+                new Edge<int>(74, 81),
+                new Edge<int>(48, 75),
+                new Edge<int>(18, 48),
+                new Edge<int>(48, 60),
+                new Edge<int>(75, 62),
+                new Edge<int>(18, 70),
+                new Edge<int>(18, 82),
+                new Edge<int>(18, 66),
+                new Edge<int>(18, 60),
+                new Edge<int>(34, 18),
+                new Edge<int>(18, 49),
+                new Edge<int>(66, 62),
+                new Edge<int>(73, 62),
+                new Edge<int>(24, 50),
+                new Edge<int>(24, 5),
+                new Edge<int>(24, 47),
+                new Edge<int>(83, 24),
+                new Edge<int>(50, 86),
+                new Edge<int>(13, 83),
+                new Edge<int>(86, 56),
+                new Edge<int>(25, 66),
+                new Edge<int>(34, 49),
+                new Edge<int>(10, 34),
+                new Edge<int>(25, 49),
+                new Edge<int>(65, 93),
+                new Edge<int>(94, 65),
+                new Edge<int>(65, 3),
+                new Edge<int>(89, 65),
+                new Edge<int>(65, 68),
+                new Edge<int>(46, 93),
+                new Edge<int>(89, 94),
+                new Edge<int>(3, 22),
+                new Edge<int>(89, 25),
+                new Edge<int>(89, 73),
+                new Edge<int>(46, 80),
+                new Edge<int>(77, 46),
+                new Edge<int>(46, 52),
+                new Edge<int>(17, 0),
+                new Edge<int>(92, 17),
+                new Edge<int>(17, 45),
+                new Edge<int>(0, 15),
+                new Edge<int>(45, 12),
+                new Edge<int>(45, 8),
+                new Edge<int>(45, 19),
+                new Edge<int>(45, 32),
+                new Edge<int>(15, 54),
+                new Edge<int>(91, 1),
+                new Edge<int>(4, 91),
+                new Edge<int>(4, 43),
+                new Edge<int>(12, 37),
+                new Edge<int>(25, 10),
+                new Edge<int>(73, 22),
+                new Edge<int>(30, 95),
+                new Edge<int>(74, 55),
+                new Edge<int>(56, 21),
+                new Edge<int>(56, 42),
+                new Edge<int>(21, 27),
+                new Edge<int>(42, 99)
+            };
+            foreach (var edge in edges)
+            {
+                if (!g.ContainsVertex(edge.Source))
+                    g.AddVertex(edge.Source);
+                if (!g.ContainsVertex(edge.Target))
+                    g.AddVertex(edge.Target);
+            }
+            g.AddEdgeRange(edges);
+
+            return g;
+        }
+
+        // troublesome component from instances/5.graph without two single-edge-connected-components which should have no minfil edges 
+        public static UndirectedGraph<int, Edge<int>> TestGraph14()
+        {
+            var g = new UndirectedGraph<int, Edge<int>>();
+            var edges = new List<Edge<int>>
+            {
+                new Edge<int>(29, 9),
+                new Edge<int>(39, 29),
+                new Edge<int>(9, 85),
+                new Edge<int>(39, 20),
+                new Edge<int>(39, 91),
+                new Edge<int>(39, 4),
+                new Edge<int>(47, 39),
+                new Edge<int>(39, 97),
+                new Edge<int>(95, 85),
+                new Edge<int>(67, 20),
+                new Edge<int>(72, 67),
+                new Edge<int>(81, 20),
+                new Edge<int>(68, 72),
+                new Edge<int>(81, 30),
+                new Edge<int>(74, 81),
+                new Edge<int>(48, 75),
+                new Edge<int>(18, 48),
+                new Edge<int>(48, 60),
+                new Edge<int>(75, 62),
+                new Edge<int>(18, 70),
+                new Edge<int>(18, 82),
+                new Edge<int>(18, 66),
+                new Edge<int>(18, 60),
+                new Edge<int>(34, 18),
+                new Edge<int>(18, 49),
+                new Edge<int>(66, 62),
+                new Edge<int>(73, 62),
+                new Edge<int>(25, 66),
+                new Edge<int>(34, 49),
+                new Edge<int>(10, 34),
+                new Edge<int>(25, 49),
+                new Edge<int>(65, 93),
+                new Edge<int>(94, 65),
+                new Edge<int>(65, 3),
+                new Edge<int>(89, 65),
+                new Edge<int>(65, 68),
+                new Edge<int>(46, 93),
+                new Edge<int>(89, 94),
+                new Edge<int>(3, 22),
+                new Edge<int>(89, 25),
+                new Edge<int>(89, 73),
+                new Edge<int>(46, 80),
+                new Edge<int>(77, 46),
+                new Edge<int>(46, 52),
+                new Edge<int>(91, 1),
+                new Edge<int>(4, 91),
+                new Edge<int>(4, 43),
+                new Edge<int>(25, 10),
+                new Edge<int>(73, 22),
+                new Edge<int>(30, 95),
+                new Edge<int>(74, 55),
+            };
+            foreach (var edge in edges)
+            {
+                if (!g.ContainsVertex(edge.Source))
+                    g.AddVertex(edge.Source);
+                if (!g.ContainsVertex(edge.Target))
+                    g.AddVertex(edge.Target);
+            }
+            g.AddEdgeRange(edges);
+
+            return g;
+        }
+
+        // weird ordering testgraph14, where findcycle2 and 3 behaves differently
+        public static UndirectedGraph<int, Edge<int>> TestGraph15()
+        {
+            var g = new UndirectedGraph<int, Edge<int>>();
+            var edges = new List<Edge<int>>
+            {
+                new Edge<int>(30, 95),
+                new Edge<int>(81, 30),
+                new Edge<int>(95, 85),
+                new Edge<int>(74, 55),
+                new Edge<int>(46, 52),
+                new Edge<int>(77, 46),
+                new Edge<int>(46, 80),
+                new Edge<int>(46, 93),
+                new Edge<int>(29, 9),
+                new Edge<int>(39, 29),
+                new Edge<int>(39, 97),
+                new Edge<int>(47, 39),
+                new Edge<int>(91, 1),
+                new Edge<int>(4, 43),
+                new Edge<int>(9, 85),
+                new Edge<int>(73, 22),
+                new Edge<int>(89, 73),
+                new Edge<int>(73, 62),
+                new Edge<int>(74, 81),
+                new Edge<int>(39, 20),
+                new Edge<int>(39, 91),
+                new Edge<int>(39, 4),
+                new Edge<int>(67, 20),
+                new Edge<int>(72, 67),
+                new Edge<int>(81, 20),
+                new Edge<int>(10, 34),
+                new Edge<int>(25, 10),
+                new Edge<int>(34, 18),
+                new Edge<int>(34, 49),
+                new Edge<int>(48, 60),
+                new Edge<int>(48, 75),
+                new Edge<int>(18, 48),
+                new Edge<int>(89, 94),
+                new Edge<int>(94, 65),
+                new Edge<int>(89, 65),
+                new Edge<int>(65, 68),
+                new Edge<int>(65, 93),
+                new Edge<int>(65, 3),
+                new Edge<int>(18, 82),
+                new Edge<int>(18, 70),
+                new Edge<int>(18, 60),
+                new Edge<int>(18, 66),
+                new Edge<int>(18, 49),
+                new Edge<int>(25, 49),
+                new Edge<int>(75, 62),
+                new Edge<int>(66, 62),
+                new Edge<int>(25, 66),
+                new Edge<int>(68, 72),
+                new Edge<int>(3, 22),
+                new Edge<int>(89, 25),
+                new Edge<int>(4, 91)
+            };
+            foreach (var edge in edges)
+            {
+                if (!g.ContainsVertex(edge.Source))
+                    g.AddVertex(edge.Source);
+                if (!g.ContainsVertex(edge.Target))
+                    g.AddVertex(edge.Target);
+            }
             g.AddEdgeRange(edges);
 
             return g;
@@ -595,6 +851,7 @@ namespace PacePrototype
             if (analysis.Moplexes.Count != 3)
                 throw new Exception("Error in findmoplex without previous");
 
+            //four cycle test
             var a = Faster.FindFourCycle1(TestGraphs.TestGraph2());
             var b = Faster.FindFourCycle2(TestGraphs.TestGraph2());
             var c = Faster.FindFourCycle3(TestGraphs.TestGraph2());
@@ -623,6 +880,15 @@ namespace PacePrototype
                 throw new Exception("difference between findFourCycle1 & 2");
             if (a != c && !a.SequenceEqual(c))
                 throw new Exception("difference between findFourCycle1 & 3");
+            var g = TestGraph8reorder(); //weirdness test TODO needs fix or convincing argument for why not
+            a = Faster.FindFourCycle1(g);
+            b = Faster.FindFourCycle2(g);
+            c = Faster.FindFourCycle3(g);
+            if (a != b && !a.SequenceEqual(b))
+                throw new Exception("difference between findFourCycle1 & 2");
+            if (a != c && !a.SequenceEqual(c))
+                throw new Exception("difference between findFourCycle1 & 3");
+
             a = Faster.FindFourCycle1(TestGraphs.TestGraph8());
             b = Faster.FindFourCycle2(TestGraphs.TestGraph8());
             c = Faster.FindFourCycle3(TestGraphs.TestGraph8());
@@ -630,10 +896,31 @@ namespace PacePrototype
                 throw new Exception("difference between findFourCycle1 & 2");
             if (a != c && !a.SequenceEqual(c))
                 throw new Exception("difference between findFourCycle1 & 3");
+            a = Faster.FindFourCycle1(TestGraphs.TestGraph13());
+            b = Faster.FindFourCycle2(TestGraphs.TestGraph13());
+            c = Faster.FindFourCycle3(TestGraphs.TestGraph13());
+            if (a != b && !a.SequenceEqual(b))
+                throw new Exception("difference between findFourCycle1 & 2");
+            if (a != c && !a.SequenceEqual(c))
+                throw new Exception("difference between findFourCycle1 & 3");
+            a = Faster.FindFourCycle1(TestGraphs.TestGraph14());
+            b = Faster.FindFourCycle2(TestGraphs.TestGraph14());
+            c = Faster.FindFourCycle3(TestGraphs.TestGraph14());
+            if (a != b && !a.SequenceEqual(b))
+                throw new Exception("difference between findFourCycle1 & 2");
+            if (a != c && !a.SequenceEqual(c))
+                throw new Exception("difference between findFourCycle1 & 3");
+            a = Faster.FindFourCycle1(TestGraphs.TestGraph15());
+            b = Faster.FindFourCycle2(TestGraphs.TestGraph15());
+            c = Faster.FindFourCycle3(TestGraphs.TestGraph15());
+            if (a != b && !a.SequenceEqual(b))
+                throw new Exception("difference between findFourCycle1 & 2");
+            if (a != c && !a.SequenceEqual(c))
+                throw new Exception("difference between findFourCycle1 & 3");
 
 
             // Too big k test
-            (var k1, var ret1) = Faster.FasterInner(TestGraphs.TestGraph8(), 8, 16, new HashSet<int>(), null, null);
+            (var k1, var ret1) = Faster.FasterInner(TestGraphs.TestGraph8(), 8, 16, new HashSet<int>(), null, null, new HashSet<Edge<int>>());
             (var k2, var ret2) = Faster.Run(TestGraphs.TestGraph8());
             if ((8 - k1) != k2)
                 throw new Exception("Wrong result if k is started too big");
