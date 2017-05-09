@@ -11,20 +11,20 @@ namespace PacePrototype
         static void Main(string[] args)
         {
             //TestGraphs.testAllGraphs();
-            //TestGraphs.Tests();
+            TestGraphs.Tests();
             //var graph1 = parse(args[0], true);
             //var graph2 = parseFile(args[0], false);
             //var graph = TestGraphs.TestGraph8();
             //var k1 = Faster.Run(graph1);
-            UndirectedGraph<int, Edge<int>> graph = TestGraphs.TestGraph13();
-            //if (args.Length > 0)
-            //{
-            //    graph = ParseFile(args[0], false);
-            //}
-            //else
-            //{
-            //    graph = ReadGraph();
-            //}
+            UndirectedGraph<int, Edge<int>> graph = null;
+            if (args.Length > 0)
+            {
+                graph = ParseFile(args[0], false);
+            }
+            else
+            {
+                graph = ReadGraph();
+            }
 
             Tuple<int, HashSet<Edge<int>>> a = Faster.Run(graph);
             var k = a.Item1;
@@ -34,7 +34,7 @@ namespace PacePrototype
             var analysis = MoplexAnalysis.AnalyseGraph(graph, null, null);
             if (!Faster.IsChordal2(analysis, graph))
             {
-                var x = Faster.FindFourCycle2(graph);
+                //var x = Faster.FindFourCycle2(graph);
                 throw new Exception("Idiot check went terribly wrong");
             }
             //Console.WriteLine($"Graph: {args[0].Split('\\').Last()} has k={k}");

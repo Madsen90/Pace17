@@ -10,7 +10,7 @@ namespace PacePrototype
 
         public static Tuple<int, HashSet<Edge<int>>> Run(UndirectedGraph<int, Edge<int>> graph)
         {
-            DrawGraph.drawGraph(graph,  new HashSet<Edge<int>>(), @"C:\Users\Frederik\Desktop\a.dot");
+            //DrawGraph.drawGraph(graph,  new HashSet<Edge<int>>(), @"C:\Users\Frederik\Desktop\a.dot");
             var componentAlgorithm = new QuickGraph.Algorithms.ConnectedComponents.ConnectedComponentsAlgorithm<int, Edge<int>>(graph);
             componentAlgorithm.Compute();
             var nodeToComponent = componentAlgorithm.Components;
@@ -45,17 +45,13 @@ namespace PacePrototype
             }
             var clone2 = CloneGraph(graph);
             clone2.AddEdgeRange(retEdges);
-            DrawGraph.drawGraph(clone2, retEdges, @"C:\Users\Frederik\Desktop\b.dot");
+            //DrawGraph.drawGraph(clone2, retEdges, @"C:\Users\Frederik\Desktop\b.dot");
             return new Tuple<int, HashSet<Edge<int>>>(retk, retEdges);
         }
 
         public static Tuple<int, HashSet<Edge<int>>> RunWithKernel(UndirectedGraph<int, Edge<int>> graph)
         {
-            var kernel = Kernel.Kernelize(graph, 0);
-            foreach (var v in kernel.A)
-            {
-                graph.RemoveVertex(int.Parse(v));
-            }
+            //DrawGraph.drawGraph(graph, new HashSet<Edge<int>>(), @"C:\Users\Frederik\Desktop\a.dot");
             var componentAlgorithm = new QuickGraph.Algorithms.ConnectedComponents.ConnectedComponentsAlgorithm<int, Edge<int>>(graph);
             componentAlgorithm.Compute();
             var nodeToComponent = componentAlgorithm.Components;
@@ -64,7 +60,7 @@ namespace PacePrototype
             var retEdges = new HashSet<Edge<int>>();
             for (int i = 0; i < componentAlgorithm.ComponentCount; i++)
             {
-                var g = new UndirectedGraph<int, Edge<int>>();
+                var g = new UndirectedGraph<int, Edge<int>>(false);
                 foreach (var v in graph.Vertices)
                 {
                     if (nodeToComponent[v] == i)
@@ -76,18 +72,23 @@ namespace PacePrototype
                 {
                     foreach (var e in graph.AdjacentEdges(v))
                     {
-                        if (g.ContainsVertex(e.GetOtherVertex(v))) g.AddEdge(e);
+                        g.AddEdge(e);
                     }
                 }
-                var tup = FindK(g, time);
+
+                var kernel = Kernel.Init(CloneGraph(g)); //remember to clone graph, as the phases will "butcher" the graph.
+                var tup = FindKKernel(g, time, kernel);
                 var k = tup.Item1;
                 var edges = tup.Item2;
                 retk += k;
-                foreach (var e in edges) retEdges.Add(e);
+                foreach (var e in edges)
+                {
+                    retEdges.Add(e);
+                }
             }
             var clone2 = CloneGraph(graph);
             clone2.AddEdgeRange(retEdges);
-            //DrawGraph.drawGraph(clone2, retEdges, @"C:\Users\Frederik\Desktop\a.dot");
+            //DrawGraph.drawGraph(clone2, retEdges, @"C:\Users\Frederik\Desktop\b.dot");
             return new Tuple<int, HashSet<Edge<int>>>(retk, retEdges);
         }
 
@@ -102,6 +103,42 @@ namespace PacePrototype
                 k++;
                 var time1 = DateTime.Now;
                 var clone = CloneGraph(graph);
+                Console.WriteLine(k);
+                var tup = FasterInner(clone, k, k * 2, new HashSet<int>(), null, null, new HashSet<Edge<int>>());
+                ret = tup.Item1;
+                retEdges = tup.Item2;
+                Console.WriteLine($"Took {(DateTime.Now - time1):c}");
+                Console.WriteLine($"Cumulated {(DateTime.Now - timeOfInit):c}");
+            }
+            return new Tuple<int, HashSet<Edge<int>>>(k - ret, retEdges);
+        }
+
+        public static Tuple<int, HashSet<Edge<int>>> FindKKernel(UndirectedGraph<int, Edge<int>> graph, DateTime timeOfInit, Holder kernel)
+        {
+            int ret = -1;
+            if(kernel.CC == 0) //no chordless cycles; i.e. the graph is chordal
+                if(IsChordal2(MoplexAnalysis.AnalyseGraph(graph,null,null), graph)) //hack - we really need to seperate
+                    return new Tuple<int, HashSet<Edge<int>>>(0, new HashSet<Edge<int>>());
+            int k = kernel.CC-1;
+            HashSet<Edge<int>> retEdges = null;
+            while (ret == -1)
+            {
+                k++;
+                Kernel.Phase3(kernel, k);
+                var g = new UndirectedGraph<int, Edge<int>>(false);
+                foreach (var relevantV in kernel.A)
+                {
+                    var v = int.Parse(relevantV);
+                    g.AddVertex(v);
+                   
+                }
+                foreach (var v in g.Vertices)
+                {
+                    g.AddEdgeRange(graph.AdjacentEdges(v));
+                }
+                // todo: connected components
+                var time1 = DateTime.Now;
+                var clone = CloneGraph(g);
                 Console.WriteLine(k);
                 var tup = FasterInner(clone, k, k * 2, new HashSet<int>(), null, null, new HashSet<Edge<int>>());
                 ret = tup.Item1;
@@ -131,7 +168,7 @@ namespace PacePrototype
                 return new Tuple<int, HashSet<Edge<int>>>(k, addedEdges);
 
             // Find four cycle
-            List<int> cycle = FindFourCycle3BUGGY(graph); //has to return four cycle in topological order
+            List<int> cycle = FindFourCycle2(graph); //has to return four cycle in topological order
             if (cycle != null)
             {
                 //if (FindFourCycle3BUGGY(graph) == null) // || !FindFourCycle2(graph).SequenceEqual(FindFourCycle3BUGGY(graph))) // only for debug
