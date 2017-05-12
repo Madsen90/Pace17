@@ -11,7 +11,7 @@ namespace PacePrototype
         static void Main(string[] args)
         {
             //TestGraphs.testAllGraphs();
-            TestGraphs.Tests();
+            //TestGraphs.Tests();
             //var graph1 = parse(args[0], true);
             //var graph2 = parseFile(args[0], false);
             //var graph = TestGraphs.TestGraph8();
@@ -25,7 +25,7 @@ namespace PacePrototype
             {
                 graph = ReadGraph();
             }
-
+            DrawGraph.drawGraph(graph,new HashSet<Edge<int>>(), @"C:\Users\Frederik\Downloads\instances\1.dot");
             Tuple<int, HashSet<Edge<int>>> a = Faster.Run(graph);
             var k = a.Item1;
             var edgeSet = a.Item2; 
