@@ -284,9 +284,9 @@ namespace PacePrototype
                 var vStar = FindVStar(missingEdge, moplexNeighbourhoodMarked, graph);
                 if (vStar == -1)
                 {
-                    vStar = FindVStar(new Edge<int>(missingEdge.Target, missingEdge.Source), moplexNeighbourhoodMarked, graph); //WHAt??
-                    marked.Remove(vStar);
+                    vStar = FindVStar(new Edge<int>(missingEdge.Target, missingEdge.Source), moplexNeighbourhoodMarked, graph); 
                 }
+                marked.Remove(vStar);
                 if (marked.Contains(missingEdge.Source))
                 {
                     marked.Remove(missingEdge.Source);
