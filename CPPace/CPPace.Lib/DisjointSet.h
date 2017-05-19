@@ -1,8 +1,7 @@
 #pragma once
 #include "EXPORT.h"
 
-struct DLLEXPORT DisjointSet
-{
+struct DLLEXPORT DisjointSet {
 public:
   int size;
   int *parents;

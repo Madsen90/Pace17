@@ -1,16 +1,11 @@
 #pragma once
-
-#ifdef GRAPHGENERATOR_EXPORTS
-#define GRAPHGENERATOR_API _declspec(dllexport)
-#else
-#define GRAPHGENERATOR_API _declspec(dllimport)
-#endif
+#include "EXPORT.h"
 
 #include "AdjacencyList.h"
 
 using namespace std;
 
-class GRAPHGENERATOR_API GraphGenerator {
+class DLLEXPORT GraphGenerator {
 public:
   static AdjacencyList random(int num_vertices, int num_edges);
 };

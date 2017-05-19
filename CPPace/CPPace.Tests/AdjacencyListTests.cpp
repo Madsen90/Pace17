@@ -172,6 +172,24 @@ namespace CPPaceTests {
       Assert::IsTrue(graph.is_clique(set<int> { 0, 1, 2, 3, 4 }));
       Assert::IsTrue(graph.is_clique(set<int> { 0, 1, 4 }));
     }
+
+    TEST_METHOD(FindVStar) {
+      int v_star;
+      AdjacencyList graph(5);
+      Assert::IsFalse(graph.find_v_star(0, 2, set<int>(), v_star));
+
+      graph.add_edge(0, 1);
+      Assert::IsFalse(graph.find_v_star(0, 2, set<int>(), v_star));
+
+      graph.add_edge(1, 2);
+      Assert::IsTrue(graph.find_v_star(0, 2, set<int>(), v_star));
+      Assert::AreEqual(1, v_star);
+
+      graph.add_edge(0, 2);
+      Assert::IsFalse(graph.find_v_star(0, 2, set<int>(), v_star));
+
+
+    }
   };
 
   TEST_CLASS(AdjacencyListBench) {
