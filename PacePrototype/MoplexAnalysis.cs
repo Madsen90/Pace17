@@ -13,7 +13,7 @@ namespace PacePrototype
         public Dictionary<int, int> EleminationOrder { get; }
         public Dictionary<int, int> EleminationOrderRev { get; }
         public Dictionary<int, List<int>> NeighbourLabels { get; }
-        public static int rounds = 0;
+        public static int Rounds = 0;
 
         private MoplexAnalysis(List<List<int>> moplexList, Dictionary<int, int> revOrder, Dictionary<int, int> order, Dictionary<int, List<int>> labels)
         {
@@ -51,28 +51,31 @@ namespace PacePrototype
 
             if(newlyAddedEdges != null) //newly added edge means that the moplexes effected must be recalculated.
             {
-                foreach(var e in newlyAddedEdges)
-                {
-                    var validMoplexes = prevMoplexes.Where(moplex =>
-                        e.Source != moplex.First()
-                        && e.Target != moplex.First()
-                        && graph.AdjacentEdges(moplex.First())
-                            .Select(edge => edge.GetOtherVertex(moplex.First()))
-                            .All(v => v != e.Source && v != e.Target)
-                        );
-                    moplexes.AddRange(validMoplexes);
-                    hasBeenChecked.AddRange(validMoplexes.SelectMany(i => i).Distinct());
-                }
-
+                if(prevMoplexes != null)
+                    foreach(var e in newlyAddedEdges)
+                    {
+                        var validMoplexes = prevMoplexes.Where(moplex =>
+                            e.Source != moplex.First()
+                            && e.Target != moplex.First()
+                            && graph.AdjacentEdges(moplex.First())
+                                .Select(edge => edge.GetOtherVertex(moplex.First()))
+                                .All(v => v != e.Source && v != e.Target)
+                            ).ToList();
+                        moplexes.AddRange(validMoplexes);
+                        hasBeenChecked.AddRange(validMoplexes.SelectMany(i => i).Distinct());
+                    }
+                
                
             } else if(prevMoplexes != null) // no newly added edge, so previously calculated moplex must still be relevant.
             {
-                return prevMoplexes;
+                moplexes.AddRange(prevMoplexes);
+                hasBeenChecked.AddRange(prevMoplexes.SelectMany(m => m).ToList());
+
             }
-            
+
 
             // Start finding new moplexes
-            foreach(var v in labels.Keys)
+            foreach (var v in labels.Keys)
             {
                 if (hasBeenChecked.Contains(v)) // no vertex can be part of multiple moplexes
                     continue;
@@ -126,7 +129,7 @@ namespace PacePrototype
                             continue; //not a component, since it was removed at the time
                         if (nodeToComponentDic.ContainsKey(neighbour)) //else neighbour is also seperator TODO: error here, Not anymore I think
                         { 
-                            int c = -1;
+                            int c;
                             nodeToComponentDic.TryGetValue(neighbour, out c);
                             connectedComponents.Add(c);
                         }
@@ -151,7 +154,6 @@ namespace PacePrototype
                     hasBeenChecked.Add(n);
                 }
             }
-            var x = moplexes.Distinct().Count();
             return moplexes;
         }
 
