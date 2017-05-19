@@ -119,6 +119,47 @@ namespace CPPaceTests {
       Assert::IsFalse(graph.is_path_chordless(vector<int> { 4, 3, 2, 1, 0 }));
     }
 
+    TEST_METHOD(FindFourCycle) {
+      AdjacencyList graph(5);
+      vector<int> cycle;
+      Assert::IsFalse(graph.find_four_cycle(cycle));
+
+      graph.add_edge(0, 1);
+      Assert::IsFalse(graph.find_four_cycle(cycle));
+      Assert::AreEqual(0, (int)cycle.size());
+
+      graph.add_edge(1, 2);
+      Assert::IsFalse(graph.find_four_cycle(cycle));
+      Assert::AreEqual(0, (int)cycle.size());
+
+      graph.add_edge(2, 3);
+      Assert::IsFalse(graph.find_four_cycle(cycle));
+      Assert::AreEqual(0, (int)cycle.size());
+
+      graph.add_edge(3, 4);
+      Assert::IsFalse(graph.find_four_cycle(cycle));
+      Assert::AreEqual(0, (int)cycle.size());
+
+      graph.add_edge(4, 0);
+      Assert::IsFalse(graph.find_four_cycle(cycle));
+      Assert::AreEqual(0, (int)cycle.size());
+
+      graph.add_edge(3, 0);
+      Assert::IsTrue(graph.find_four_cycle(cycle));
+      Assert::AreEqual(4, (int)cycle.size());
+
+      graph.add_edge(0, 2);
+      Assert::IsFalse(graph.find_four_cycle(cycle));
+      Assert::AreEqual(0, (int)cycle.size());
+    }
+
+    TEST_METHOD(FindFourCycleBerryBordat) {
+      AdjacencyList graph = SampleGraphs::berry_bordat();
+      vector<int> cycle;
+      Assert::IsTrue(graph.find_four_cycle(cycle));
+      Assert::AreEqual(4, (int)cycle.size());
+    }
+
     TEST_METHOD(MakeClique) {
       AdjacencyList graph(5);
       Assert::IsFalse(graph.is_clique(set<int> { 0, 1, 2, 3, 4 }));

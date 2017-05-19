@@ -19,6 +19,7 @@ public:
   set<int>* adjacency_list;
 
   AdjacencyList(int num_vertices);
+  AdjacencyList();
 
   set<int> edges(int v);
   bool has_edge(int u, int v);
@@ -26,7 +27,8 @@ public:
   bool is_clique(set<int>& vertices);
   vector<pair<int, int>> all_edges();
   bool is_path_chordless(vector<int>& path);
-
+  bool find_four_cycle(vector<int>&);
+  
   void add_edge(int u, int v);
   void remove_edge(int u, int v);
   void make_clique(set<int>& vertices);

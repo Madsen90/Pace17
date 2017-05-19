@@ -81,7 +81,7 @@ bool AdjacencyList::is_path_chordless(vector<int>& path) {
   set<int> path_set;
   for (int u : path) path_set.emplace(u);
 
-  for (int i = 0; i < path.size() - 1; i++) {
+  for (unsigned int i = 0; i < path.size() - 1; i++) {
     int u = path[i];
     int next = path[i + 1];
     for (int v : edges(u)) {
@@ -92,6 +92,26 @@ bool AdjacencyList::is_path_chordless(vector<int>& path) {
   }
 
   return true;
+}
+
+bool AdjacencyList::find_four_cycle(vector<int>& result) {
+  for (int t = 0; t < num_vertices; t++) {
+    for (int u : edges(t)) {
+      for (int v : edges(u)) {
+        if (t == v) continue;
+        for (int w : edges(v)) {
+          if (u == w) continue;
+          for (int x : edges(w)) {
+            if (x != t || has_edge(t, v) || has_edge(u, w)) continue;
+            result = vector<int> { t, u, v, w };
+            return true;
+          }
+        }
+      }
+    }
+  }
+  result = vector<int>();
+  return false;
 }
 
 void AdjacencyList::add_edge(int u, int v) {
