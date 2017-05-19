@@ -1,16 +1,11 @@
 #pragma once
-
-#ifdef LEXBFS_EXPORTS
-#define LEXBFS_API _declspec(dllexport)
-#else
-#define LEXBFS_API _declspec(dllimport)
-#endif
+#include "EXPORT.h"
 
 #include "AdjacencyList.h"
 
 using namespace std;
 
-class LEXBFS_API LexBFS {
+class DLLEXPORT LexBFS {
 public:
   int num_vertices;
 

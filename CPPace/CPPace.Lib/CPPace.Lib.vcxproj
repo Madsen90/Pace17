@@ -141,9 +141,11 @@
   <ItemGroup>
     <ClInclude Include="AdjacencyList.h" />
     <ClInclude Include="DisjointSet.h" />
+    <ClInclude Include="EXPORT.h" />
     <ClInclude Include="GraphGenerator.h" />
     <ClInclude Include="GraphIO.h" />
     <ClInclude Include="LexBFS.h" />
+    <ClInclude Include="MinimumFillIn.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AdjacencyList.cpp" />

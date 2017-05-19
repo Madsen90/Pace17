@@ -1,10 +1,5 @@
 #pragma once
-
-#ifdef GRAPHIO_EXPORTS
-#define GRAPHIO_API _declspec(dllexport)
-#else
-#define GRAPHIO_API _declspec(dllimport)
-#endif
+#include "EXPORT.h"
 
 #include <iostream>
 #include <string>
@@ -13,7 +8,7 @@
 
 using namespace std;
 
-class GRAPHIO_API GraphIO {
+class DLLEXPORT GraphIO {
 public:
   class GraphContext {
   public:

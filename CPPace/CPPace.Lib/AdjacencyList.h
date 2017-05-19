@@ -1,10 +1,5 @@
 #pragma once
-
-#ifdef ADJACENCYLIST_EXPORTS
-#define ADJACENCYLIST_API _declspec(dllexport)
-#else
-#define ADJACENCYLIST_API _declspec(dllimport)
-#endif
+#include "EXPORT.h"
 
 #include <set>
 #include "DisjointSet.h"
@@ -12,7 +7,7 @@
 
 using namespace std;
 
-class ADJACENCYLIST_API AdjacencyList {
+class DLLEXPORT AdjacencyList {
 public:
   int num_edges;
   int num_vertices;

@@ -1,12 +1,7 @@
 #pragma once
+#include "EXPORT.h"
 
-#ifdef DISJOINTSET_EXPORTS
-#define DISJOINTSET_API _declspec(dllexport)
-#else
-#define DISJOINTSET_API _declspec(dllimport)
-#endif
-
-struct DISJOINTSET_API DisjointSet
+struct DLLEXPORT DisjointSet
 {
 public:
   int size;
