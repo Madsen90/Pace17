@@ -145,6 +145,7 @@
     <ClInclude Include="EXPORT.h" />
     <ClInclude Include="GraphGenerator.h" />
     <ClInclude Include="GraphIO.h" />
+    <ClInclude Include="Kernelizer.h" />
     <ClInclude Include="LexBFS.h" />
     <ClInclude Include="MinimumFillIn.h" />
   </ItemGroup>
@@ -153,6 +154,7 @@
     <ClCompile Include="DisjointSet.cpp" />
     <ClCompile Include="GraphGenerator.cpp" />
     <ClCompile Include="GraphIO.cpp" />
+    <ClCompile Include="Kernelizer.cpp" />
     <ClCompile Include="LexBFS.cpp" />
     <ClCompile Include="MinimumFillIn.cpp" />
   </ItemGroup>

@@ -23,4 +23,5 @@ namespace CPPaceTests {
       Assert::IsFalse(lex.is_chordal(graph));
     }
   };
+
 }

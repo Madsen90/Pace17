@@ -12,7 +12,6 @@ Kernel Kernelizer::phase1(AdjacencyList& graph)
 
   bool found_cycle;
   do {
-    found_cycle = false;
     vector<int> cycle;
     //graph.subgraph
     found_cycle = find_chordless_cycle(graph, cycle);
@@ -94,11 +93,11 @@ vector<int> Kernelizer::MCS(AdjacencyList& graph)
   map<int, int> weight;
 
   for (int v : *graph.adjacency_list) {
-    weight.insert(v, 0);
+    weight[v] = 0;
     order.push_back(v);
   }
 
-  for(int i = graph.num_vertices; i >= 0; i--) {
+  for(int i = graph.num_vertices-1; i >= 0; i--) {
     //maximum unnumbered vertex:
     int max_unnumbered = -1, value = INT_MIN;
     for(map<int, int>::value_type& kv : weight) {
@@ -106,6 +105,7 @@ vector<int> Kernelizer::MCS(AdjacencyList& graph)
         max_unnumbered = kv.first, value = kv.second;
       }
     }
+     
 
     order[i] = max_unnumbered;
     numbered.emplace(max_unnumbered);
