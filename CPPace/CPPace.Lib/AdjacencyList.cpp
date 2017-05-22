@@ -1,5 +1,8 @@
 #include "AdjacencyList.h"
 #include <vector>
+#include <queue>
+
+#include "ConsList.h"
 
 AdjacencyList::AdjacencyList(int num_vertices)
   : num_edges(0),
@@ -112,6 +115,62 @@ bool AdjacencyList::find_four_cycle(vector<int>& result) {
   }
   result = vector<int>();
   return false;
+}
+
+bool AdjacencyList::find_v_star(int x, int y, set<int>& moplex, int& v_star) {
+  queue<shared_ptr<ConsList<int>>> q;
+  vector<vector<int>> paths;
+  q.push(make_shared<ConsList<int>>(x));
+  for (int i = 0; i < num_vertices; i++)
+    visited[i] = false;
+  visited[x] = true;
+
+  do {
+    shared_ptr<ConsList<int>> next = q.front();
+    q.pop();
+    for (int n : edges(next->value)) {
+      if (n == y) {
+        vector<int> path = ConsList<int>::to_vector(ConsList<int>::cons(n, next));
+        if (is_path_chordless(path))
+          paths.emplace_back(path);
+      }
+      else if (moplex.find(n) == moplex.end() && !visited[n])
+      {
+        visited[n] = true;
+        q.push(ConsList<int>::cons(n, next));
+      }
+    }
+  } while (!q.empty());
+
+  if (paths.empty())
+    return false;
+
+  v_star = paths[0][1];
+  if (paths.size() == 1)
+    return true;
+
+  //check x-v*
+  bool found_v_star = true;
+  for (int i = 1; i < paths.size(); i++) {
+    if (paths[i][1] != v_star) {
+      found_v_star = false;
+      break;
+    }
+  }
+  if (found_v_star)
+    return true;
+
+  //check y-v*
+  found_v_star = true;
+  v_star = paths[0][paths[0].size() - 2];
+  for (int i = 1; i < paths.size(); i++) {
+    vector<int> path = paths[i];
+    if (path[path.size() - 2] != v_star) {
+      found_v_star = false;
+      break;
+    }
+  }
+  return found_v_star;
 }
 
 void AdjacencyList::add_edge(int u, int v) {

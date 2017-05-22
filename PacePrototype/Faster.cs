@@ -171,11 +171,11 @@ namespace PacePrototype
             List<int> cycle = FindFourCycle2(graph); //has to return four cycle in topological order
             if (cycle != null)
             {
-                //if (FindFourCycle3BUGGY(graph) == null) // || !FindFourCycle2(graph).SequenceEqual(FindFourCycle3BUGGY(graph))) // only for debug
+                //if (FindFourCycle3(graph) == null) // || !FindFourCycle2(graph).SequenceEqual(FindFourCycle3(graph))) // only for debug
                 //{
                 //    var o = FindFourCycle1(graph);
                 //    var a = FindFourCycle2(graph);
-                //    var b = FindFourCycle3BUGGY(graph);
+                //    var b = FindFourCycle3(graph);
                 //}
 
                 //foreach (var v in graph.Vertices)
@@ -547,7 +547,7 @@ namespace PacePrototype
         }
 
         // DFS based four-cycle-finder
-        public static List<int> FindFourCycle3BUGGY(UndirectedGraph<int, Edge<int>> graph)
+        public static List<int> FindFourCycle3(UndirectedGraph<int, Edge<int>> graph)
         {
             foreach (var v in graph.Vertices)
             {

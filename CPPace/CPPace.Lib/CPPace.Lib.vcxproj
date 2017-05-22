@@ -140,6 +140,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AdjacencyList.h" />
+    <ClInclude Include="ConsList.h" />
     <ClInclude Include="DisjointSet.h" />
     <ClInclude Include="EXPORT.h" />
     <ClInclude Include="GraphGenerator.h" />

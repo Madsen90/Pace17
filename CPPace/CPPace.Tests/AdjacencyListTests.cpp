@@ -172,6 +172,39 @@ namespace CPPaceTests {
       Assert::IsTrue(graph.is_clique(set<int> { 0, 1, 2, 3, 4 }));
       Assert::IsTrue(graph.is_clique(set<int> { 0, 1, 4 }));
     }
+
+    TEST_METHOD(FindVStar) {
+      int v_star;
+      AdjacencyList graph(5);
+      Assert::IsFalse(graph.find_v_star(0, 2, set<int>(), v_star));
+
+      graph.add_edge(0, 1);
+      Assert::IsFalse(graph.find_v_star(0, 2, set<int>(), v_star));
+
+      graph.add_edge(1, 2);
+      Assert::IsTrue(graph.find_v_star(0, 2, set<int>(), v_star));
+      Assert::AreEqual(1, v_star);
+
+      graph.add_edge(2, 3);
+      Assert::IsTrue(graph.find_v_star(0, 3, set<int>(), v_star));
+      Assert::IsTrue(v_star == 1 || v_star == 2);
+
+      graph.add_edge(1, 4);
+      Assert::IsTrue(graph.find_v_star(0, 3, set<int>(), v_star));
+      Assert::IsTrue(v_star == 1 || v_star == 2);
+
+      graph.add_edge(3, 4);
+      Assert::IsTrue(graph.find_v_star(0, 3, set<int>(), v_star));
+      Assert::AreEqual(1, v_star);
+
+      graph.add_edge(0, 4);
+      Assert::IsFalse(graph.find_v_star(0, 3, set<int>(), v_star));
+
+      Assert::IsTrue(graph.find_v_star(0, 3, set<int> { 4 }, v_star));
+      Assert::IsTrue(v_star == 1 || v_star == 2);
+
+
+    }
   };
 
   TEST_CLASS(AdjacencyListBench) {

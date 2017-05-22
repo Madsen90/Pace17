@@ -36,6 +36,9 @@
     <ClInclude Include="EXPORT.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ConsList.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AdjacencyList.cpp">

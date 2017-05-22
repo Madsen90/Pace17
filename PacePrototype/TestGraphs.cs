@@ -826,28 +826,28 @@ namespace PacePrototype
             //four cycle test
             var a = Faster.FindFourCycle1(TestGraphs.TestGraph2());
             var b = Faster.FindFourCycle2(TestGraphs.TestGraph2());
-            var c = Faster.FindFourCycle3BUGGY(TestGraphs.TestGraph2());
+            var c = Faster.FindFourCycle3(TestGraphs.TestGraph2());
             if (a != b && !a.SequenceEqual(b))
                 throw new Exception("difference between findFourCycle1 & 2");
             if (a != c && !a.SequenceEqual(c))
                 throw new Exception("difference between findFourCycle1 & 3");
             a = Faster.FindFourCycle1(TestGraphs.TestGraph4());
             b = Faster.FindFourCycle2(TestGraphs.TestGraph4());
-            c = Faster.FindFourCycle3BUGGY(TestGraphs.TestGraph4());
+            c = Faster.FindFourCycle3(TestGraphs.TestGraph4());
             if (a != b && !a.SequenceEqual(b))
                 throw new Exception("difference between findFourCycle1 & 2");
             if (a != c && !a.SequenceEqual(c))
                 throw new Exception("difference between findFourCycle1 & 3");
             a = Faster.FindFourCycle1(TestGraphs.TestGraph5());
             b = Faster.FindFourCycle2(TestGraphs.TestGraph5());
-            c = Faster.FindFourCycle3BUGGY(TestGraphs.TestGraph5());
+            c = Faster.FindFourCycle3(TestGraphs.TestGraph5());
             if (a != b && !a.SequenceEqual(b))
                 throw new Exception("difference between findFourCycle1 & 2");
             if (a != c && !a.SequenceEqual(c))
                 throw new Exception("difference between findFourCycle1 & 3");
             a = Faster.FindFourCycle1(TestGraphs.TestGraph6());
             b = Faster.FindFourCycle2(TestGraphs.TestGraph6());
-            c = Faster.FindFourCycle3BUGGY(TestGraphs.TestGraph6());
+            c = Faster.FindFourCycle3(TestGraphs.TestGraph6());
             if (a != b && !a.SequenceEqual(b))
                 throw new Exception("difference between findFourCycle1 & 2");
             if (a != c && !a.SequenceEqual(c))
@@ -855,7 +855,7 @@ namespace PacePrototype
             //var g = TestGraph8reorder(); //weirdness test TODO needs fix or convincing argument for why not
             //a = Faster.FindFourCycle1(g);
             //b = Faster.FindFourCycle2(g);
-            //c = Faster.FindFourCycle3BUGGY(g);
+            //c = Faster.FindFourCycle3(g);
             //if (a != b && !a.SequenceEqual(b))
             //    throw new Exception("difference between findFourCycle1 & 2");
             //if (a != c && !a.SequenceEqual(c))
@@ -863,28 +863,28 @@ namespace PacePrototype
 
             a = Faster.FindFourCycle1(TestGraphs.TestGraph8());
             b = Faster.FindFourCycle2(TestGraphs.TestGraph8());
-            c = Faster.FindFourCycle3BUGGY(TestGraphs.TestGraph8());
+            c = Faster.FindFourCycle3(TestGraphs.TestGraph8());
             if (a != b && !a.SequenceEqual(b))
                 throw new Exception("difference between findFourCycle1 & 2");
             if (a != c && !a.SequenceEqual(c))
                 throw new Exception("difference between findFourCycle1 & 3");
             a = Faster.FindFourCycle1(TestGraphs.TestGraph13());
             b = Faster.FindFourCycle2(TestGraphs.TestGraph13());
-            c = Faster.FindFourCycle3BUGGY(TestGraphs.TestGraph13());
+            c = Faster.FindFourCycle3(TestGraphs.TestGraph13());
             if (a != b && !a.SequenceEqual(b))
                 throw new Exception("difference between findFourCycle1 & 2");
             if (a != c && !a.SequenceEqual(c))
                 throw new Exception("difference between findFourCycle1 & 3");
             a = Faster.FindFourCycle1(TestGraphs.TestGraph14());
             b = Faster.FindFourCycle2(TestGraphs.TestGraph14());
-            c = Faster.FindFourCycle3BUGGY(TestGraphs.TestGraph14());
+            c = Faster.FindFourCycle3(TestGraphs.TestGraph14());
             if (a != b && !a.SequenceEqual(b))
                 throw new Exception("difference between findFourCycle1 & 2");
             if (a != c && !a.SequenceEqual(c))
                 throw new Exception("difference between findFourCycle1 & 3");
             a = Faster.FindFourCycle1(TestGraphs.TestGraph15());
             b = Faster.FindFourCycle2(TestGraphs.TestGraph15());
-            c = Faster.FindFourCycle3BUGGY(TestGraphs.TestGraph15());
+            c = Faster.FindFourCycle3(TestGraphs.TestGraph15());
             // In this graph, the rithms find different cycles. I believe this to be ok, so have disabled the sequenceequal
             if(a != null && a.Count != 4) 
                 throw new Exception("error in findFourCycle1");
