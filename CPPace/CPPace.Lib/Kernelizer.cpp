@@ -1,28 +1,32 @@
 #include "Kernelizer.h"
-#include <map>
 #include <queue>
 
 Kernel Kernelizer::phase1(AdjacencyList& graph)
 {
   Kernel kernel;
   kernel.chordless_cycles = 0;
-  for (int v : *graph.adjacency_list) {
-    kernel.b.emplace(v);
+  for (int v = 0; v < graph.vertices.size(); v++) {
+    if(graph.vertices[v].active)
+      kernel.b.emplace(v);
   }
 
   bool found_cycle;
   do {
     vector<int> cycle;
-    //graph.subgraph
     found_cycle = find_chordless_cycle(graph, cycle);
     if(found_cycle) {
-      kernel.chordless_cycles += cycle.size();
+      kernel.chordless_cycles++; //kMin += cycleSet.size() - 3;
       for (int v : cycle) {
         kernel.a.emplace(v);
         kernel.b.erase(v);
       }
+      for (int v : cycle)
+        graph.remove_vertex(v);
     }
   } while (found_cycle);
+
+  for (int v : kernel.a) 
+    graph.add_vertex(v);
 
   return kernel;
 }
@@ -30,22 +34,21 @@ Kernel Kernelizer::phase1(AdjacencyList& graph)
 
 bool Kernelizer::find_chordless_cycle(AdjacencyList& graph, vector<int>& cycle)
 {
-  //missing components and subgraph
+  //missing components
 
-  vector<int> order = MCS(graph);
-
-  for (int i = 0; i < order.size(); i++) {
+  map<int, int> order = MCS(graph);
+  int i = 0;
+  for (auto kv : order) {
 
     //find m_adjecent:
 
     set<int> m_adjacent;
-    set<int> neighbours = graph.edges(order[i]);
+    set<int> neighbours = graph.edges(kv.first);
 
-    auto it = next(order.begin(),i);
-    while(it != std::prev(order.end())) { // only way i could get O(v*log(v))
-      if (neighbours.find(*it) != neighbours.end())
-        m_adjacent.emplace(*it);
-      it = next(it);
+    
+    for(int n : neighbours) {
+      if (order[n] > kv.second)
+        m_adjacent.emplace(n);
     }
     
     //find cycle from m_adjecent
@@ -61,56 +64,59 @@ bool Kernelizer::find_chordless_cycle(AdjacencyList& graph, vector<int>& cycle)
         for(int k = j+1; k < m_adjecent_list.size(); k++) {
           int w = m_adjecent_list[k];
 
-          set<int> subgraph_set(*graph.adjacency_list);
-          subgraph_set.erase(order[i]);
-          for (int n : m_adjacent) {
-            if (n != v && n != w)
-              subgraph_set.erase(n);
-          }
-          // graph.subgraph(subgraph_set);
+          m_adjacent.erase(v);
+          m_adjacent.erase(w);
+          m_adjacent.emplace(kv.first);
+
+          graph.remove_vertices(m_adjacent);
           if(!graph.has_edge(v, w)) {
             vector<int> path;
-            if(BFS_path(graph, v, w, path) && path.size() > 3) {
+            if(BFS_path(graph, v, w, path) && path.size() >= 3) { //maybe redudant path size check
               for (int n : path) {
                 cycle.push_back(n);
               }
-              cycle.push_back(order[i]);
+              cycle.push_back(kv.first);
+              graph.add_vertices(m_adjacent);
               return true;
             }
           }
+          graph.add_vertices(m_adjacent);
+          m_adjacent.emplace(v);
+          m_adjacent.emplace(w);
+          m_adjacent.erase(kv.first);
         }
       }
     }
+    i++;
   }
   return false;
 }
 
-vector<int> Kernelizer::MCS(AdjacencyList& graph)
+map<int, int> Kernelizer::MCS(AdjacencyList& graph)
 {
-  vector<int> order;
-  order.reserve(graph.num_vertices);
+  map<int, int> order;
   set<int> numbered;
   map<int, int> weight;
-
-  for (int v : *graph.adjacency_list) {
+  int order_tmp = 0;
+  for (int v = 0; v < graph.vertices.size(); v++) {
+    if(!graph.vertices[v].active) continue;
     weight[v] = 0;
-    order.push_back(v);
   }
 
-  for(int i = graph.num_vertices-1; i >= 0; i--) {
-    //maximum unnumbered vertex:
+
+  for(int i = weight.size()-1; i >= 0; i--) {
+    //maximum weighted unnumbered vertex:
     int max_unnumbered = -1, value = INT_MIN;
     for(map<int, int>::value_type& kv : weight) {
       if(numbered.find(kv.first) == numbered.end() && kv.second > value) {
         max_unnumbered = kv.first, value = kv.second;
       }
     }
-     
-
-    order[i] = max_unnumbered;
+    order[max_unnumbered] = i;
     numbered.emplace(max_unnumbered);
 
     for(int v : graph.edges(max_unnumbered)) {
+      if (!graph.vertices[v].active) continue;
       if(numbered.find(v) == numbered.end()) {
         weight[v]++;
       }
@@ -124,7 +130,7 @@ bool Kernelizer::BFS_path(AdjacencyList& graph, int start, int end, vector<int>&
   vector<int> from_vector;
   from_vector.reserve(graph.num_vertices);
   for(int i = 0; i < graph.num_vertices; i++) {
-    from_vector[i] = -1;
+    from_vector.emplace_back(-1);
   }
   from_vector[start] = start;
   queue<int> q;

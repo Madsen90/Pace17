@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
 #include "../CPPace.Lib/LexBFS.h"
+#include <iostream>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -22,6 +23,23 @@ namespace CPPaceTests {
 
       Assert::IsFalse(lex.is_chordal(graph));
     }
+
+    TEST_METHOD(IsChordal) {
+      AdjacencyList graph(3);
+
+      LexBFS lex(graph.num_vertices);
+      lex.order(graph);
+      Assert::IsTrue(lex.is_chordal(graph));
+      
+      graph.add_edge(0, 1); 
+      lex.order(graph);
+      Assert::IsTrue(lex.is_chordal(graph));
+
+      graph.add_edge(1, 2);
+      lex.order(graph);
+      //Assert::IsTrue(lex.is_chordal1(graph));
+    }
+
   };
 
 }
