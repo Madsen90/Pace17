@@ -131,5 +131,18 @@ namespace CPPaceTests {
       Assert::IsTrue(MinimumFillIn::find_v_star(graph, 0, 3, set<int> { 4 }, v_star));
       Assert::IsTrue(v_star == 1 || v_star == 2);
     }
+
+    TEST_METHOD(FindMoplexesBerryBordat) {
+      AdjacencyList graph = SampleGraphs::berry_bordat();
+      set<set<int>> moplexes = MinimumFillIn::find_moplexes(graph);
+      Assert::IsTrue(set<set<int>> {
+        set<int> { 0, 1 },
+        set<int> { 2 },
+        set<int> { 3 },
+        set<int> { 4 },
+        set<int> { 6 },
+        set<int> { 7 }
+      } == moplexes);
+    }
   };
 }

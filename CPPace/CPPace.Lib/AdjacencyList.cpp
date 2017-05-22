@@ -7,7 +7,6 @@ AdjacencyList::AdjacencyList(int num_vertices)
     num_vertices(num_vertices),
     vertices(),
     visited(),
-    connectivity_labels(new int[num_vertices]),
     connectivity_dirty(false) {
   vertices.resize(num_vertices);
   visited.resize(num_vertices);
@@ -35,10 +34,10 @@ bool AdjacencyList::is_connected(int u, int v) {
   if (connectivity_dirty)
     regenerate_connectivity();
 
-  return connectivity_labels[u] == connectivity_labels[v];
+  return vertices[u].label == vertices[v].label;
 }
 
-void AdjacencyList::regenerate_connectivity() {
+int AdjacencyList::regenerate_connectivity() {
   // Exclude inactive vertices from search
   for (int i = 0; i < num_vertices; i++)
     visited[i] = !vertices[i].active;
@@ -54,7 +53,7 @@ void AdjacencyList::regenerate_connectivity() {
       int u = stack.back();
       stack.pop_back();
 
-      connectivity_labels[u] = label;
+      vertices[u].label = label;
       visited[u] = true;
 
       for (int v : edges(u)) {
@@ -65,6 +64,7 @@ void AdjacencyList::regenerate_connectivity() {
     label++;
   }
   connectivity_dirty = false;
+  return label;
 }
 
 bool AdjacencyList::is_clique(set<int>& vertice_set) {
