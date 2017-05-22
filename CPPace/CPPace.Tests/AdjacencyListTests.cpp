@@ -8,7 +8,6 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 namespace CPPaceTests {
   TEST_CLASS(AdjacencyListTests) {
   public:
-
     TEST_METHOD(Constructor) {
       const int n = 5;
       AdjacencyList graph(n);
@@ -96,70 +95,6 @@ namespace CPPaceTests {
       Assert::IsTrue(graph.is_clique(set<int> { 0 }));
     }
 
-    TEST_METHOD(ChordlessPath) {
-      AdjacencyList graph(5);
-      Assert::IsTrue(graph.is_path_chordless(vector<int> { 0 }));
-
-      // 0-1 2 3 4
-      graph.add_edge(0, 1);
-      Assert::IsTrue(graph.is_path_chordless(vector<int> { 0 }));
-      Assert::IsTrue(graph.is_path_chordless(vector<int> { 0, 1 }));
-
-      // 0-1-2-3-4
-      graph.add_edge(1, 2);
-      graph.add_edge(3, 4);
-      graph.add_edge(2, 3);
-      Assert::IsTrue(graph.is_path_chordless(vector<int> { 0, 1, 2, 3, 4 }));
-      Assert::IsTrue(graph.is_path_chordless(vector<int> { 4, 3, 2, 1, 0 }));
-      
-      // 0-1-2-3-4
-      //    \_/
-      graph.add_edge(1, 3);
-      Assert::IsFalse(graph.is_path_chordless(vector<int> { 0, 1, 2, 3, 4 }));
-      Assert::IsFalse(graph.is_path_chordless(vector<int> { 4, 3, 2, 1, 0 }));
-    }
-
-    TEST_METHOD(FindFourCycle) {
-      AdjacencyList graph(5);
-      vector<int> cycle;
-      Assert::IsFalse(graph.find_four_cycle(cycle));
-
-      graph.add_edge(0, 1);
-      Assert::IsFalse(graph.find_four_cycle(cycle));
-      Assert::AreEqual(0, (int)cycle.size());
-
-      graph.add_edge(1, 2);
-      Assert::IsFalse(graph.find_four_cycle(cycle));
-      Assert::AreEqual(0, (int)cycle.size());
-
-      graph.add_edge(2, 3);
-      Assert::IsFalse(graph.find_four_cycle(cycle));
-      Assert::AreEqual(0, (int)cycle.size());
-
-      graph.add_edge(3, 4);
-      Assert::IsFalse(graph.find_four_cycle(cycle));
-      Assert::AreEqual(0, (int)cycle.size());
-
-      graph.add_edge(4, 0);
-      Assert::IsFalse(graph.find_four_cycle(cycle));
-      Assert::AreEqual(0, (int)cycle.size());
-
-      graph.add_edge(3, 0);
-      Assert::IsTrue(graph.find_four_cycle(cycle));
-      Assert::AreEqual(4, (int)cycle.size());
-
-      graph.add_edge(0, 2);
-      Assert::IsFalse(graph.find_four_cycle(cycle));
-      Assert::AreEqual(0, (int)cycle.size());
-    }
-
-    TEST_METHOD(FindFourCycleBerryBordat) {
-      AdjacencyList graph = SampleGraphs::berry_bordat();
-      vector<int> cycle;
-      Assert::IsTrue(graph.find_four_cycle(cycle));
-      Assert::AreEqual(4, (int)cycle.size());
-    }
-
     TEST_METHOD(MakeClique) {
       AdjacencyList graph(5);
       Assert::IsFalse(graph.is_clique(set<int> { 0, 1, 2, 3, 4 }));
@@ -171,39 +106,6 @@ namespace CPPaceTests {
       graph.make_clique(set<int> { 0, 1, 2, 3, 4 });
       Assert::IsTrue(graph.is_clique(set<int> { 0, 1, 2, 3, 4 }));
       Assert::IsTrue(graph.is_clique(set<int> { 0, 1, 4 }));
-    }
-
-    TEST_METHOD(FindVStar) {
-      int v_star;
-      AdjacencyList graph(5);
-      Assert::IsFalse(graph.find_v_star(0, 2, set<int>(), v_star));
-
-      graph.add_edge(0, 1);
-      Assert::IsFalse(graph.find_v_star(0, 2, set<int>(), v_star));
-
-      graph.add_edge(1, 2);
-      Assert::IsTrue(graph.find_v_star(0, 2, set<int>(), v_star));
-      Assert::AreEqual(1, v_star);
-
-      graph.add_edge(2, 3);
-      Assert::IsTrue(graph.find_v_star(0, 3, set<int>(), v_star));
-      Assert::IsTrue(v_star == 1 || v_star == 2);
-
-      graph.add_edge(1, 4);
-      Assert::IsTrue(graph.find_v_star(0, 3, set<int>(), v_star));
-      Assert::IsTrue(v_star == 1 || v_star == 2);
-
-      graph.add_edge(3, 4);
-      Assert::IsTrue(graph.find_v_star(0, 3, set<int>(), v_star));
-      Assert::AreEqual(1, v_star);
-
-      graph.add_edge(0, 4);
-      Assert::IsFalse(graph.find_v_star(0, 3, set<int>(), v_star));
-
-      Assert::IsTrue(graph.find_v_star(0, 3, set<int> { 4 }, v_star));
-      Assert::IsTrue(v_star == 1 || v_star == 2);
-
-
     }
   };
 

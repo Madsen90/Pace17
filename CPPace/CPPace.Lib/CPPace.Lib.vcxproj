@@ -154,6 +154,7 @@
     <ClCompile Include="GraphGenerator.cpp" />
     <ClCompile Include="GraphIO.cpp" />
     <ClCompile Include="LexBFS.cpp" />
+    <ClCompile Include="MinimumFillIn.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

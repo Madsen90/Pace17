@@ -7,10 +7,8 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 namespace CPPaceTests {
   TEST_CLASS(ConsListTests) {
   public:
-
     TEST_METHOD(Cons) {
       shared_ptr<ConsList<int>> list = ConsList<int>::create(1);
-      
       list = ConsList<int>::cons(2, list);
       
       Assert::AreEqual(list->value, 2);
@@ -24,12 +22,10 @@ namespace CPPaceTests {
       Assert::AreEqual(list1->prev->prev->value, 2);
       Assert::AreEqual(list1->prev->prev->prev->value, 1);
 
-
       Assert::AreEqual(list2->value, 24);
       Assert::AreEqual(list2->prev->value, 23);
       Assert::AreEqual(list2->prev->prev->value, 2);
       Assert::AreEqual(list2->prev->prev->prev->value, 1);
-
     }
 
     TEST_METHOD(ToVector) {
@@ -53,6 +49,5 @@ namespace CPPaceTests {
       Assert::AreEqual(1, vector[7]);
       Assert::AreEqual(8, (int)vector.size());
     }
-
   };
 }
