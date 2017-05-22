@@ -18,7 +18,7 @@ GraphIO::GraphContext GraphIO::read_from_stream(istream& stream) {
   }
 
   AdjacencyList graph(index);
-  for (int i = 0; i < us.size(); i++)
+  for (unsigned int i = 0; i < us.size(); i++)
     graph.add_edge(us[i], vs[i]);
 
   vector<string> vertex_names(index);
