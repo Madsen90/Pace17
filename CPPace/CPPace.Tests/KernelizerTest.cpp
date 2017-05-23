@@ -121,9 +121,6 @@ public:
       graph.add_edge(2, 5);
       order = Kernelizer::MCS(graph);
       Assert::IsFalse(is_chordal_given_order(graph, order));
-
-
-
     }
 
     TEST_METHOD(FindChordlessCycle) {
@@ -151,8 +148,7 @@ public:
       for(int v : cycle) {
         uniqueTest.emplace(v);
       }
-      Assert::AreEqual(uniqueTest.size(), cycle.size());
-      
+      Assert::AreEqual(uniqueTest.size(), cycle.size());      
 
       cycle = vector<int>();
       graph.add_edge(0, 4);
@@ -207,7 +203,6 @@ public:
         uniqueTest.emplace(v);
       }
       Assert::AreEqual(uniqueTest.size(), cycle.size());
-
     }
 
     TEST_METHOD(BFSPath) {
@@ -243,7 +238,6 @@ public:
       Assert::IsTrue(Kernelizer::BFS_path(graph, 0, 4, path));
       Assert::AreEqual(3, (int)path.size());
 
-
       path = vector<int>();
       graph.remove_vertex(0);
       Assert::IsTrue(Kernelizer::BFS_path(graph, 1, 4, path));
@@ -269,7 +263,6 @@ public:
       path = vector<int>();
       Assert::IsTrue(Kernelizer::BFS_path(graph, 3, 0, path));
       Assert::AreEqual(4, (int)path.size());
-
     }
 
     TEST_METHOD(Phase1) {
@@ -308,11 +301,6 @@ public:
       kernel = Kernelizer::phase1(graph);
       Assert::AreEqual(6, (int)kernel.a.size());
       Assert::AreEqual(5, (int)kernel.b.size());
-
-      //could probably use more testing
-
     }
   };
-
-
 }
