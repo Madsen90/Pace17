@@ -3,7 +3,6 @@
 #include "../CPPace.Lib/LexBFS.h"
 #include <iostream>
 
-
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace CPPaceTests {

@@ -152,6 +152,7 @@
     <ClCompile Include="ConsListTests.cpp" />
     <ClCompile Include="KernelizerTest.cpp" />
     <ClCompile Include="LexBFSTests.cpp" />
+    <ClCompile Include="MCSLexBFSComparison.cpp" />
     <ClCompile Include="MinimumFillInTests.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

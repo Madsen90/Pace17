@@ -174,4 +174,19 @@ bool Kernelizer::BFS_path(AdjacencyList& graph, int start, int end, vector<int>&
   return true;
 }
 
+bool Kernelizer::is_chordal_given_order(AdjacencyList& graph, map<int, int> order) {
+  for (int v = 0; v < order.size(); v++) {
+    int ordering = order[v];
+    set<int> higher_order_neighbours;
+    for (int n : graph.edges(v)) {
+      if (order.find(n) != order.end() && order[n] > ordering) {
+        higher_order_neighbours.emplace(n);
+      }
+    }
 
+    if (!graph.is_clique(higher_order_neighbours)) {
+      return false;
+    }
+  }
+  return true;
+}

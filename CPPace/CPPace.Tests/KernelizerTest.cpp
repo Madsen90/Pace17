@@ -7,67 +7,48 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace CPPaceTests {
   TEST_CLASS(KernelizerTests) {
-private: 
-    /// copied from lexbfs chordality check, to help MCS order test
-  static bool is_chordal_given_order(AdjacencyList& graph, map<int, int> order)
-  {
-      for (int v = 0; v < order.size(); v++) {
-        int ordering = order[v];
-        set<int> higher_order_neighbours;
-        for (int n : graph.edges(v)) {
-          if (order.find(n) != order.end() && order[n] > ordering) {
-            higher_order_neighbours.emplace(n);
-          }
-        }
-        
-        if (!graph.is_clique(higher_order_neighbours)) {
-          return false;
-        }
-      }
-      return true;
-  }
 public:
 
     TEST_METHOD(MCS) {
       AdjacencyList graph = SampleGraphs::berry_bordat();
       map<int, int> order = Kernelizer::MCS(graph);
-      Assert::IsFalse(is_chordal_given_order(graph, order));
+      Assert::IsFalse(Kernelizer::is_chordal_given_order(graph, order));
 
       LexBFS lex(graph.num_vertices);
       lex.order(graph);
-      Assert::AreEqual(lex.is_chordal(graph), is_chordal_given_order(graph, order));
+      Assert::AreEqual(lex.is_chordal(graph), Kernelizer::is_chordal_given_order(graph, order));
 
       graph = AdjacencyList(5);
       order = Kernelizer::MCS(graph);
-      Assert::IsTrue(is_chordal_given_order(graph, order));
+      Assert::IsTrue(Kernelizer::is_chordal_given_order(graph, order));
       
       graph.add_edge(0, 1);
       order = Kernelizer::MCS(graph);
-      Assert::IsTrue(is_chordal_given_order(graph, order));
+      Assert::IsTrue(Kernelizer::is_chordal_given_order(graph, order));
 
       graph.add_edge(1, 2);
       order = Kernelizer::MCS(graph);
-      Assert::IsTrue(is_chordal_given_order(graph, order));
+      Assert::IsTrue(Kernelizer::is_chordal_given_order(graph, order));
 
       graph.add_edge(2, 3);
       order = Kernelizer::MCS(graph);
-      Assert::IsTrue(is_chordal_given_order(graph, order));
+      Assert::IsTrue(Kernelizer::is_chordal_given_order(graph, order));
 
       graph.add_edge(0, 3);
       order = Kernelizer::MCS(graph);
-      Assert::IsFalse(is_chordal_given_order(graph, order));
+      Assert::IsFalse(Kernelizer::is_chordal_given_order(graph, order));
 
       graph.add_edge(0, 2);
       order = Kernelizer::MCS(graph);
-      Assert::IsTrue(is_chordal_given_order(graph, order));
+      Assert::IsTrue(Kernelizer::is_chordal_given_order(graph, order));
 
       graph.add_edge(3, 4);
       order = Kernelizer::MCS(graph);
-      Assert::IsTrue(is_chordal_given_order(graph, order));
+      Assert::IsTrue(Kernelizer::is_chordal_given_order(graph, order));
 
       graph.add_edge(1, 4);
       order = Kernelizer::MCS(graph);
-      Assert::IsFalse(is_chordal_given_order(graph, order));
+      Assert::IsFalse(Kernelizer::is_chordal_given_order(graph, order));
 
       graph = AdjacencyList(5);
       graph.add_edge(0, 1);
@@ -77,11 +58,11 @@ public:
       graph.add_edge(0, 3);
       graph.add_edge(0, 4);
       order = Kernelizer::MCS(graph);
-      Assert::IsFalse(is_chordal_given_order(graph, order));
+      Assert::IsFalse(Kernelizer::is_chordal_given_order(graph, order));
 
       graph.remove_vertex(4);
       order = Kernelizer::MCS(graph);
-      Assert::IsFalse(is_chordal_given_order(graph, order));
+      Assert::IsFalse(Kernelizer::is_chordal_given_order(graph, order));
 
       graph = AdjacencyList(5);
       graph.add_edge(0, 1);
@@ -92,7 +73,7 @@ public:
       graph.add_edge(0, 4);
       graph.remove_vertex(3);
       order = Kernelizer::MCS(graph);
-      Assert::IsTrue(is_chordal_given_order(graph, order));
+      Assert::IsTrue(Kernelizer::is_chordal_given_order(graph, order));
 
       graph = AdjacencyList(5);
       graph.add_edge(0, 1);
@@ -103,24 +84,24 @@ public:
       graph.add_edge(0, 4);
       graph.remove_edge(0, 3);
       order = Kernelizer::MCS(graph);
-      Assert::IsFalse(is_chordal_given_order(graph, order));
+      Assert::IsFalse(Kernelizer::is_chordal_given_order(graph, order));
 
       graph = SampleGraphs::multiple_moplexes_and_big_cc();
       order = Kernelizer::MCS(graph);
-      Assert::IsFalse(is_chordal_given_order(graph, order));
+      Assert::IsFalse(Kernelizer::is_chordal_given_order(graph, order));
 
       graph.remove_vertex(8);
       order = Kernelizer::MCS(graph);
-      Assert::IsTrue(is_chordal_given_order(graph, order));
+      Assert::IsTrue(Kernelizer::is_chordal_given_order(graph, order));
 
       graph = SampleGraphs::multiple_moplexes_and_big_cc();
       graph.remove_vertex(4);
       order = Kernelizer::MCS(graph);
-      Assert::IsTrue(is_chordal_given_order(graph, order));
+      Assert::IsTrue(Kernelizer::is_chordal_given_order(graph, order));
 
       graph.add_edge(2, 5);
       order = Kernelizer::MCS(graph);
-      Assert::IsFalse(is_chordal_given_order(graph, order));
+      Assert::IsFalse(Kernelizer::is_chordal_given_order(graph, order));
     }
 
     TEST_METHOD(FindChordlessCycle) {
