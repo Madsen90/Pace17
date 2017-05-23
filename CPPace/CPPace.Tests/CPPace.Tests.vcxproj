@@ -150,6 +150,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ConsListTests.cpp" />
+    <ClCompile Include="GraphIOTests.cpp" />
     <ClCompile Include="KernelizerTest.cpp" />
     <ClCompile Include="LexBFSTests.cpp" />
     <ClCompile Include="MCSLexBFSComparison.cpp" />

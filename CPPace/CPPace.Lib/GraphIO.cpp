@@ -53,10 +53,11 @@ void GraphIO::write_to_stream(GraphContext& context, ostream& stream, Format for
              << " -- "
              << context.vertex_name(edge.second);
 
+      pair<int, int> edge_rev(edge.second, edge.first);
       for (pair<string, set<pair<int, int>>> colored_edges : context.edge_color_map) {
         string color = colored_edges.first;
         set<pair<int, int>> edges = colored_edges.second;
-        if (edges.find(edge) != edges.end()) {
+        if (edges.find(edge) != edges.end() || edges.find(edge_rev) != edges.end()) {
           stream << " "
                  << "[color=\""
                  << color
