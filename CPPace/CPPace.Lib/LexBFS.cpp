@@ -7,14 +7,14 @@
 
 LexBFS::LexBFS(int num_vertices)
   : num_vertices(num_vertices),
-    ordering(new int[num_vertices * 2]),
-    positions(new int[num_vertices * 2]),
+    ordering (vector<int>(num_vertices)),
+    positions(vector<int>(num_vertices)),
     chordal(Chordal::Dirty)
 { }
 
 void LexBFS::order(AdjacencyList& graph) {
   list<set<int>*> partitions;
-  int label = 0;
+  int label = num_vertices-1;
   
   // Inital partition is single set of all vertices
   set<int>* initial_partition = new set<int>();
@@ -32,7 +32,7 @@ void LexBFS::order(AdjacencyList& graph) {
     pf->erase(pivot);
     ordering[label] = pivot;
     positions[pivot] = label;
-    label++;
+    label--;
 
     set<int> adjacency = graph.edges(pivot);
     std::list<set<int>*>::iterator it = partitions.begin();
@@ -64,10 +64,10 @@ bool LexBFS::is_chordal(AdjacencyList& graph)
 {
   if (chordal == Chordal::Dirty) {
     for (int v = 0; v < num_vertices; v++) {
-      int order = ordering[v];
+      int order = positions[v];
       set<int> higher_order_neighbours;
       for (int n : graph.edges(v)) {
-        if (position(n) > order) {
+        if (positions[n] > order) {
           higher_order_neighbours.emplace(n);
         }
       }
