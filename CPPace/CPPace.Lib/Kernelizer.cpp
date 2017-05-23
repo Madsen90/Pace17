@@ -31,6 +31,17 @@ Kernel Kernelizer::phase1(AdjacencyList& graph)
   return kernel;
 }
 
+Kernel Kernelizer::phase2(AdjacencyList& graph, Kernel& phase1_kernel)
+{
+  bool cycle_found;
+  do {
+    cycle_found = false;
+
+  } while (cycle_found);
+  return phase1_kernel;
+}
+
+
 
 bool Kernelizer::find_chordless_cycle(AdjacencyList& graph, vector<int>& cycle)
 {
