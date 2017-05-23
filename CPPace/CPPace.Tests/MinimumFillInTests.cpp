@@ -144,5 +144,15 @@ namespace CPPaceTests {
         set<int> { 7 }
       } == moplexes);
     }
+
+    TEST_METHOD(FindMinFillBerryBordat) {
+      AdjacencyList graph = SampleGraphs::berry_bordat();
+      stack<pair<int, int>> edges = MinimumFillIn::minimum_fill_in(graph);
+      Assert::AreEqual(2, (int)edges.size());
+      Assert::IsTrue(edges.top().first == 4 && edges.top().second == 5 || edges.top().first == 5 && edges.top().second == 6);
+      edges.pop();
+      Assert::IsTrue(edges.top().first == 4 && edges.top().second == 5 || edges.top().first == 5 && edges.top().second == 6);
+    }
+
   };
 }

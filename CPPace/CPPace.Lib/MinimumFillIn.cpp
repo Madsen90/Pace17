@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <iterator>
 #include <queue>
+#include "LexBFS.h"
 
 bool MinimumFillIn::is_path_chordless(AdjacencyList& graph, vector<int>& path) {
   set<int> path_set;
@@ -200,6 +201,7 @@ set<int> add_edge_wrapper(AdjacencyList& graph, int x, int y, set<int>& marked, 
     changed_markings.emplace(y);
     marked.erase(y_it);
   }
+  graph.add_edge(x, y);
   added.emplace(x, y);
   return changed_markings;
 }
@@ -216,7 +218,12 @@ set<int> get_neighbourhood_of_moplex(AdjacencyList& graph, set<int>& moplex) {
 }
 
 MinimumFillInResult minimum_fill_in_inner(AdjacencyList& graph, int k, int r, stack<pair<int, int>>& added, set<int>& marked) {
-  if (k < 0 || r < -1) return MinimumFillInResult(k, added);
+  if (k < 0 || r < -1) return MinimumFillInResult(-1, stack<pair<int, int>>());
+  
+  LexBFS lex(graph.num_vertices);
+  lex.order(graph);
+  if(lex.is_chordal(graph))
+    return MinimumFillInResult(k, added);
 
   //CASE: Four cycles
   vector<int> four_cycle;
@@ -249,7 +256,7 @@ MinimumFillInResult minimum_fill_in_inner(AdjacencyList& graph, int k, int r, st
   //Find moplexes
   vector<set<int>> moplexes = MinimumFillIn::find_moplexes(graph);
 
-    bool contains_marked, contains_unmarked = false;
+    bool contains_marked = false, contains_unmarked = false;
 
     //CASE: Moplex with marked and unmarked edges
     for (set<int> moplex : moplexes) {
@@ -265,7 +272,12 @@ MinimumFillInResult minimum_fill_in_inner(AdjacencyList& graph, int k, int r, st
           marked.emplace(n);
           r--;
         }
-        return minimum_fill_in_inner(graph, k, r, added, marked);
+        MinimumFillInResult result = minimum_fill_in_inner(graph, k, r, added, marked);
+        for (int n : moplex) {
+          marked.erase(n);
+          r++;
+        }
+        return result;
       }
     }
     //CASE: Simplicial moplexes with only unmarked edges
@@ -288,7 +300,9 @@ MinimumFillInResult minimum_fill_in_inner(AdjacencyList& graph, int k, int r, st
         if (graph.is_clique(adjacent)) {
           graph.remove_vertices(adjacent);
 
-          return minimum_fill_in_inner(graph, k, r, added, marked);
+          MinimumFillInResult result = minimum_fill_in_inner(graph, k, r, added, marked);
+          graph.add_vertices(adjacent);
+          return result;
         }
       }
     }
@@ -320,8 +334,10 @@ MinimumFillInResult minimum_fill_in_inner(AdjacencyList& graph, int k, int r, st
           if (marked.erase(v_star) != 0) //R might not need to be incremented for v_star
             r++;
           r += add_edge_wrapper(graph, missing_edge.first, missing_edge.second, marked, added).size();
-
-          return minimum_fill_in_inner(graph, k-1, r, added, marked);
+          MinimumFillInResult result = minimum_fill_in_inner(graph, k-1, r, added, marked);
+          graph.remove_edge(missing_edge.first, missing_edge.second);
+          added.pop();
+          return result;
         }
       }
     }
@@ -380,6 +396,7 @@ stack<pair<int, int>> MinimumFillIn::minimum_fill_in(AdjacencyList& graph) {
   while (true) {
     //KERNELIZE
     MinimumFillInResult res = minimum_fill_in_inner(graph, k, k * 2, stack<pair<int, int>>(), set<int>());
+    k++;
     if (res.k != -1) return res.edges;
   }
   return stack<pair<int, int>>();
