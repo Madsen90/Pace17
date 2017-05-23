@@ -26,7 +26,7 @@ namespace CPPaceTests {
 
     TEST_METHOD(IsChordal) {
       //Single node
-      AdjacencyList graph(4);
+      AdjacencyList graph(1);
       graph.add_vertex(0);
 
       LexBFS lex(graph.num_vertices);
@@ -34,6 +34,7 @@ namespace CPPaceTests {
       Assert::IsTrue(lex.is_chordal(graph));
 
       //Two single nodes
+      graph = AdjacencyList(2);
       graph.add_vertex(1);
 
       lex = LexBFS(graph.num_vertices);
@@ -48,6 +49,8 @@ namespace CPPaceTests {
       Assert::IsTrue(lex.is_chordal(graph));
 
       //Line of three node
+      graph = AdjacencyList(3);
+      graph.add_edge(0, 1);
       graph.add_edge(1, 2);
 
       lex = LexBFS(graph.num_vertices);
@@ -55,6 +58,9 @@ namespace CPPaceTests {
       Assert::IsTrue(lex.is_chordal(graph));
 
       //4-Cycle
+      graph = AdjacencyList(4);
+      graph.add_edge(0, 1);
+      graph.add_edge(1, 2);
       graph.add_edge(2, 3);
       graph.add_edge(0, 3);
 
