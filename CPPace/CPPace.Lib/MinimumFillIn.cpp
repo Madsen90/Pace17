@@ -395,7 +395,9 @@ stack<pair<int, int>> MinimumFillIn::minimum_fill_in(AdjacencyList& graph) {
   int k = 0;
   while (true) {
     //KERNELIZE
-    MinimumFillInResult res = minimum_fill_in_inner(graph, k, k * 2, stack<pair<int, int>>(), set<int>());
+    stack<pair<int, int>> added;
+    set<int> marked;
+    MinimumFillInResult res = minimum_fill_in_inner(graph, k, k * 2, added, marked);
     k++;
     if (res.k != -1) return res.edges;
   }

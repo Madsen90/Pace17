@@ -3,9 +3,9 @@
 #include <queue>
 #include <iterator>
 #include <climits>
+#include <algorithm>
 
-static bool set_size_comparison(set<int> a, set<int> b)
-{
+static bool set_size_comparison(set<int> a, set<int> b) {
   return a.size() < b.size();
 }
 
@@ -57,7 +57,7 @@ bool Kernelizer::phase2(AdjacencyList& graph, Kernel& phase1_kernel) {
         for (int a_neighbour : graph.edges(a_vertex)) {
           b_minus_a.erase(a_neighbour);
         }
-        std::set_intersection(
+        set_intersection(
           b_minus_a.begin(), b_minus_a.end(),
           phase1_kernel.b.begin(), phase1_kernel.b.end(),
           inserter(R, R.begin()));
