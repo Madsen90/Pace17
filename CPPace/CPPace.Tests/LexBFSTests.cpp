@@ -207,6 +207,31 @@ namespace CPPaceTests {
       lex = LexBFS(graph.num_vertices);
       lex.order(graph);
       Assert::IsTrue(lex.is_chordal(graph));
+      
+      //6-cycle with noise
+      graph = SampleGraphs::multiple_moplexes_and_big_cc();
+      lex = LexBFS(graph.num_vertices);
+      lex.order(graph);
+      Assert::IsFalse(lex.is_chordal(graph));
+
+      //Break cycle
+      graph.remove_vertex(8);
+      lex = LexBFS(graph.num_vertices);
+      lex.order(graph);
+      Assert::IsTrue(lex.is_chordal(graph));
+
+      //Break cycle
+      graph = SampleGraphs::multiple_moplexes_and_big_cc();
+      lex = LexBFS(graph.num_vertices);
+      graph.remove_vertex(4);
+      lex.order(graph);
+      Assert::IsTrue(lex.is_chordal(graph));
+
+      //Create new cycle
+      graph.add_edge(2, 5);
+      lex = LexBFS(graph.num_vertices);
+      lex.order(graph);
+      Assert::IsFalse(lex.is_chordal(graph));
     }
   };
 

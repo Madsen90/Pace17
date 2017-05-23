@@ -105,7 +105,7 @@ public:
       order = Kernelizer::MCS(graph);
       Assert::IsFalse(is_chordal_given_order(graph, order));
 
-      graph = SampleGraphs::multible_moplexes_and_big_cc();
+      graph = SampleGraphs::multiple_moplexes_and_big_cc();
       order = Kernelizer::MCS(graph);
       Assert::IsFalse(is_chordal_given_order(graph, order));
 
@@ -113,7 +113,7 @@ public:
       order = Kernelizer::MCS(graph);
       Assert::IsTrue(is_chordal_given_order(graph, order));
 
-      graph = SampleGraphs::multible_moplexes_and_big_cc();
+      graph = SampleGraphs::multiple_moplexes_and_big_cc();
       graph.remove_vertex(4);
       order = Kernelizer::MCS(graph);
       Assert::IsTrue(is_chordal_given_order(graph, order));
@@ -165,7 +165,7 @@ public:
       }
       Assert::AreEqual(uniqueTest.size(), cycle.size());
 
-      graph = SampleGraphs::multible_moplexes_and_big_cc();
+      graph = SampleGraphs::multiple_moplexes_and_big_cc();
       cycle = vector<int>();
       Assert::IsTrue(Kernelizer::find_chordless_cycle(graph, cycle));
       Assert::AreEqual(6, (int)cycle.size());
@@ -194,7 +194,7 @@ public:
       }
       Assert::AreEqual(uniqueTest.size(), cycle.size());
 
-      graph = SampleGraphs::multible_moplexes_and_big_cc();
+      graph = SampleGraphs::multiple_moplexes_and_big_cc();
       graph.remove_vertex(4);
       cycle = vector<int>();
       Assert::IsFalse(Kernelizer::find_chordless_cycle(graph, cycle));
@@ -304,7 +304,7 @@ public:
       Assert::AreEqual(4, (int)kernel.a.size());
       Assert::AreEqual(4, (int)kernel.b.size());
 
-      graph = SampleGraphs::multible_moplexes_and_big_cc();
+      graph = SampleGraphs::multiple_moplexes_and_big_cc();
       kernel = Kernelizer::phase1(graph);
       Assert::AreEqual(6, (int)kernel.a.size());
       Assert::AreEqual(5, (int)kernel.b.size());
