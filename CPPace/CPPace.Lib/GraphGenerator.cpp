@@ -1,4 +1,5 @@
 #include "GraphGenerator.h"
+#include <cstdlib>
 
 AdjacencyList GraphGenerator::random(int num_vertices, int num_edges) {
   AdjacencyList graph(num_vertices);
@@ -12,4 +13,5 @@ AdjacencyList GraphGenerator::random(int num_vertices, int num_edges) {
   }
 
   return graph;
+
 }
