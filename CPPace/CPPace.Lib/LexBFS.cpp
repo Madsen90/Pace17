@@ -19,7 +19,8 @@ void LexBFS::order(AdjacencyList& graph) {
   // Inital partition is single set of all vertices
   set<int>* initial_partition = new set<int>();
   for (int i = 0; i < graph.num_vertices; i++)
-    initial_partition->emplace(i);
+    if (graph.vertices[i].active)
+      initial_partition->emplace(i);
   partitions.push_back(initial_partition);
 
   while (!partitions.empty()) {

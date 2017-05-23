@@ -26,6 +26,7 @@ namespace CPPaceTests {
 
     TEST_METHOD(IsChordal) {
       AdjacencyList graph(3);
+<<<<<<< HEAD
 
       LexBFS lex(graph.num_vertices);
       lex.order(graph);
@@ -40,6 +41,16 @@ namespace CPPaceTests {
       //Assert::IsTrue(lex.is_chordal1(graph));
     }
 
+=======
+      graph.add_edge(0, 1);
+      graph.add_edge(1, 2);
+
+      LexBFS lex(graph.num_vertices);
+      lex.order(graph);
+
+      Assert::IsTrue(lex.is_chordal(graph));
+    }
+>>>>>>> 83860b8b395e7e5f9eb31d4e6fd3a1bf8179ee3d
   };
 
 }
