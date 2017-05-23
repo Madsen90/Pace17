@@ -142,7 +142,7 @@ namespace CPPaceTests {
         set<int> { 4 },
         set<int> { 6 },
         set<int> { 7 }
-      } == moplexes);
+      } == moplexes); 
     }
 
     TEST_METHOD(FindMinFillBerryBordat) {

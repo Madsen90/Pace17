@@ -88,7 +88,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;CPPACELIB_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;CPPACELIB_EXPORTS;LOGGING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -147,6 +147,7 @@
     <ClInclude Include="GraphIO.h" />
     <ClInclude Include="Kernelizer.h" />
     <ClInclude Include="LexBFS.h" />
+    <ClInclude Include="Log.h" />
     <ClInclude Include="MinimumFillIn.h" />
   </ItemGroup>
   <ItemGroup>
