@@ -8,7 +8,6 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 namespace CPPaceTests {
   TEST_CLASS(KernelizerTests) {
 public:
-
     TEST_METHOD(MCS) {
       AdjacencyList graph = SampleGraphs::berry_bordat();
       map<int, int> order = Kernelizer::MCS(graph);
@@ -481,7 +480,31 @@ public:
       Assert::AreEqual(6, (int)phase3_kernel.b.size());
       Assert::AreEqual(1, phase3_kernel.kMin);
       Assert::IsTrue(pair<int, int>(0, 1) == *phase3_kernel.essential_edges.begin());
-      
+
+
+      //weird behaviour test
+      graph = SampleGraphs::instances_84();
+      kernel = Kernelizer::phase1(graph);
+      Assert::IsTrue(Kernelizer::phase2(graph, kernel));
+      phase3_kernel = Kernel();
+      Assert::IsTrue(Kernelizer::phase3(graph, kernel, phase3_kernel, 13));
+      Assert::AreEqual(31, (int)phase3_kernel.a.size());
+      Assert::AreEqual(45, (int)phase3_kernel.b.size());
+      Assert::AreEqual(13, phase3_kernel.kMin);
+
+      graph = SampleGraphs::berry_bordat();
+      kernel = Kernelizer::phase1(graph);
+      Assert::IsTrue(Kernelizer::phase2(graph, kernel));
+      phase3_kernel = Kernel();
+      Assert::IsFalse(Kernelizer::phase3(graph, kernel, phase3_kernel, 0));
+      phase3_kernel = Kernel();
+      Assert::IsTrue(Kernelizer::phase3(graph, kernel, phase3_kernel, 2));
+      Assert::AreEqual(8, (int)phase3_kernel.a.size());
+      Assert::AreEqual(0, (int)phase3_kernel.b.size());
+      Assert::AreEqual(2, phase3_kernel.kMin);
+
+
+
     }
 
     TEST_METHOD(NonEdges) {

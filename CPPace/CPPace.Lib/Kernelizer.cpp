@@ -86,7 +86,7 @@ bool Kernelizer::phase2(AdjacencyList& graph, Kernel& phase1_kernel) {
                 if (phase1_kernel.b.find(p) != phase1_kernel.b.end())
                   sub_path.emplace(p);
                 else {
-                  sub_paths.emplace_back(set<int>(sub_path));
+                  sub_paths.emplace_back(sub_path); //intentional copy construction by emplace
                   sub_path.clear();
                   previous_v_in_b = false;
                 }
@@ -98,7 +98,7 @@ bool Kernelizer::phase2(AdjacencyList& graph, Kernel& phase1_kernel) {
                 }
               }
             }
-            if (!sub_path.empty()) sub_paths.emplace_back(sub_path);
+            if (!sub_path.empty()) sub_paths.push_back(sub_path);
 
             sort(sub_paths.begin(), sub_paths.end(), set_size_comparison);
 
@@ -136,8 +136,7 @@ bool Kernelizer::phase2(AdjacencyList& graph, Kernel& phase1_kernel) {
   return !phase1_kernel.a.empty();
 }
 
-bool Kernelizer::phase3(AdjacencyList& graph, Kernel& phase2_kernel, Kernel& phase3_kernel, int max_k)
-{
+bool Kernelizer::phase3(AdjacencyList& graph, Kernel& phase2_kernel, Kernel& phase3_kernel, int max_k) {
   if (max_k < phase2_kernel.kMin)
     return false;
 
@@ -208,6 +207,7 @@ bool Kernelizer::phase3(AdjacencyList& graph, Kernel& phase2_kernel, Kernel& pha
     graph.remove_edge(edge.first, edge.second);
   }
   graph.add_vertices(phase2_kernel.b);
+
   return true;
 }
 
@@ -268,6 +268,7 @@ bool Kernelizer::find_chordless_cycle(AdjacencyList& graph, vector<int>& cycle) 
     }
     i++;
   }
+
   return false;
 }
 
@@ -347,7 +348,7 @@ vector<pair<int, int>> Kernelizer::find_non_edges(AdjacencyList& graph)
     for(int v = u+1; v < graph.num_vertices; v++) {
       if(!graph.vertices[v].active) continue;
       if(graph.has_edge(v, u)) continue;
-      non_edges.emplace_back(pair<int, int>(u, v));
+      non_edges.emplace_back(u, v);
     }
   }
   return non_edges;
