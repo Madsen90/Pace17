@@ -200,4 +200,21 @@ namespace CPPaceTests {
       Assert::IsTrue(SampleGraphs::berry_bordat().edges(7) == graph.edges(7));
     }
   };
+
+  TEST_CLASS(AdjacencyListBench) {
+  public:
+    TEST_METHOD(AddEdgeRandom) {
+      const unsigned int seed = 0x69c384b2;
+      const int num_edges = 1000000;
+      const int num_vertices = 1000;
+      AdjacencyList graph(num_vertices);
+      srand(seed);
+
+      for (size_t i = 0; i < num_edges; i++) {
+        int u = rand() % num_vertices;
+        int v = rand() % num_vertices;
+        graph.add_edge(u, v);
+      }
+    }
+  };
 }
