@@ -59,29 +59,25 @@ void LexBFS::order(AdjacencyList& graph) {
   chordal = Chordal::Dirty;
 }
 
-bool LexBFS::is_chordal(AdjacencyList& graph) {
+bool LexBFS::is_chordal(AdjacencyList& graph)
+{
   if (chordal == Chordal::Dirty) {
-    set<int> visited_vertices;
-    AdjacencyList visited_graph(graph.num_vertices);
-    for (int i = 0; i < num_vertices; i++) {
-      int u = ordering[i];
-      set<int> adjacency = graph.edges(u);
-      for (int v : adjacency) {
-        if (visited_vertices.find(v) != visited_vertices.end())
-          visited_graph.add_edge(u, v);
+    for (int v = 0; v < num_vertices; v++) {
+      int order = ordering[v];
+      set<int> higher_order_neighbours;
+      for (int n : graph.edges(v)) {
+        if (position(n) > order) {
+          higher_order_neighbours.emplace(n);
+        }
       }
-      
-      if (!graph.is_clique(adjacency)) {
+      if (!graph.is_clique(higher_order_neighbours)) {
         chordal = Chordal::False;
         return false;
       }
-
-      visited_vertices.emplace(u);
     }
-
     chordal = Chordal::True;
+    return true;
   }
-
   return chordal == Chordal::True;
 }
 
