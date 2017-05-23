@@ -60,8 +60,7 @@ void LexBFS::order(AdjacencyList& graph) {
   chordal = Chordal::Dirty;
 }
 
-bool LexBFS::is_chordal(AdjacencyList& graph)
-{
+bool LexBFS::is_chordal(AdjacencyList& graph) {
   if (chordal == Chordal::Dirty) {
     for (int v = 0; v < num_vertices; v++) {
       int order = ordering[v];
