@@ -13,15 +13,15 @@ struct Kernel
 {
   set<int> a;
   set<int> b;
-  int chordless_cycles;
+  int kMin;
   set<pair<int, int>> essential_edges;
 };
 
 class DLLEXPORT Kernelizer {
 public:
   static Kernel phase1(AdjacencyList& graph);
-  static Kernel phase2(AdjacencyList& graph, Kernel& phase1_kernel);
-  static Kernel phase3(AdjacencyList& graph, Kernel& phase1_kernel, int min_k);
+  static bool phase2(AdjacencyList& graph, Kernel& phase1_kernel);
+  static bool Kernelizer::phase3(AdjacencyList& graph, Kernel& phase2_kernel, Kernel& phase3_kernel, int max_k);
 
 //private:
   static bool find_chordless_cycle(AdjacencyList& graph, vector<int>& cycle);
