@@ -18,10 +18,10 @@ public:
 
 private:
   // Array of vertices in lexicographic order
-  int* ordering;
+  vector<int> ordering;
 
   // The inverse of ordering - positions[v] is vertex v's position in ordering
-  int* positions;
+  vector<int> positions;
 
   // Allows lazy chordality checking
   enum Chordal { Dirty, True, False };

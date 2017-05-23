@@ -7,12 +7,16 @@
 using namespace std;
 
 struct Vertex {
-  bool active;
   set<int> adjacency;
+  bool active;
+
+  // Label differentiating components of the graph.
+  int label;
 
   Vertex()
-    : active(true),
-    adjacency() {}
+    : adjacency(),
+      active(true)
+  {}
 };
 
 class DLLEXPORT AdjacencyList {
@@ -24,6 +28,9 @@ public:
   // Useful vector for marking vertices.
   // Zero-out before use - leave dirty after use.
   vector<bool> visited;
+
+  // Component labels are lazily updated when needed and connectivity_dirty is set.
+  bool connectivity_dirty;
 
   AdjacencyList(int num_vertices);
 
@@ -42,12 +49,5 @@ public:
   void remove_vertex(int u);
   void remove_vertices(set<int> vertices);
   void set_vertices(set<int> vertices);
-
-private:
-  // Vertex labels differentiating components of the graph.
-  // Labels are lazily updated when needed and connectivity_dirty is set.
-  int* connectivity_labels;
-  bool connectivity_dirty;
-
-  void regenerate_connectivity();
+  int regenerate_connectivity();
 };

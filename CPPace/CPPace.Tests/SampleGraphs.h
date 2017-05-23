@@ -24,7 +24,7 @@ public:
   }
 
   // Graph with 3-vertex moplex {0,1,2}, 6-vertex cycle, and "false" moplex triangle
-  static AdjacencyList multible_moplexes_and_big_cc()
+  static AdjacencyList multiple_moplexes_and_big_cc()
   {
     AdjacencyList graph(11);
     graph.add_edge(0, 1);
