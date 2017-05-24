@@ -407,7 +407,8 @@ stack<pair<int, int>> MinimumFillIn::minimum_fill_in(GraphIO::GraphContext conte
   Log::info("========================================");
   
   while (true) {
-    Log::info("Searching for solution (k = %d)", k);
+    int k_original = k;
+    Log::info("Searching for solution (k = %d)", k_original);
     Kernel k_kernel;
     if (!Kernelizer::phase3(graph, kernel, k_kernel, k)) {
       Log::info("Kernelization phase 3 completed (no solution for k = %d)", kernel.kMin);
@@ -439,16 +440,14 @@ stack<pair<int, int>> MinimumFillIn::minimum_fill_in(GraphIO::GraphContext conte
     set<int> marked;
     MinimumFillInResult res = minimum_fill_in_inner(graph, k, k * 2, added, marked);
     if (res.k != -1) {
-      Log::info("Solution found for k = %d", k);
+      Log::info("Solution found for k = %d", k_original);
       return res.edges;
     }
-    Log::info("No solution found for k = %d", k);
+    Log::info("No solution found for k = %d", k_original);
 
     graph.add_vertices(k_kernel.b);
-    for (pair<int, int> edge : k_kernel.essential_edges) {
+    for (pair<int, int> edge : k_kernel.essential_edges)
       graph.remove_edge(edge.first, edge.second);
-      k++;
-    }
-    k++;
+    k = k_original + 1;
   }
 }

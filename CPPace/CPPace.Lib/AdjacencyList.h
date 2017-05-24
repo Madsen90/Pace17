@@ -8,14 +8,18 @@ using namespace std;
 
 struct Vertex {
   set<int> adjacency;
+  set<int> active_adjacency_cache;
   bool active;
-
+  bool active_adjacency_cache_dirty;
+  
   // Label differentiating components of the graph.
   int label;
 
   Vertex()
     : adjacency(),
-      active(true)
+      active_adjacency_cache(),
+      active(true),
+      active_adjacency_cache_dirty(true)
   {}
 };
 

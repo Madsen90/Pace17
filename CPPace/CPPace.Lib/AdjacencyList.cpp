@@ -13,14 +13,22 @@ AdjacencyList::AdjacencyList(int num_vertices)
 }
 
 set<int> AdjacencyList::edges(int u) {
+  if (!vertices[u].active_adjacency_cache_dirty)
+    return vertices[u].active_adjacency_cache;
+
   set<int> result;
   if (!vertices[u].active) return result;
   for (int v : vertices[u].adjacency)
     if (vertices[v].active)
       result.emplace(v);
+
+  vertices[u].active_adjacency_cache = result;
+  vertices[u].active_adjacency_cache_dirty = false;
+
   return result;
 }
 
+// TODO: Use edges()?
 bool AdjacencyList::has_edge(int u, int v, bool include_inactive) {
   return (include_inactive || (vertices[u].active && vertices[v].active)) &&
     vertices[u].adjacency.find(v) != vertices[u].adjacency.end();
@@ -98,6 +106,8 @@ void AdjacencyList::add_edge(int u, int v) {
   vertices[v].adjacency.emplace(u);
   num_edges++;
   connectivity_dirty = true;
+  vertices[u].active_adjacency_cache_dirty = true;
+  vertices[v].active_adjacency_cache_dirty = true;
 }
 
 void AdjacencyList::remove_edge(int u, int v) {
@@ -106,6 +116,8 @@ void AdjacencyList::remove_edge(int u, int v) {
   vertices[v].adjacency.erase(u);
   num_edges--;
   connectivity_dirty = true;
+  vertices[u].active_adjacency_cache_dirty = true;
+  vertices[v].active_adjacency_cache_dirty = true;
 }
 
 void AdjacencyList::make_clique(set<int>& vertices) {
@@ -116,8 +128,14 @@ void AdjacencyList::make_clique(set<int>& vertices) {
 }
 
 void AdjacencyList::add_vertex(int u) {
+  if (vertices[u].active) return;
+
   vertices[u].active = true;
   connectivity_dirty = true;
+  
+  vertices[u].active_adjacency_cache_dirty = true;
+  for (int v : edges(u))
+    vertices[v].active_adjacency_cache_dirty = true;
 }
 
 void AdjacencyList::add_vertices(set<int> vertices) {
@@ -131,8 +149,15 @@ void AdjacencyList::add_all_vertices() {
 }
 
 void AdjacencyList::remove_vertex(int u) {
+  if (!vertices[u].active) return;
+
+  for (int v : edges(u))
+    vertices[v].active_adjacency_cache_dirty = true;
+
   vertices[u].active = false;
   connectivity_dirty = true;
+
+  vertices[u].active_adjacency_cache_dirty = true;
 }
 
 void AdjacencyList::remove_vertices(set<int> vertices) {
