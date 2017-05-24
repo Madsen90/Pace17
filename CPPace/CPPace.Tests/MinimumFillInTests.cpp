@@ -264,9 +264,10 @@ namespace CPPaceTests {
   TEST_CLASS(MinFillPerformance) {
   public:
     TEST_METHOD(VeryBigCycle) {
-      AdjacencyList graph = BuildNCycle(1000);
+      AdjacencyList graph = BuildNCycle(75);
       GraphIO::GraphContext context(graph);
-      GraphIO::write_to_path(context, "C:\\Users\\Frederik\\Downloads\\instances\\thousandcycle.graph");
+      auto edges = MinimumFillIn::minimum_fill_in(graph);
+      Assert::AreEqual(72, (int)edges.size());
     }
   };
 }
