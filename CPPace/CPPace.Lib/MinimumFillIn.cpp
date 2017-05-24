@@ -428,10 +428,10 @@ stack<pair<int, int>> MinimumFillIn::minimum_fill_in(GraphIO::GraphContext conte
     Log::info("Kernelization phase 3 completed");
     Log::info("Removed %d vertices (%.2f%%)",
       k_kernel.b.size(),
-      (float)k_kernel.b.size() / context.graph.num_vertices);
+      (float)k_kernel.b.size() / context.graph.num_vertices * 100);
     Log::info("Removed %d edges (%.2f%%)",
       num_edges_removed,
-      (float)num_edges_removed / context.graph.num_edges);
+      (float)num_edges_removed / context.graph.num_edges * 100);
 
     stack<pair<int, int>> added;
     graph.remove_vertices(k_kernel.b);
