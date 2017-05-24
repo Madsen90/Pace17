@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
     while (!edges.empty()) {
       pair<int, int> edge = edges.top();
       edges.pop();
-      cout << edge.first << " " << edge.second << endl;
+      cout << context.vertex_name(edge.first) << " " << context.vertex_name(edge.second) << endl;
     }
     break;
   }
