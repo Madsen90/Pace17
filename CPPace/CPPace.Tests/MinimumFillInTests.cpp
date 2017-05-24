@@ -307,21 +307,21 @@ namespace CPPaceTests {
   TEST_CLASS(MinFillPerformance) {
   public:
     TEST_METHOD(VeryBigCycle) {
-      AdjacencyList graph = BuildNCycle(500);
+      AdjacencyList graph = BuildNCycle(600);
       GraphIO::GraphContext context(graph);
       auto edges = MinimumFillIn::minimum_fill_in(graph);
-      Assert::AreEqual(497, (int)edges.size());
+      Assert::AreEqual(597, (int)edges.size());
     }
 
     TEST_METHOD(VeryBigFullyConnected) {
-      AdjacencyList graph = BuildNFully(1000);
+      AdjacencyList graph = BuildNFully(1500);
       GraphIO::GraphContext context(graph);
       auto edges = MinimumFillIn::minimum_fill_in(graph);
       Assert::AreEqual(0, (int)edges.size());
     }
 
     TEST_METHOD(VeryBigSub) {
-      AdjacencyList graph = BuildNFullyHalfDeleted(1000);
+      AdjacencyList graph = BuildNFullyHalfDeleted(1500);
       GraphIO::GraphContext context(graph);
       auto edges = MinimumFillIn::minimum_fill_in(graph);
       while (!edges.empty()) {
@@ -335,7 +335,7 @@ namespace CPPaceTests {
     }
 
     TEST_METHOD(VeryBigHalf) {
-      AdjacencyList graph = BuildNHalfFull(100);
+      AdjacencyList graph = BuildNHalfFull(15);
       GraphIO::GraphContext context(graph);
       auto edges = MinimumFillIn::minimum_fill_in(graph);
       while (!edges.empty()) {
