@@ -1,4 +1,5 @@
 #include "MinimumFillIn.h"
+#include "Log.h"
 #include "ConsList.h"
 #include "LexBFS.h"
 #include "Kernelizer.h"
@@ -394,17 +395,41 @@ MinimumFillInResult minimum_fill_in_inner(AdjacencyList& graph, int k, int r, st
 }
 
 stack<pair<int, int>> MinimumFillIn::minimum_fill_in(GraphIO::GraphContext context) {
+  Log::info("Initial kernelization...");
   AdjacencyList graph = context.graph;
   Kernel kernel = Kernelizer::phase1(graph);
-  if (!Kernelizer::phase2(graph, kernel))
+  Log::info("Kernelization phase 1 completed (lower bound k = %d)", kernel.kMin);
+
+  if (!Kernelizer::phase2(graph, kernel)) {
+    Log::info("Kernelization phase 2 completed (graph is chordal)");
     return stack<pair<int, int>>();
+  }
   int k = kernel.kMin;
-
+  Log::info("Kernelization phase 2 completed (lower bound k = %d)", kernel.kMin);
+  Log::info("========================================");
+  
   while (true) {
+    Log::info("Searching for solution (k = %d)", k);
     Kernel k_kernel;
-    if (!Kernelizer::phase3(graph, kernel, k_kernel, k)) continue;
-    stack<pair<int, int>> added;
+    if (!Kernelizer::phase3(graph, kernel, k_kernel, k)) {
+      Log::info("Kernelization phase 3 completed (no solution for k = %d)", kernel.kMin);
+      continue;
+    }
 
+    int num_edges_removed = 0;
+    for (int u : k_kernel.b)
+      for (int v : context.graph.edges(u))
+        if (u > v) num_edges_removed++;
+
+    Log::info("Kernelization phase 3 completed");
+    Log::info("Removed %d vertices (%.2f%%)",
+      k_kernel.b.size(),
+      (float)k_kernel.b.size() / context.graph.num_vertices);
+    Log::info("Removed %d edges (%.2f%%)",
+      num_edges_removed,
+      (float)num_edges_removed / context.graph.num_edges);
+
+    stack<pair<int, int>> added;
     graph.remove_vertices(k_kernel.b);
     for (pair<int, int> edge : k_kernel.essential_edges) {
       graph.add_edge(edge.first, edge.second);
@@ -414,9 +439,13 @@ stack<pair<int, int>> MinimumFillIn::minimum_fill_in(GraphIO::GraphContext conte
 
     set<int> marked;
     MinimumFillInResult res = minimum_fill_in_inner(graph, k, k * 2, added, marked);
-    if (res.k != -1) return res.edges;
-    graph.add_vertices(k_kernel.b);
+    if (res.k != -1) {
+      Log::info("Solution found for k = %d", k);
+      return res.edges;
+    }
+    Log::info("No solution found for k = %d", k);
 
+    graph.add_vertices(k_kernel.b);
     for (pair<int, int> edge : k_kernel.essential_edges) {
       graph.remove_edge(edge.first, edge.second);
       k++;

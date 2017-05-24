@@ -1,28 +1,39 @@
 #pragma once
 #include <iostream>
 #include <string>
+#include <cstdarg>
 
 using namespace std;
 
 class Log {
 public:
-  static void info(string str) {
-    write_line("[INFO] " + str);
+  static void info(const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+    printf_wrapper(string("[INFO] ").append(format).c_str(), args);
+    va_end(args);
   }
 
-  static void warn(string str) {
-    write_line("[WARN] " + str);
+  static void warn(const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+    printf_wrapper(string("[WARN] ").append(format).c_str(), args);
+    va_end(args);
   }
 
-  static void error(string str) {
-    write_line("[ERROR] " + str);
+  static void error(const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+    printf_wrapper(string("[ERROR] ").append(format).c_str(), args);
+    va_end(args);
   }
 
 private:
-  static void write_line(string str) {
+  static void printf_wrapper(const char* format, va_list args) {
 #ifndef LOGGING
     return;
 #endif
-    cout << str << endl;
+    vprintf(format, args);
+    printf("\n");
   }
 };
