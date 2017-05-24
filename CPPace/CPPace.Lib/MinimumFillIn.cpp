@@ -4,6 +4,7 @@
 #include <iterator>
 #include <queue>
 #include "LexBFS.h"
+#include "Kernelizer.h"
 
 bool MinimumFillIn::is_path_chordless(AdjacencyList& graph, vector<int>& path) {
   set<int> path_set;
@@ -391,15 +392,33 @@ MinimumFillInResult minimum_fill_in_inner(AdjacencyList& graph, int k, int r, st
     return res_branch2;
 }
 
-stack<pair<int, int>> MinimumFillIn::minimum_fill_in(AdjacencyList& graph) {
-  int k = 0;
+stack<pair<int, int>> MinimumFillIn::minimum_fill_in(GraphIO::GraphContext context) {
+  AdjacencyList graph = context.graph;
+  Kernel kernel = Kernelizer::phase1(graph);
+  if (!Kernelizer::phase2(graph, kernel))
+    return stack<pair<int, int>>();
+  int k = kernel.kMin;
+
   while (true) {
-    //KERNELIZE
+    Kernel k_kernel;
+    if (!Kernelizer::phase3(graph, kernel, k_kernel, k)) continue;
+
+    graph.remove_vertices(k_kernel.b);
+    for (pair<int, int> edge : k_kernel.essential_edges) {
+      graph.add_edge(edge.first, edge.second);
+      k--;
+    }
+
     stack<pair<int, int>> added;
     set<int> marked;
     MinimumFillInResult res = minimum_fill_in_inner(graph, k, k * 2, added, marked);
-    k++;
     if (res.k != -1) return res.edges;
+    graph.add_vertices(k_kernel.b);
+
+    for (pair<int, int> edge : k_kernel.essential_edges) {
+      graph.remove_edge(edge.first, edge.second);
+      k++;
+    }
+    k++;
   }
-  return stack<pair<int, int>>();
 }
