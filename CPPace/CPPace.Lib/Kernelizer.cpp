@@ -136,6 +136,14 @@ bool Kernelizer::phase2(AdjacencyList& graph, Kernel& phase1_kernel) {
   return !phase1_kernel.a.empty();
 }
 
+static void phase3_cleanup(AdjacencyList& graph, Kernel& phase2_kernel, Kernel& phase3_kernel)
+{
+  for (pair<int, int> edge : phase3_kernel.essential_edges) {
+    graph.remove_edge(edge.first, edge.second);
+  }
+  graph.add_vertices(phase2_kernel.b);
+}
+
 bool Kernelizer::phase3(AdjacencyList& graph, Kernel& phase2_kernel, Kernel& phase3_kernel, int max_k) {
   int k_prime = max_k;
   phase3_kernel.a = set<int>(phase2_kernel.a);
@@ -190,7 +198,10 @@ bool Kernelizer::phase3(AdjacencyList& graph, Kernel& phase2_kernel, Kernel& pha
       phase3_kernel.essential_edges.emplace(non_edge);
       k_prime--;
       graph.add_edge(non_edge.first, non_edge.second);
-      if (k_prime < 0) return false;
+      if (k_prime < 0) {
+        phase3_cleanup(graph, phase2_kernel, phase3_kernel);
+        return false;
+      }
     } else {
       for (int v : a_xy) {
         phase3_kernel.a.emplace(v);
@@ -199,12 +210,7 @@ bool Kernelizer::phase3(AdjacencyList& graph, Kernel& phase2_kernel, Kernel& pha
     }
   }
 
-  //graph clean-up
-  for (pair<int, int> edge : phase3_kernel.essential_edges) {
-    graph.remove_edge(edge.first, edge.second);
-  }
-  graph.add_vertices(phase2_kernel.b);
-
+  phase3_cleanup(graph, phase2_kernel, phase3_kernel);
   return true;
 }
 

@@ -14,8 +14,9 @@ int main(int argc, char *argv[]) {
     while (!edges.empty()) {
       pair<int, int> edge = edges.top();
       edges.pop();
-      Log::info(std::to_string(edge.first) + " " + std::to_string(edge.second));
+      Log::info(to_string(edge.first) + " " + to_string(edge.second));
     }
+    Log::info("Done");
     break;
   }
   default:

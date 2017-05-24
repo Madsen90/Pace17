@@ -1,11 +1,11 @@
 #pragma once
 #include "EXPORT.h"
 #include "AdjacencyList.h"
+#include "GraphIO.h"
 
 #include <vector>
 #include <set>
 #include <stack>
-#include "GraphIO.h"
 
 using namespace std;
 
