@@ -287,9 +287,10 @@ MinimumFillInResult minimum_fill_in_inner(AdjacencyList& graph, int k, int r, st
 
       //Check if moplex is unmarked
       bool is_unmarked_moplex = true;
-      for (int n : moplexes[i])
+      for (int n : moplexes[i]) {
         if (marked.find(n) != marked.end())
           is_unmarked_moplex = false;
+      }
 
       if (is_unmarked_moplex) {
         //unmarked moplex found. Note it
@@ -299,10 +300,10 @@ MinimumFillInResult minimum_fill_in_inner(AdjacencyList& graph, int k, int r, st
 
         //Check if neighbours are a clique
         if (graph.is_clique(adjacent)) {
-          graph.remove_vertices(adjacent);
+          graph.remove_vertices(moplexes[i]);
 
           MinimumFillInResult result = minimum_fill_in_inner(graph, k, r, added, marked);
-          graph.add_vertices(adjacent);
+          graph.add_vertices(moplexes[i]);
           return result;
         }
       }
@@ -317,9 +318,9 @@ MinimumFillInResult minimum_fill_in_inner(AdjacencyList& graph, int k, int r, st
 
       for (int n : moplex_neighbourhood){
         for (int m : moplex_neighbourhood) {
-          if (n == m) continue;
+          if (n >= m) continue;
           if (!graph.has_edge(n, m))
-            if (missing_edge.first == 0 && missing_edge.second == 0)
+            if (missing_edge.first == missing_edge.second)
               missing_edge = pair<int, int>(n, m);
             else {
               missing_more_than_one = true;
@@ -329,7 +330,7 @@ MinimumFillInResult minimum_fill_in_inner(AdjacencyList& graph, int k, int r, st
         if (missing_more_than_one) break;
       }
 
-      if (!missing_more_than_one && missing_edge.first != 0 && missing_edge.second != 0) {
+      if (!missing_more_than_one && missing_edge.first != missing_edge.second) { 
         int v_star;
         if (MinimumFillIn::find_v_star(graph, missing_edge.first, missing_edge.second, moplexes[unmarked_moplex_indices[i]], v_star)) {
           if (marked.erase(v_star) != 0) //R might not need to be incremented for v_star
@@ -402,14 +403,15 @@ stack<pair<int, int>> MinimumFillIn::minimum_fill_in(GraphIO::GraphContext conte
   while (true) {
     Kernel k_kernel;
     if (!Kernelizer::phase3(graph, kernel, k_kernel, k)) continue;
+    stack<pair<int, int>> added;
 
     graph.remove_vertices(k_kernel.b);
     for (pair<int, int> edge : k_kernel.essential_edges) {
       graph.add_edge(edge.first, edge.second);
+      added.push(edge);
       k--;
     }
 
-    stack<pair<int, int>> added;
     set<int> marked;
     MinimumFillInResult res = minimum_fill_in_inner(graph, k, k * 2, added, marked);
     if (res.k != -1) return res.edges;

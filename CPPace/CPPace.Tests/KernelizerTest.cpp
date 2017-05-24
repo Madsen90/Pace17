@@ -503,6 +503,26 @@ public:
       Assert::AreEqual(0, (int)phase3_kernel.b.size());
       Assert::AreEqual(2, phase3_kernel.kMin);
 
+      graph = AdjacencyList(10);
+      graph.add_edge(0, 1);
+      graph.add_edge(1, 2);
+      graph.add_edge(2, 3);
+      graph.add_edge(3, 4);
+      graph.add_edge(4, 5);
+      graph.add_edge(5, 6);
+      graph.add_edge(6, 7);
+      graph.add_edge(7, 8);
+      graph.add_edge(8, 9);
+      graph.add_edge(9, 0);
+      kernel = Kernelizer::phase1(graph);
+      Assert::IsTrue(Kernelizer::phase2(graph, kernel));
+      phase3_kernel = Kernel();
+      Assert::IsFalse(Kernelizer::phase3(graph, kernel, phase3_kernel, 4));
+      phase3_kernel = Kernel();
+      Assert::IsTrue(Kernelizer::phase3(graph, kernel, phase3_kernel, 7));
+      Assert::AreEqual(10, (int)phase3_kernel.a.size());
+      Assert::AreEqual(0, (int)phase3_kernel.b.size());
+      Assert::AreEqual(7, phase3_kernel.kMin);
 
 
     }

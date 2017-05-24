@@ -145,6 +145,8 @@ static void phase3_cleanup(AdjacencyList& graph, Kernel& phase2_kernel, Kernel& 
 }
 
 bool Kernelizer::phase3(AdjacencyList& graph, Kernel& phase2_kernel, Kernel& phase3_kernel, int max_k) {
+  if (phase2_kernel.kMin > max_k)
+    return false;
   int k_prime = max_k;
   phase3_kernel.a = set<int>(phase2_kernel.a);
   phase3_kernel.b = set<int>(phase2_kernel.b);
