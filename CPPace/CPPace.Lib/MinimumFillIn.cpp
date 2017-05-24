@@ -501,26 +501,64 @@ stack<pair<int, int>> MinimumFillIn::minimum_fill_in(GraphIO::GraphContext conte
     }
     Log::info("Components in kernel: %d", context.graph.regenerate_connectivity());
 
-    set<int> marked;
-    vector<set<int>> empty_moplex_set;
-    set<pair<int, int>> empty_edge_set;
-    Stats stats;
-    MinimumFillInResult res = minimum_fill_in_inner(context.graph, k, k * 2, added, marked, empty_moplex_set, empty_edge_set, stats);
-    
-    Log::info("Branch statistics:");
-    Log::info("4-cycles: ....................... %d", stats.num_four_cycles);
-    Log::info("Semi-marked moplexes: ........... %d", stats.num_semi_marked_moplexes);
-    Log::info("Unmarked simplicial moplexes: ... %d", stats.num_unmarked_simplicial_moplexes);
-    Log::info("Unmarked moplexes missing 1 edge: %d", stats.num_unmarked_missing_one_edge_moplexes);
-    Log::info("Marked moplexes: ................ %d", stats.num_marked_moplexes);
-    Log::info("Unmarked moplexes: .............. %d", stats.num_unmarked_moplexes);
+    //Component splitting
+    vector<set<int>> components(context.graph.regenerate_connectivity());
+    for (int i = 0; i < context.graph.vertices.size(); i++)
+      if(context.graph.vertices[i].active)
+        components[context.graph.vertices[i].label].emplace(i);
 
-    if (res.k != -1) {
+    int acc_k = 0;
+    stack<pair<int, int>> acc_added;
+
+    //Run algorithm on each component
+    for (int i = 0; i < components.size(); i++) {
+      int internal_k;
+      if (components.size() == 1)
+        internal_k = k;
+      else
+        internal_k = 0;
+
+      MinimumFillInResult res(-1, stack<pair<int, int>>());
+
+      while (acc_k <= k) {
+        context.graph.set_vertices(components[i]); //Set vertices
+
+        set<int> marked;
+        vector<set<int>> empty_moplex_set;
+        set<pair<int, int>> empty_edge_set;
+        Stats stats;
+
+        res = minimum_fill_in_inner(context.graph, internal_k, internal_k * 2, added, marked, empty_moplex_set, empty_edge_set, stats);
+
+        Log::info("Branch statistics:");
+        Log::info("4-cycles: ....................... %d", stats.num_four_cycles);
+        Log::info("Semi-marked moplexes: ........... %d", stats.num_semi_marked_moplexes);
+        Log::info("Unmarked simplicial moplexes: ... %d", stats.num_unmarked_simplicial_moplexes);
+        Log::info("Unmarked moplexes missing 1 edge: %d", stats.num_unmarked_missing_one_edge_moplexes);
+        Log::info("Marked moplexes: ................ %d", stats.num_marked_moplexes);
+        Log::info("Unmarked moplexes: .............. %d", stats.num_unmarked_moplexes);
+
+        if (res.k != -1) {//Component solved with k
+          acc_k += res.k;
+          while (!res.edges.empty()) {
+            acc_added.push(res.edges.top());
+            res.edges.pop();
+          }
+          break;
+        }
+        else
+          internal_k++;
+      }
+      if (acc_k > k) //Failed to find solution with k. Restart
+        break;
+    }
+    if(acc_k <= k) { //Correct solution. Return added edges
       Log::info("Solution found for k = %d", original_k);
-      return res.edges;
+      return acc_added;
     }
     Log::info("No solution found for k = %d", original_k);
 
+    //K-solution not found. Restore graph and increment k.
     context.graph.add_vertices(k_kernel.b);
     for (pair<int, int> edge : k_kernel.essential_edges) {
       context.graph.remove_edge(edge.first, edge.second);
