@@ -1,10 +1,11 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
 #include "../CPPace.Lib/MinimumFillIn.h"
+#include "../CPPace.Lib/LexBFS.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
-static  AdjacencyList BuildNCycle(int n) {
+static AdjacencyList BuildNCycle(int n) {
   //Cycle with N nodes
   AdjacencyList graph(n);
   for (int i = 0; i < n; i++) {
@@ -12,6 +13,48 @@ static  AdjacencyList BuildNCycle(int n) {
       graph.add_edge(i, 0);
     else
       graph.add_edge(i, i + 1);
+  }
+  return graph;
+}
+
+static AdjacencyList BuildNFullyHalfDeleted(int n) {
+  //Fully connected with N nodes
+  AdjacencyList graph(n);
+  for (int i = 0; i < n; i++) {
+    for (int j = 1; j < n; j++) {
+      graph.add_edge(i, j);
+    }
+  }
+  srand(0);
+  for (int i = 0; i < n; i++) {
+    graph.vertices[i].active = (rand() % 2);
+  }
+
+  return graph;
+}
+
+
+static AdjacencyList BuildNHalfFull(int n) {
+  //Fully connected with N nodes
+  srand(0);
+  AdjacencyList graph(n);
+  for (int i = 0; i < n; i++) {
+    for (int j = 1; j < n; j++) {
+      if(rand() % 2) graph.add_edge(i, j);
+    }
+  }
+
+  return graph;
+}
+
+
+static AdjacencyList BuildNFully(int n) {
+  //Fully connected with N nodes
+  AdjacencyList graph(n);
+  for (int i = 0; i < n; i++) {
+    for (int j = 1; j < n; j++) {
+      graph.add_edge(i, j);
+    }
   }
   return graph;
 }
@@ -264,10 +307,45 @@ namespace CPPaceTests {
   TEST_CLASS(MinFillPerformance) {
   public:
     TEST_METHOD(VeryBigCycle) {
-      AdjacencyList graph = BuildNCycle(75);
+      AdjacencyList graph = BuildNCycle(500);
       GraphIO::GraphContext context(graph);
       auto edges = MinimumFillIn::minimum_fill_in(graph);
-      Assert::AreEqual(72, (int)edges.size());
+      Assert::AreEqual(497, (int)edges.size());
+    }
+
+    TEST_METHOD(VeryBigFullyConnected) {
+      AdjacencyList graph = BuildNFully(1000);
+      GraphIO::GraphContext context(graph);
+      auto edges = MinimumFillIn::minimum_fill_in(graph);
+      Assert::AreEqual(0, (int)edges.size());
+    }
+
+    TEST_METHOD(VeryBigSub) {
+      AdjacencyList graph = BuildNFullyHalfDeleted(1000);
+      GraphIO::GraphContext context(graph);
+      auto edges = MinimumFillIn::minimum_fill_in(graph);
+      while (!edges.empty()) {
+        pair<int, int> edge = edges.top();
+        edges.pop();
+        graph.add_edge(edge.first, edge.second);
+      }
+      LexBFS lex(graph.num_vertices);
+      lex.order(graph);
+      Assert::IsTrue(lex.is_chordal(graph));
+    }
+
+    TEST_METHOD(VeryBigHalf) {
+      AdjacencyList graph = BuildNHalfFull(100);
+      GraphIO::GraphContext context(graph);
+      auto edges = MinimumFillIn::minimum_fill_in(graph);
+      while (!edges.empty()) {
+        pair<int, int> edge = edges.top();
+        edges.pop();
+        graph.add_edge(edge.first, edge.second);
+      }
+      LexBFS lex(graph.num_vertices);
+      lex.order(graph);
+      Assert::IsTrue(lex.is_chordal(graph));
     }
   };
 }
