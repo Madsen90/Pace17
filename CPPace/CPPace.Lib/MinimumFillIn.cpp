@@ -101,7 +101,27 @@ bool MinimumFillIn::find_v_star(AdjacencyList& graph, int x, int y, set<int>& mo
   return found_v_star;
 }
 
-vector<set<int>> MinimumFillIn::find_moplexes(AdjacencyList& graph) {
+
+set<int> get_neighbourhood_of_moplex(AdjacencyList& graph, set<int>& moplex) {
+  set<int> adjacent = graph.edges(*moplex.begin());
+  //Remove moplex from adjacent
+  for (int n : moplex) {
+    auto found = adjacent.find(n);
+    if (found != adjacent.end())
+      adjacent.erase(found);
+  }
+  return adjacent;
+}
+
+static bool moplex_has_edge_in_neighbourhood(AdjacencyList& graph, set<int>& moplex, pair<int, int>& edge)
+{
+  for (int n : get_neighbourhood_of_moplex(graph, moplex)) {
+    if (edge.first == n) return true;
+    if (edge.second == n) return true;
+  }
+}
+
+vector<set<int>> MinimumFillIn::find_moplexes(AdjacencyList& graph, vector<set<int>> previous_moplexes, set<pair<int, int>> newly_added_edges) {
   vector<set<int>> moplexes;
 
   // Exclude inactive vertices from search
@@ -110,6 +130,35 @@ vector<set<int>> MinimumFillIn::find_moplexes(AdjacencyList& graph) {
   for (int u = 0; u < graph.num_vertices; u++)
     visited[u] = !graph.vertices[u].active;
 
+  // No need to recompute uneffected moplexes
+  for (set<int> prev_moplex : previous_moplexes) {
+    bool still_valid = true;
+
+    // is_active check
+    for (int v : prev_moplex) {
+      if (!(still_valid = !visited[v])) 
+        break;
+    }
+    if (!still_valid) continue;
+
+    // if moplex have been affected by a newly added edge, it must be recomputed, i.e. is not valid
+    for (pair<int, int> new_edge : newly_added_edges) {
+      still_valid = moplex_has_edge_in_neighbourhood(graph, prev_moplex, new_edge);
+      still_valid = still_valid && prev_moplex.find(new_edge.first) == prev_moplex.end();
+      still_valid = still_valid && prev_moplex.find(new_edge.second) == prev_moplex.end();
+      if (!still_valid) break;
+    }
+    
+    // the moplex does not need to be recomputed
+    if(still_valid) {
+      moplexes.push_back(prev_moplex);
+      for (int v : prev_moplex) {
+        visited[v] = true;
+      }
+    }
+  }
+
+  // time to find new moplexes
   for (int u = 0; u < graph.num_vertices; u++) {
     if (visited[u]) continue;
     visited[u] = true;
@@ -205,16 +254,6 @@ set<int> add_edge_wrapper(AdjacencyList& graph, int x, int y, set<int>& marked, 
   return changed_markings;
 }
 
-set<int> get_neighbourhood_of_moplex(AdjacencyList& graph, set<int>& moplex) {
-  set<int> adjacent = graph.edges(*moplex.begin());
-  //Remove moplex from adjacent
-  for (int n : moplex) {
-    auto found = adjacent.find(n);
-    if (found != adjacent.end())
-      adjacent.erase(found);
-  }
-  return adjacent;
-}
 
 MinimumFillInResult minimum_fill_in_inner(AdjacencyList& graph, int k, int r, stack<pair<int, int>>& added, set<int>& marked) {
   if (k < 0 || r < -1) return MinimumFillInResult(-1, stack<pair<int, int>>());
@@ -253,7 +292,7 @@ MinimumFillInResult minimum_fill_in_inner(AdjacencyList& graph, int k, int r, st
   }
 
   //Find moplexes
-  vector<set<int>> moplexes = MinimumFillIn::find_moplexes(graph);
+  vector<set<int>> moplexes = MinimumFillIn::find_moplexes(graph, vector<set<int>>(), set<pair<int, int>>());
 
     bool contains_marked = false, contains_unmarked = false;
 

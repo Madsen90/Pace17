@@ -3,6 +3,7 @@
 #include "../CPPace.Lib/MinimumFillIn.h"
 #include "../CPPace.Lib/LexBFS.h"
 #include "../CPPace.Lib/GraphGenerator.h"
+#include "StdUtils.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -190,7 +191,7 @@ namespace CPPaceTests {
 
     TEST_METHOD(FindMoplexesBerryBordat) {
       AdjacencyList graph = SampleGraphs::berry_bordat();
-      vector<set<int>> moplexes = MinimumFillIn::find_moplexes(graph);
+      vector<set<int>> moplexes = MinimumFillIn::find_moplexes(graph, vector<set<int>>(), set<pair<int, int>>());
       Assert::IsTrue(vector<set<int>> {
         set<int> { 0, 1 },
         set<int> { 2 },
@@ -199,6 +200,273 @@ namespace CPPaceTests {
         set<int> { 6 },
         set<int> { 7 }
       } == moplexes); 
+    }
+
+    TEST_METHOD(FindMoplexesMultipleGraph) {
+      //"BAD" graph
+      AdjacencyList graph = SampleGraphs::multiple_moplexes_and_big_cc();
+      vector<set<int>> moplexes = MinimumFillIn::find_moplexes(graph, vector<set<int>>(), set<pair<int, int>>());
+      Assert::IsTrue(vector<set<int>> {
+        set<int> { 0, 1, 2 },
+        set<int> { 7 },
+        set<int> { 8 },
+        set<int> { 9 },
+        set<int> { 10 },
+      } == moplexes);
+
+      //removing 7 to make 6 a moplex
+      graph.remove_vertex(7);
+      moplexes = MinimumFillIn::find_moplexes(graph, vector<set<int>>(), set<pair<int, int>>());
+      Assert::IsTrue(vector<set<int>> {
+        set<int> { 0, 1, 2 },
+        set<int> { 6 },
+        set<int> { 8 },
+        set<int> { 9 },
+        set<int> { 10 },
+      } == moplexes);
+
+      //removing 6 to make 4 and 5 into moplexes
+      graph.remove_vertex(6);
+      moplexes = MinimumFillIn::find_moplexes(graph, vector<set<int>>(), set<pair<int, int>>());
+      Assert::IsTrue(vector<set<int>> {
+        set<int> { 0, 1, 2 },
+        set<int> { 4 },
+        set<int> { 5 },
+        set<int> { 8 },
+        set<int> { 9 },
+        set<int> { 10 },
+      } == moplexes);
+
+      //readding 7 
+      graph.add_vertex(7);
+      moplexes = MinimumFillIn::find_moplexes(graph, vector<set<int>>(), set<pair<int, int>>());
+      Assert::IsTrue(vector<set<int>> {
+        set<int> { 0, 1, 2 },
+          set<int> { 4 },
+          set<int> { 5 },
+          set<int> { 7 },
+          set<int> { 8 },
+          set<int> { 9 },
+          set<int> { 10 },
+      } == moplexes);
+    }
+
+    TEST_METHOD(FindMoplexesCycle) {
+      //10-cycle
+      AdjacencyList graph = GraphGenerator::cycle(10);
+      vector<set<int>> moplexes = MinimumFillIn::find_moplexes(graph, vector<set<int>>(), set<pair<int, int>>());
+      Assert::IsTrue(vector<set<int>> {
+        set<int> { 0 },
+        set<int> { 1 },
+        set<int> { 2 },
+        set<int> { 3 },
+        set<int> { 4 },
+        set<int> { 5 },
+        set<int> { 6 },
+        set<int> { 7 },
+        set<int> { 8 },
+        set<int> { 9 },
+      } == moplexes);
+
+      //straight path
+      graph.remove_vertex(0);
+      moplexes = MinimumFillIn::find_moplexes(graph, vector<set<int>>(), set<pair<int, int>>());
+      Assert::IsTrue(vector<set<int>> {
+        set<int> { 1 },
+        set<int> { 9 },
+      } == moplexes);
+
+      //readding 0
+      graph.add_vertex(0);
+      moplexes = MinimumFillIn::find_moplexes(graph, vector<set<int>>(), set<pair<int, int>>());
+      Assert::IsTrue(vector<set<int>> {
+        set<int> { 0 },
+        set<int> { 1 },
+        set<int> { 2 },
+        set<int> { 3 },
+        set<int> { 4 },
+        set<int> { 5 },
+        set<int> { 6 },
+        set<int> { 7 },
+        set<int> { 8 },
+        set<int> { 9 },
+      } == moplexes);
+
+      // making 0 a simplicial moplex
+      graph.add_edge(1, 9);
+      moplexes = MinimumFillIn::find_moplexes(graph, vector<set<int>>(), set<pair<int, int>>());
+      Assert::IsTrue(vector<set<int>> {
+        set<int> { 0 },
+        set<int> { 2 },
+        set<int> { 3 },
+        set<int> { 4 },
+        set<int> { 5 },
+        set<int> { 6 },
+        set<int> { 7 },
+        set<int> { 8 },
+      } == moplexes);
+    }
+
+    static bool moplex_order(set<int> a, set<int> b)
+    {
+      for (int i = 0; i < std_min(a.size(), b.size()); i++) {
+        if(*next(a.begin(), i) == *next(b.begin(), i)) continue;
+        return *next(a.begin(), i) < *next(b.begin(), i);
+      }
+      return a.size() < b.size();
+    }
+
+    TEST_METHOD(FindMoplexCachingCycle) {
+      // initial result
+      vector<set<int>> result;
+      result.push_back(set<int> { 0 });
+      result.push_back(set<int> { 1 });
+      result.push_back(set<int> { 2 });
+      result.push_back(set<int> { 3 });
+      result.push_back(set<int> { 4 });
+      result.push_back(set<int> { 5 });
+      result.push_back(set<int> { 6 });
+      result.push_back(set<int> { 7 });
+      result.push_back(set<int> { 8 });
+      result.push_back(set<int> { 9 });
+
+      // initial cache
+      vector<set<int>> cache;
+      cache.push_back(set<int> { 0 });
+      
+      // initial added edges since last recompute
+      set<pair<int, int>> edges;
+
+      //10-cycle with {0} cached
+      AdjacencyList graph = GraphGenerator::cycle(10);
+      vector<set<int>> moplexes = MinimumFillIn::find_moplexes(graph, cache, edges);
+      Assert::IsTrue( result == moplexes);
+
+      //10-cycle with several moplexes cached, out of order
+      cache.clear();
+      cache.push_back(set<int> { 3 });
+      cache.push_back(set<int> { 1 });
+      cache.push_back(set<int> { 2 });
+      cache.push_back(set<int> { 4 });
+      moplexes = MinimumFillIn::find_moplexes(graph, cache, edges);
+      std_sort(moplexes.begin(), moplexes.end(), moplex_order);
+      Assert::IsTrue(result == moplexes);
+
+      //10-cycle with several moplexes cached, including removed ones
+      result.clear();
+      result.push_back(set<int> { 0 });
+      result.push_back(set<int> { 2 });
+      result.push_back(set<int> { 3 });
+      result.push_back(set<int> { 4 });
+      result.push_back(set<int> { 5 });
+      result.push_back(set<int> { 6 });
+      result.push_back(set<int> { 7 });
+      result.push_back(set<int> { 8 });
+
+      cache.clear();
+      cache.push_back(set<int> { 1 });
+      cache.push_back(set<int> { 2 });
+      cache.push_back(set<int> { 4 });
+
+      edges.clear();
+      edges.emplace(1, 9);
+      graph.add_edge(1, 9);
+
+
+      moplexes = MinimumFillIn::find_moplexes(graph, cache, edges);
+      std_sort(moplexes.begin(), moplexes.end(), moplex_order);
+      Assert::IsTrue(result == moplexes);
+
+
+      //same case, but another cache
+      cache.clear();
+      cache.push_back(set<int> { 9 });
+      cache.push_back(set<int> { 2 });
+      cache.push_back(set<int> { 0 });
+
+      moplexes = MinimumFillIn::find_moplexes(graph, cache, edges);
+      std_sort(moplexes.begin(), moplexes.end(), moplex_order);
+      Assert::IsTrue(result == moplexes);
+
+      //same case, but one more added edge
+      result.clear();
+      result.push_back(set<int> { 0 });
+      result.push_back(set<int> { 2 });
+      result.push_back(set<int> { 4 });
+      result.push_back(set<int> { 6 });
+      result.push_back(set<int> { 7 });
+      result.push_back(set<int> { 8 });
+
+      cache.clear();
+      cache.push_back(set<int> { 9 });
+      cache.push_back(set<int> { 2 });
+      cache.push_back(set<int> { 0 });
+
+
+      edges.emplace(3, 5);
+      graph.add_edge(3, 5);
+
+      moplexes = MinimumFillIn::find_moplexes(graph, cache, edges);
+      std_sort(moplexes.begin(), moplexes.end(), moplex_order);
+      Assert::IsTrue(result == moplexes);
+    }
+
+
+    TEST_METHOD(FindMoplexCachingBerryBordat) {
+      // initial result
+      vector<set<int>> result;
+      result.push_back(set<int> { 0, 1 });
+      result.push_back(set<int> { 2 });
+      result.push_back(set<int> { 3 });
+      result.push_back(set<int> { 4 });
+      result.push_back(set<int> { 6 });
+      result.push_back(set<int> { 7 });
+
+      // initial cache
+      vector<set<int>> cache;
+
+      // initial added edges since last recompute
+      set<pair<int, int>> edges;
+
+      //Berry Bordat not cached
+      AdjacencyList graph = SampleGraphs::berry_bordat();
+      vector<set<int>> moplexes = MinimumFillIn::find_moplexes(graph, cache, edges);
+      Assert::IsTrue(result == moplexes);
+
+      //one new edge, no cache
+      edges.clear();
+      edges.emplace(0, 1);
+      moplexes = MinimumFillIn::find_moplexes(graph, cache, edges);
+      Assert::IsTrue(result == moplexes);
+
+
+      //everything cachced, no edges
+      cache.clear();
+      cache.push_back(set<int> { 0, 1 });
+      cache.push_back(set<int> { 2 });
+      cache.push_back(set<int> { 3 });
+      cache.push_back(set<int> { 4 });
+      cache.push_back(set<int> { 6 });
+      cache.push_back(set<int> { 7 });
+
+      edges.clear();
+      moplexes = MinimumFillIn::find_moplexes(graph, cache, edges);
+      Assert::IsTrue(result == moplexes);
+
+      //everything cached but a new edge between 5 and 6, invalidating 6 as moplex
+
+      result.clear();
+      result.push_back(set<int> { 0, 1 });
+      result.push_back(set<int> { 2 });
+      result.push_back(set<int> { 3 });
+      result.push_back(set<int> { 4 });
+      result.push_back(set<int> { 7 });
+
+      edges.clear();
+      edges.emplace(5, 6);
+      graph.add_edge(5, 6);
+      moplexes = MinimumFillIn::find_moplexes(graph, cache, edges);
+      Assert::IsTrue(result == moplexes);
     }
 
     TEST_METHOD(FindMinFillBerryBordat) {
