@@ -60,10 +60,6 @@ bool Kernelizer::phase2(AdjacencyList& graph, Kernel& phase1_kernel) {
         }
 
         set<int> R = SetFunctions::set_intersect_two(b_minus_a, phase1_kernel.b);
-        /*set_intersection(
-          b_minus_a.begin(), b_minus_a.end(),
-          phase1_kernel.b.begin(), phase1_kernel.b.end(),
-          inserter(R, R.begin()));*/
         graph.remove_vertex(b_vertex);
 
         for(int v : R) {
@@ -165,19 +161,7 @@ bool Kernelizer::phase3(AdjacencyList& graph, Kernel& phase2_kernel, Kernel& pha
     set<int> x_neighbourhood = graph.edges(x);
     set<int> y_neighbourhood = graph.edges(y);
     graph.remove_vertices(phase2_kernel.b);
-    //set<int> x_y_intersect;
     set<int> x_y_b = SetFunctions::set_intersect_three(x_neighbourhood, y_neighbourhood, phase3_kernel.b);
-
-    //set_intersection(
-    //  x_neighbourhood.begin(), x_neighbourhood.end(),
-    //  y_neighbourhood.begin(), y_neighbourhood.end(),
-    //  inserter(x_y_intersect, x_y_intersect.begin())    
-    //);
-    //set_intersection(
-    //  x_y_intersect.begin(), x_y_intersect.end(),
-    //  phase3_kernel.b.begin(), phase3_kernel.b.end(),
-    //  inserter(x_y_b, x_y_b.begin())
-    //);
 
     set<int> a_xy;
     for (int n : x_y_b) {
@@ -258,7 +242,7 @@ bool Kernelizer::find_chordless_cycle(AdjacencyList& graph, vector<int>& cycle) 
           graph.remove_vertices(m_adjacent);
           if(!graph.has_edge(v, w)) {
             vector<int> path;
-            if(BFS_path(graph, v, w, path) && path.size() >= 3) { //maybe redudant path size check
+            if(BFS_path(graph, v, w, path) && path.size() >= 3) { //maybe redundant path size check
               for (int n : path) {
                 cycle.push_back(n);
               }
