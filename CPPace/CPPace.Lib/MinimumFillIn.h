@@ -1,11 +1,11 @@
 #pragma once
 #include "EXPORT.h"
-#include "AdjacencyList.h"
-#include "GraphIO.h"
 
 #include <vector>
 #include <set>
 #include <stack>
+#include "AdjacencyList.h"
+#include "GraphIO.h"
 
 using namespace std;
 
@@ -15,5 +15,5 @@ public:
   static bool find_four_cycle(AdjacencyList& graph, vector<int>&);
   static bool find_v_star(AdjacencyList& graph, int x, int y, set<int>& moplex, int& v_star);
   static vector<set<int>> find_moplexes(AdjacencyList& graph);
-  static  stack<pair<int, int>> MinimumFillIn::minimum_fill_in(GraphIO::GraphContext context);
+  static  stack<pair<int, int>> minimum_fill_in(GraphIO::GraphContext context);
 };

@@ -1,10 +1,10 @@
 #include "MinimumFillIn.h"
 #include "ConsList.h"
+#include "LexBFS.h"
+#include "Kernelizer.h"
 #include <algorithm>
 #include <iterator>
 #include <queue>
-#include "LexBFS.h"
-#include "Kernelizer.h"
 
 bool MinimumFillIn::is_path_chordless(AdjacencyList& graph, vector<int>& path) {
   set<int> path_set;
