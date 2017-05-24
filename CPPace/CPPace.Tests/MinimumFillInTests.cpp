@@ -154,5 +154,101 @@ namespace CPPaceTests {
       Assert::IsTrue(edges.top().first == 4 && edges.top().second == 5 || edges.top().first == 5 && edges.top().second == 6);
     }
 
+    TEST_METHOD(MinimumFillInKTests) {
+      //4-cycle
+      AdjacencyList graph = AdjacencyList(4);
+      graph.add_edge(0, 1);
+      graph.add_edge(1, 2);
+      graph.add_edge(2, 3);
+      graph.add_edge(3, 0);
+
+      stack<pair<int, int>> result = MinimumFillIn::minimum_fill_in(graph);
+      Assert::IsTrue(1 == result.size());
+
+      //5-cycle
+      graph = AdjacencyList(5);
+      graph.add_edge(0, 1);
+      graph.add_edge(1, 2);
+      graph.add_edge(2, 3);
+      graph.add_edge(3, 4);
+      graph.add_edge(4, 0);
+
+      result = MinimumFillIn::minimum_fill_in(graph);
+      Assert::IsTrue(2 == result.size());      
+
+      //2 single nodes
+      graph = AdjacencyList(2);
+
+      result = MinimumFillIn::minimum_fill_in(graph);
+      Assert::IsTrue(0 == result.size());
+
+      //2 4-cycles
+      graph = AdjacencyList(8);
+      graph.add_edge(0, 1);
+      graph.add_edge(1, 2);
+      graph.add_edge(2, 3);
+      graph.add_edge(3, 0);
+
+      graph.add_edge(4, 5);
+      graph.add_edge(5, 6);
+      graph.add_edge(6, 7);
+      graph.add_edge(7, 4);
+
+      result = MinimumFillIn::minimum_fill_in(graph);
+      Assert::IsTrue(2 == result.size());
+
+      //10 cycle
+      graph = AdjacencyList(10);
+      graph.add_edge(0, 1);
+      graph.add_edge(1, 2);
+      graph.add_edge(2, 3);
+      graph.add_edge(3, 4);
+      graph.add_edge(4, 5);
+      graph.add_edge(5, 6);
+      graph.add_edge(6, 7);
+      graph.add_edge(7, 8);
+      graph.add_edge(8, 9);
+      graph.add_edge(9, 0);
+
+      result = MinimumFillIn::minimum_fill_in(graph);
+      Assert::IsTrue(7 == result.size());
+
+      //2 combined 4-cycles. Solvable with one.
+      graph = AdjacencyList(6);
+      graph.add_edge(0, 1);
+      graph.add_edge(1, 4);
+      graph.add_edge(0, 2);
+      graph.add_edge(0, 3);
+      graph.add_edge(3, 4);
+
+      result = MinimumFillIn::minimum_fill_in(graph);
+      Assert::IsTrue(1 == result.size());
+
+      //10 combined 4-cycles. Solvable with one
+      graph = AdjacencyList(12);
+      graph.add_edge(0, 1);
+      graph.add_edge(0, 2);
+      graph.add_edge(0, 3);
+      graph.add_edge(0, 5);
+      graph.add_edge(0, 6);
+      graph.add_edge(0, 7);
+      graph.add_edge(0, 8);
+      graph.add_edge(0, 9);
+      graph.add_edge(0, 10);
+      graph.add_edge(0, 11);
+      graph.add_edge(4, 1);
+      graph.add_edge(4, 2);
+      graph.add_edge(4, 3);
+      graph.add_edge(4, 5);
+      graph.add_edge(4, 6);
+      graph.add_edge(4, 7);
+      graph.add_edge(4, 8);
+      graph.add_edge(4, 9);
+      graph.add_edge(4, 10);
+      graph.add_edge(4, 11);
+
+      result = MinimumFillIn::minimum_fill_in(graph);
+      Assert::IsTrue(1 == result.size());
+    }
   };
 }
