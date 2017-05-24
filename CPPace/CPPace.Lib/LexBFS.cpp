@@ -85,10 +85,10 @@ bool LexBFS::is_chordal(AdjacencyList& graph) {
   return chordal == Chordal::True;
 }
 
-inline int LexBFS::vertex(int position) {
+int LexBFS::vertex(int position) {
   return ordering[position];
 }
 
-inline int LexBFS::position(int vertex) {
+int LexBFS::position(int vertex) {
   return positions[vertex];
 }
