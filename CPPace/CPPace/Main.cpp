@@ -8,15 +8,16 @@ int main(int argc, char *argv[]) {
   switch (argc) {
   case 2: {
     GraphIO::GraphContext context = GraphIO::read_from_path(argv[1]);
-    Log::info("NUM_EDGES: ..... " + to_string(context.graph.num_edges));
-    Log::info("NUM_VERTICES: .. " + to_string(context.graph.num_vertices));
+    Log::info("NAME: .......... %s", argv[1]);
+    Log::info("NUM_EDGES: ..... %d", context.graph.num_edges);
+    Log::info("NUM_VERTICES: .. %d", context.graph.num_vertices);
+    Log::info("========================================");
     stack<pair<int, int>> edges = MinimumFillIn::minimum_fill_in(context);
     while (!edges.empty()) {
       pair<int, int> edge = edges.top();
       edges.pop();
-      Log::info(to_string(edge.first) + " " + to_string(edge.second));
+      Log::info("%d %d", edge.first, edge.second);
     }
-    Log::info("Done");
     break;
   }
   default:
