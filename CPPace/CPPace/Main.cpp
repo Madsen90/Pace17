@@ -6,17 +6,29 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
   switch (argc) {
+  case 1: {
+    GraphIO::GraphContext context = GraphIO::read_from_stream(cin);
+    stack<pair<int, int>> edges = MinimumFillIn::minimum_fill_in(context);
+    while (!edges.empty()) {
+      pair<int, int> edge = edges.top();
+      edges.pop();
+      cout << edge.first << " " << edge.second << endl;
+    }
+    break;
+  }
   case 2: {
     GraphIO::GraphContext context = GraphIO::read_from_path(argv[1]);
     Log::info("NAME: .......... %s", argv[1]);
     Log::info("NUM_EDGES: ..... %d", context.graph.num_edges);
     Log::info("NUM_VERTICES: .. %d", context.graph.num_vertices);
     Log::info("========================================");
+    
     stack<pair<int, int>> edges = MinimumFillIn::minimum_fill_in(context);
+    Log::info("Solution:");
     while (!edges.empty()) {
       pair<int, int> edge = edges.top();
       edges.pop();
-      Log::info("%d %d", edge.first, edge.second);
+      Log::info("%s -- %s", context.vertex_name(edge.first).c_str(), context.vertex_name(edge.second).c_str());
     }
     break;
   }
