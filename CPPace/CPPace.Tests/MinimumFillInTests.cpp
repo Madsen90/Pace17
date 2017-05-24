@@ -213,7 +213,7 @@ namespace CPPaceTests {
       result = MinimumFillIn::minimum_fill_in(graph);
       Assert::IsTrue(7 == result.size());
 
-      //2 combined 4-cycles. Solvable with one.
+      //6 nodes in a diamond shape. Solvable with one.
       graph = AdjacencyList(6);
       graph.add_edge(0, 1);
       graph.add_edge(1, 4);
@@ -224,7 +224,7 @@ namespace CPPaceTests {
       result = MinimumFillIn::minimum_fill_in(graph);
       Assert::IsTrue(1 == result.size());
 
-      //10 combined 4-cycles. Solvable with one
+      //10 nodes in a diamond shape. Solvable with one
       graph = AdjacencyList(12);
       graph.add_edge(0, 1);
       graph.add_edge(0, 2);
