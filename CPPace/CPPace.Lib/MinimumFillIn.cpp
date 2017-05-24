@@ -1,4 +1,5 @@
 #include "MinimumFillIn.h"
+#include "SetFunctions.h"
 #include "Log.h"
 #include "ConsList.h"
 #include "LexBFS.h"
@@ -156,12 +157,12 @@ vector<set<int>> MinimumFillIn::find_moplexes(AdjacencyList& graph) {
         connected_to = components;
       }
       else {
-        set<int> component_intersection;
+        /*set<int> component_intersection;
         set_intersection(
           components.begin(), components.end(),
           connected_to.begin(), connected_to.end(),
-          inserter(component_intersection, component_intersection.begin()));
-        connected_to = component_intersection;
+          inserter(component_intersection, component_intersection.begin()));*/
+        connected_to = SetFunctions::set_intersect_two(components, connected_to);//component_intersection;
       }
       graph.remove_vertex(v);
 
@@ -237,8 +238,9 @@ MinimumFillInResult minimum_fill_in_inner(AdjacencyList& graph, int k, int r, st
     //Reset
     graph.remove_edge(four_cycle[0], four_cycle[2]);
     added.pop();    
-    for (int mark : changed_markings)
-      marked.emplace(mark);
+    marked = SetFunctions::set_union_two(marked, changed_markings);
+    /*for (int mark : changed_markings)
+      marked.emplace(mark);*/
 
     //Branch 2
     changed_markings = add_edge_wrapper(graph, four_cycle[1], four_cycle[3], marked, added);
@@ -247,8 +249,9 @@ MinimumFillInResult minimum_fill_in_inner(AdjacencyList& graph, int k, int r, st
     //Reset
     graph.remove_edge(four_cycle[1], four_cycle[3]);
     added.pop();
-    for (int mark : changed_markings)
-      marked.emplace(mark);
+    marked = SetFunctions::set_union_two(marked, changed_markings);
+    /*for (int mark : changed_markings)
+      marked.emplace(mark);*/
 
     if (res_branch1.k > res_branch2.k)
       return res_branch1;
@@ -270,10 +273,13 @@ MinimumFillInResult minimum_fill_in_inner(AdjacencyList& graph, int k, int r, st
       }
       if (contains_marked && contains_unmarked) {
         //Found a moplex fulfilling the criteria
-        for (int n : moplex) {
+        /*for (int n : moplex) {
           marked.emplace(n);
           r--;
-        }
+        }*/
+        marked = SetFunctions::set_union_two(marked, moplex);
+        r -= moplex.size();
+
         MinimumFillInResult result = minimum_fill_in_inner(graph, k, r, added, marked);
         for (int n : moplex) {
           marked.erase(n);
@@ -354,10 +360,13 @@ MinimumFillInResult minimum_fill_in_inner(AdjacencyList& graph, int k, int r, st
     set<int> moplex = *moplexes.begin();
 
     //Branch 1
-    for (int n : moplex) {
+    /*for (int n : moplex) {
       r--;
       marked.emplace(n);
-    }
+    }*/
+    marked = SetFunctions::set_union_two(marked, moplex);
+    r -= moplex.size();
+
 
     MinimumFillInResult res_branch1 = minimum_fill_in_inner(graph, k, r, added, marked);
 
@@ -390,8 +399,9 @@ MinimumFillInResult minimum_fill_in_inner(AdjacencyList& graph, int k, int r, st
       graph.remove_edge(edge.first, edge.second);
       added.pop();
     }
-    for (int n : changed_markings)
-      marked.emplace(n);
+    /*for (int n : changed_markings)
+      marked.emplace(n);*/
+    marked = SetFunctions::set_union_two(marked, changed_markings);
 
     if (res_branch1.k > res_branch2.k)
       return res_branch1;

@@ -149,6 +149,7 @@
     <ClInclude Include="LexBFS.h" />
     <ClInclude Include="Log.h" />
     <ClInclude Include="MinimumFillIn.h" />
+    <ClInclude Include="SetFunctions.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AdjacencyList.cpp" />
@@ -158,6 +159,7 @@
     <ClCompile Include="Kernelizer.cpp" />
     <ClCompile Include="LexBFS.cpp" />
     <ClCompile Include="MinimumFillIn.cpp" />
+    <ClCompile Include="SetFunctions.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

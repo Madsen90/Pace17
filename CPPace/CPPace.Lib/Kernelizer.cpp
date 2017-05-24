@@ -1,5 +1,6 @@
 #include "Kernelizer.h"
 #include "MinimumFillIn.h"
+#include "SetFunctions.h"
 #include <queue>
 #include <iterator>
 #include <climits>
@@ -52,15 +53,17 @@ bool Kernelizer::phase2(AdjacencyList& graph, Kernel& phase1_kernel) {
 
       for(int b_vertex : neighbourhood_in_B) {
         //(N(b_vertex) - N(a_vertex) intersect phase2_kernel.b:
-        set<int> R;
+        
         set<int> b_minus_a = graph.edges(b_vertex);
         for (int a_neighbour : graph.edges(a_vertex)) {
           b_minus_a.erase(a_neighbour);
         }
-        set_intersection(
+
+        set<int> R = SetFunctions::set_intersect_two(b_minus_a, phase1_kernel.b);
+        /*set_intersection(
           b_minus_a.begin(), b_minus_a.end(),
           phase1_kernel.b.begin(), phase1_kernel.b.end(),
-          inserter(R, R.begin()));
+          inserter(R, R.begin()));*/
         graph.remove_vertex(b_vertex);
 
         for(int v : R) {
@@ -162,19 +165,19 @@ bool Kernelizer::phase3(AdjacencyList& graph, Kernel& phase2_kernel, Kernel& pha
     set<int> x_neighbourhood = graph.edges(x);
     set<int> y_neighbourhood = graph.edges(y);
     graph.remove_vertices(phase2_kernel.b);
-    set<int> x_y_intersect;
-    set<int> x_y_b;
+    //set<int> x_y_intersect;
+    set<int> x_y_b = SetFunctions::set_intersect_three(x_neighbourhood, y_neighbourhood, phase3_kernel.b);
 
-    set_intersection(
-      x_neighbourhood.begin(), x_neighbourhood.end(),
-      y_neighbourhood.begin(), y_neighbourhood.end(),
-      inserter(x_y_intersect, x_y_intersect.begin())    
-    );
-    set_intersection(
-      x_y_intersect.begin(), x_y_intersect.end(),
-      phase3_kernel.b.begin(), phase3_kernel.b.end(),
-      inserter(x_y_b, x_y_b.begin())
-    );
+    //set_intersection(
+    //  x_neighbourhood.begin(), x_neighbourhood.end(),
+    //  y_neighbourhood.begin(), y_neighbourhood.end(),
+    //  inserter(x_y_intersect, x_y_intersect.begin())    
+    //);
+    //set_intersection(
+    //  x_y_intersect.begin(), x_y_intersect.end(),
+    //  phase3_kernel.b.begin(), phase3_kernel.b.end(),
+    //  inserter(x_y_b, x_y_b.begin())
+    //);
 
     set<int> a_xy;
     for (int n : x_y_b) {
