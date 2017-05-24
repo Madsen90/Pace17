@@ -434,6 +434,7 @@ stack<pair<int, int>> MinimumFillIn::minimum_fill_in(GraphIO::GraphContext conte
       added.push(edge);
       k--;
     }
+    Log::info("Components in kernel: %d", context.graph.regenerate_connectivity());
 
     set<int> marked;
     MinimumFillInResult res = minimum_fill_in_inner(graph, k, k * 2, added, marked);
