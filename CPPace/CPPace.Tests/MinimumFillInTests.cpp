@@ -2,6 +2,7 @@
 #include "CppUnitTest.h"
 #include "../CPPace.Lib/MinimumFillIn.h"
 #include "../CPPace.Lib/LexBFS.h"
+#include "../CPPace.Lib/GraphGenerator.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -346,6 +347,53 @@ namespace CPPaceTests {
       LexBFS lex(graph.num_vertices);
       lex.order(graph);
       Assert::IsTrue(lex.is_chordal(graph));
+    }
+  };
+
+  TEST_CLASS(MinFillInstances) {
+  public:
+    TEST_METHOD(Instance5) {
+      Assert::AreEqual(21, solve_instance("5.graph"));
+    }
+
+    TEST_METHOD(Instance9) {
+      Assert::AreEqual(7, solve_instance("9.graph"));
+    }
+
+    TEST_METHOD(Instance12) {
+      Assert::AreEqual(0, solve_instance("12.graph"));
+    }
+
+    TEST_METHOD(Instance20) {
+      Assert::AreEqual(2, solve_instance("20.graph"));
+    }
+
+    TEST_METHOD(Instance43) {
+      Assert::AreEqual(0, solve_instance("43.graph"));
+    }
+
+    TEST_METHOD(Instance50) {
+      Assert::AreEqual(3, solve_instance("50.graph"));
+    }
+
+    TEST_METHOD(Instance74) {
+      Assert::AreEqual(0, solve_instance("74.graph"));
+    }
+
+    TEST_METHOD(Instance84) {
+      Assert::AreEqual(15, solve_instance("84.graph"));
+    }
+
+  private:
+    int solve_instance(string name) {
+      const int n = 10;
+      int max_solution = 0;
+      GraphIO::GraphContext context = GraphIO::read_from_path("../../CPPace.Tests/problem-instances/" + name);
+      for (int i = 0; i < n; i++) {
+        int k = MinimumFillIn::minimum_fill_in(context).size();
+        max_solution = max_solution > k ? max_solution : k;
+      }
+      return max_solution;
     }
   };
 }

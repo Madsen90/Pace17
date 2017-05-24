@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Problem Instances">
+      <UniqueIdentifier>{c39f0532-4329-4c6d-a22c-33f4db13c40e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -53,5 +56,31 @@
     <ClCompile Include="SetFunctionsTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="test-instances\50.graph">
+      <Filter>Problem Instances</Filter>
+    </None>
+    <None Include="test-instances\74.graph">
+      <Filter>Problem Instances</Filter>
+    </None>
+    <None Include="test-instances\84.graph">
+      <Filter>Problem Instances</Filter>
+    </None>
+    <None Include="test-instances\5.graph">
+      <Filter>Problem Instances</Filter>
+    </None>
+    <None Include="test-instances\9.graph">
+      <Filter>Problem Instances</Filter>
+    </None>
+    <None Include="test-instances\12.graph">
+      <Filter>Problem Instances</Filter>
+    </None>
+    <None Include="test-instances\20.graph">
+      <Filter>Problem Instances</Filter>
+    </None>
+    <None Include="test-instances\43.graph">
+      <Filter>Problem Instances</Filter>
+    </None>
   </ItemGroup>
 </Project>

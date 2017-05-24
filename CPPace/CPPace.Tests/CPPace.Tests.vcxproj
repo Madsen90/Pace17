@@ -169,6 +169,16 @@
       <Project>{9c3b164f-9b9a-425e-b9db-58e6249ac8bf}</Project>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="test-instances\12.graph" />
+    <None Include="test-instances\20.graph" />
+    <None Include="test-instances\43.graph" />
+    <None Include="test-instances\5.graph" />
+    <None Include="test-instances\50.graph" />
+    <None Include="test-instances\74.graph" />
+    <None Include="test-instances\84.graph" />
+    <None Include="test-instances\9.graph" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
