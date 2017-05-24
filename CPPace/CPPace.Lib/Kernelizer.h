@@ -23,7 +23,5 @@ public:
 
   static bool find_chordless_cycle(AdjacencyList& graph, vector<int>& cycle);
   static vector<pair<int, int>> find_non_edges(AdjacencyList& graph);
-  static map<int, int> MCS(AdjacencyList& graph);
   static bool BFS_path(AdjacencyList& graph, int start, int end, vector<int>& path);
-  static bool is_chordal_given_order(AdjacencyList& graph, map<int, int> order);
 };
