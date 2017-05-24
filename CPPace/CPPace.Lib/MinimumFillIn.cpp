@@ -121,7 +121,7 @@ static bool moplex_has_edge_in_neighbourhood(AdjacencyList& graph, set<int>& mop
   }
 }
 
-vector<set<int>> MinimumFillIn::find_moplexes(AdjacencyList& graph, vector<set<int>> previous_moplexes, set<pair<int, int>> newly_added_edges) {
+vector<set<int>> MinimumFillIn::find_moplexes(AdjacencyList& graph, vector<set<int>>& previous_moplexes, set<pair<int, int>>& newly_added_edges) {
   vector<set<int>> moplexes;
 
   // Exclude inactive vertices from search
@@ -255,7 +255,7 @@ set<int> add_edge_wrapper(AdjacencyList& graph, int x, int y, set<int>& marked, 
 }
 
 
-MinimumFillInResult minimum_fill_in_inner(AdjacencyList& graph, int k, int r, stack<pair<int, int>>& added, set<int>& marked) {
+MinimumFillInResult minimum_fill_in_inner(AdjacencyList& graph, int k, int r, stack<pair<int, int>>& added, set<int>& marked, vector<set<int>>& cached_moplexes, set<pair<int, int>>& parents_new_edges) {
   if (k < 0 || r < -1) return MinimumFillInResult(-1, stack<pair<int, int>>());
 
   if (k == 0) { // due to kernel and incrementing k, we know that there is only a potential solution when k == 0
@@ -270,20 +270,24 @@ MinimumFillInResult minimum_fill_in_inner(AdjacencyList& graph, int k, int r, st
   if (MinimumFillIn::find_four_cycle(graph, four_cycle)) {
     //Branch 1
     set<int> changed_markings = add_edge_wrapper(graph, four_cycle[0], four_cycle[2], marked, added);
-    MinimumFillInResult res_branch1 = minimum_fill_in_inner(graph, k - 1, r + changed_markings.size(), added, marked);
-
+    parents_new_edges.emplace(four_cycle[0], four_cycle[2]);
+    MinimumFillInResult res_branch1 = minimum_fill_in_inner(graph, k - 1, r + changed_markings.size(), added, marked, cached_moplexes, parents_new_edges);
+    
     //Reset
     graph.remove_edge(four_cycle[0], four_cycle[2]);
     added.pop();    
+    parents_new_edges.erase(pair<int, int>(four_cycle[0], four_cycle[2])); // this should never fail, as new edges are never removed. Instead a new set is made, with the exception of four cycles, where new edges are simply overridden.
     marked = SetFunctions::set_union_two(marked, changed_markings);
 
     //Branch 2
     changed_markings = add_edge_wrapper(graph, four_cycle[1], four_cycle[3], marked, added);
-    MinimumFillInResult res_branch2 = minimum_fill_in_inner(graph, k - 1, r + changed_markings.size(), added, marked);
+    parents_new_edges.emplace(four_cycle[1], four_cycle[3]);
+    MinimumFillInResult res_branch2 = minimum_fill_in_inner(graph, k - 1, r + changed_markings.size(), added, marked, cached_moplexes, parents_new_edges);
 
     //Reset
     graph.remove_edge(four_cycle[1], four_cycle[3]);
     added.pop();
+    parents_new_edges.erase(pair<int, int>(four_cycle[1], four_cycle[3]));
     marked = SetFunctions::set_union_two(marked, changed_markings);
 
     if (res_branch1.k > res_branch2.k)
@@ -292,143 +296,146 @@ MinimumFillInResult minimum_fill_in_inner(AdjacencyList& graph, int k, int r, st
   }
 
   //Find moplexes
-  vector<set<int>> moplexes = MinimumFillIn::find_moplexes(graph, vector<set<int>>(), set<pair<int, int>>());
+  vector<set<int>> moplexes = MinimumFillIn::find_moplexes(graph, cached_moplexes, parents_new_edges);
+  set<pair<int, int>> new_edges; // do not use parents_new_edges or cached_moplexes from this point onwards, as parent branches might still need it.
+  bool contains_marked = false, contains_unmarked = false;
 
-    bool contains_marked = false, contains_unmarked = false;
+  //CASE: Moplex with marked and unmarked members
+  for (set<int> moplex : moplexes) {
+    for (int n : moplex) {
+      if (marked.find(n) != marked.end())
+        contains_marked = true;
+      else
+        contains_unmarked = true;
+    }
+    if (contains_marked && contains_unmarked) {
+      //Found a moplex fulfilling the criteria
+      marked = SetFunctions::set_union_two(marked, moplex);
+      r -= moplex.size();
 
-    //CASE: Moplex with marked and unmarked edges
-    for (set<int> moplex : moplexes) {
+      MinimumFillInResult result = minimum_fill_in_inner(graph, k, r, added, marked, moplexes, new_edges);
       for (int n : moplex) {
-        if (marked.find(n) != marked.end())
-          contains_marked = true;
-        else
-          contains_unmarked = true;
+        marked.erase(n);
+        r++;
       }
-      if (contains_marked && contains_unmarked) {
-        //Found a moplex fulfilling the criteria
-        marked = SetFunctions::set_union_two(marked, moplex);
-        r -= moplex.size();
+      return result;
+    }
+  }
+  //CASE: Simplicial moplexes with only unmarked edges
+  vector<int> unmarked_moplex_indices;
+  for (int i = 0; i < moplexes.size(); i++) {
 
-        MinimumFillInResult result = minimum_fill_in_inner(graph, k, r, added, marked);
-        for (int n : moplex) {
-          marked.erase(n);
-          r++;
-        }
+    //Check if moplex is unmarked
+    bool is_unmarked_moplex = true;
+    for (int n : moplexes[i]) {
+      if (marked.find(n) != marked.end())
+        is_unmarked_moplex = false;
+    }
+
+    if (is_unmarked_moplex) {
+      //unmarked moplex found. Note it
+      unmarked_moplex_indices.emplace_back(i);
+      //Find adjacent of moplex
+      set<int> adjacent = get_neighbourhood_of_moplex(graph, moplexes[i]);
+      //Check if neighbours are a clique
+      if (graph.is_clique(adjacent)) {
+        graph.remove_vertices(moplexes[i]);
+
+        MinimumFillInResult result = minimum_fill_in_inner(graph, k, r, added, marked, moplexes, new_edges);
+        graph.add_vertices(moplexes[i]);
         return result;
       }
     }
-    //CASE: Simplicial moplexes with only unmarked edges
-    vector<int> unmarked_moplex_indices;
-    for (int i = 0; i < moplexes.size(); i++) {
+  }
 
-      //Check if moplex is unmarked
-      bool is_unmarked_moplex = true;
-      for (int n : moplexes[i]) {
-        if (marked.find(n) != marked.end())
-          is_unmarked_moplex = false;
+  //CASE: Moplex with only unmarked and neighbourhood only missing one edge
+  for (int i = 0; i < unmarked_moplex_indices.size(); i++) {
+    pair<int, int> missing_edge;
+    bool missing_more_than_one = false;
+
+    set<int> moplex_neighbourhood = get_neighbourhood_of_moplex(graph, moplexes[unmarked_moplex_indices[i]]);
+
+    for (int n : moplex_neighbourhood){
+      for (int m : moplex_neighbourhood) {
+        if (n >= m) continue;
+        if (!graph.has_edge(n, m))
+          if (missing_edge.first == missing_edge.second)
+            missing_edge = pair<int, int>(n, m);
+          else {
+            missing_more_than_one = true;
+            break;
+          }
       }
-
-      if (is_unmarked_moplex) {
-        //unmarked moplex found. Note it
-        unmarked_moplex_indices.emplace_back(i);
-        //Find adjacent of moplex
-        set<int> adjacent = get_neighbourhood_of_moplex(graph, moplexes[i]);
-
-        //Check if neighbours are a clique
-        if (graph.is_clique(adjacent)) {
-          graph.remove_vertices(moplexes[i]);
-
-          MinimumFillInResult result = minimum_fill_in_inner(graph, k, r, added, marked);
-          graph.add_vertices(moplexes[i]);
-          return result;
-        }
-      }
+      if (missing_more_than_one) break;
     }
 
-    //CASE: Moplex with only unmarked and neighbourhood only missing one edge
-    for (int i = 0; i < unmarked_moplex_indices.size(); i++) {
-      pair<int, int> missing_edge;
-      bool missing_more_than_one = false;
-
-      set<int> moplex_neighbourhood = get_neighbourhood_of_moplex(graph, moplexes[unmarked_moplex_indices[i]]);
-
-      for (int n : moplex_neighbourhood){
-        for (int m : moplex_neighbourhood) {
-          if (n >= m) continue;
-          if (!graph.has_edge(n, m))
-            if (missing_edge.first == missing_edge.second)
-              missing_edge = pair<int, int>(n, m);
-            else {
-              missing_more_than_one = true;
-              break;
-            }
-        }
-        if (missing_more_than_one) break;
-      }
-
-      if (!missing_more_than_one && missing_edge.first != missing_edge.second) { 
-        int v_star;
-        if (MinimumFillIn::find_v_star(graph, missing_edge.first, missing_edge.second, moplexes[unmarked_moplex_indices[i]], v_star)) {
-          if (marked.erase(v_star) != 0) //R might not need to be incremented for v_star
-            r++;
-          r += add_edge_wrapper(graph, missing_edge.first, missing_edge.second, marked, added).size();
-          MinimumFillInResult result = minimum_fill_in_inner(graph, k-1, r, added, marked);
-          graph.remove_edge(missing_edge.first, missing_edge.second);
-          added.pop();
-          return result;
-        }
+    if (!missing_more_than_one && missing_edge.first != missing_edge.second) { 
+      int v_star;
+      if (MinimumFillIn::find_v_star(graph, missing_edge.first, missing_edge.second, moplexes[unmarked_moplex_indices[i]], v_star)) {
+        if (marked.erase(v_star) != 0) //R might not need to be incremented for v_star
+          r++;
+        r += add_edge_wrapper(graph, missing_edge.first, missing_edge.second, marked, added).size();
+        new_edges.insert(missing_edge); 
+        MinimumFillInResult result = minimum_fill_in_inner(graph, k-1, r, added, marked, moplexes, new_edges);
+        graph.remove_edge(missing_edge.first, missing_edge.second);
+        added.pop(); 
+        new_edges.erase(missing_edge);
+        return result;
       }
     }
+  }
 
-    //CASE: All moplexes are marked
-    if (unmarked_moplex_indices.size() == 0) {
-      return MinimumFillInResult(-1, stack<pair<int, int>>());
-   }
+  //CASE: All moplexes are marked
+  if (unmarked_moplex_indices.size() == 0) {
+    return MinimumFillInResult(-1, stack<pair<int, int>>());
+  }
 
-    //CASE: Unmarked moplex
-    set<int> moplex = *moplexes.begin();
+  //CASE: Unmarked moplex
+  set<int> moplex = *moplexes.begin();
 
-    //Branch 1
-    marked = SetFunctions::set_union_two(marked, moplex);
-    r -= moplex.size();
+  //Branch 1
+  marked = SetFunctions::set_union_two(marked, moplex);
+  r -= moplex.size();
 
 
-    MinimumFillInResult res_branch1 = minimum_fill_in_inner(graph, k, r, added, marked);
+  MinimumFillInResult res_branch1 = minimum_fill_in_inner(graph, k, r, added, marked, moplexes, new_edges);
 
-    //Reset
-    for (int n : moplex) {
-      r++;
-      marked.erase(n);
-    }
+  //Reset
+  for (int n : moplex) {
+    r++;
+    marked.erase(n);
+  }
     
-    int added_edges_counter = 0;
-    set<int> changed_markings;
+  int added_edges_counter = 0;
+  set<int> changed_markings;
 
-    //Branch 2
-    set<int> neighbourhood = get_neighbourhood_of_moplex(graph, moplex);
-    for (int n : neighbourhood) {
-      for (int m : neighbourhood) {
-        if (n != m && !graph.has_edge(n, m)) {
-          added_edges_counter++;
-          for (int mark : add_edge_wrapper(graph, n, m, marked, added))
-            changed_markings.emplace(mark);
-        }
+  //Branch 2
+  set<int> neighbourhood = get_neighbourhood_of_moplex(graph, moplex);
+  for (int n : neighbourhood) {
+    for (int m : neighbourhood) {
+      if (n != m && !graph.has_edge(n, m)) {
+        added_edges_counter++;
+        new_edges.emplace(n, m); 
+        for (int mark : add_edge_wrapper(graph, n, m, marked, added))
+          changed_markings.emplace(mark);
       }
     }
+  }
 
-    MinimumFillInResult res_branch2 = minimum_fill_in_inner(graph, k - added_edges_counter, r, added, marked);
+  MinimumFillInResult res_branch2 = minimum_fill_in_inner(graph, k - added_edges_counter, r, added, marked, moplexes, new_edges);
 
-    //Reset
-    while (added_edges_counter--) {
-      pair<int, int> edge = added.top();
-      graph.remove_edge(edge.first, edge.second);
-      added.pop();
-    }
-    marked = SetFunctions::set_union_two(marked, changed_markings);
+  //Reset
+  while (added_edges_counter--) {
+    pair<int, int> edge = added.top();
+    graph.remove_edge(edge.first, edge.second);
+    new_edges.erase(edge);
+    added.pop();
+  }
+  marked = SetFunctions::set_union_two(marked, changed_markings);
 
-    if (res_branch1.k > res_branch2.k)
-      return res_branch1;
-    return res_branch2;
+  if (res_branch1.k > res_branch2.k)
+    return res_branch1;
+  return res_branch2;
 }
 
 stack<pair<int, int>> MinimumFillIn::minimum_fill_in(GraphIO::GraphContext context) {
@@ -476,7 +483,9 @@ stack<pair<int, int>> MinimumFillIn::minimum_fill_in(GraphIO::GraphContext conte
     Log::info("Components in kernel: %d", context.graph.regenerate_connectivity());
 
     set<int> marked;
-    MinimumFillInResult res = minimum_fill_in_inner(graph, k, k * 2, added, marked);
+    vector<set<int>> empty_moplex_set;
+    set<pair<int, int>> empty_edge_set;
+    MinimumFillInResult res = minimum_fill_in_inner(graph, k, k * 2, added, marked, empty_moplex_set, empty_edge_set);
     if (res.k != -1) {
       Log::info("Solution found for k = %d", k);
       return res.edges;
