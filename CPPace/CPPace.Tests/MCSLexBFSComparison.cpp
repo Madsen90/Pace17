@@ -37,7 +37,7 @@ public:
     return graph;
   }
 
-  AdjacencyList BuildNCycle(int n) {
+static  AdjacencyList BuildNCycle(int n) {
     //Cycle with N nodes
     AdjacencyList graph(n);
     for (int i = 0; i < n; i++) {

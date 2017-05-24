@@ -4,6 +4,18 @@
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
+static  AdjacencyList BuildNCycle(int n) {
+  //Cycle with N nodes
+  AdjacencyList graph(n);
+  for (int i = 0; i < n; i++) {
+    if (i == n - 1)
+      graph.add_edge(i, 0);
+    else
+      graph.add_edge(i, i + 1);
+  }
+  return graph;
+}
+
 namespace CPPaceTests {
   TEST_CLASS(MinimumFillInTests) {
   public:
@@ -249,6 +261,15 @@ namespace CPPaceTests {
 
       result = MinimumFillIn::minimum_fill_in(graph);
       Assert::IsTrue(1 == result.size());
+    }
+  };
+
+  TEST_CLASS(MinFillPerformance) {
+  public:
+    TEST_METHOD(VeryBigCycle) {
+      AdjacencyList graph = BuildNCycle(1000);
+      GraphIO::GraphContext context(graph);
+      GraphIO::write_to_path(context, "C:\\Users\\Frederik\\Downloads\\instances\\thousandcycle.graph");
     }
   };
 }
