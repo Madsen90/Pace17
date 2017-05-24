@@ -145,6 +145,15 @@ namespace CPPaceTests {
       } == moplexes); 
     }
 
+    TEST_METHOD(FindMinFillBerryBordat) {
+      AdjacencyList graph = SampleGraphs::berry_bordat();
+      stack<pair<int, int>> edges = MinimumFillIn::minimum_fill_in(graph);
+      Assert::AreEqual(2, (int)edges.size());
+      Assert::IsTrue(edges.top().first == 4 && edges.top().second == 5 || edges.top().first == 5 && edges.top().second == 6);
+      edges.pop();
+      Assert::IsTrue(edges.top().first == 4 && edges.top().second == 5 || edges.top().first == 5 && edges.top().second == 6);
+    }
+
     TEST_METHOD(MinimumFillInKTests) {
       //4-cycle
       AdjacencyList graph = AdjacencyList(4);
@@ -154,7 +163,7 @@ namespace CPPaceTests {
       graph.add_edge(3, 0);
 
       stack<pair<int, int>> result = MinimumFillIn::minimum_fill_in(graph);
-      Assert::IsTrue(1 == result.size);
+      Assert::IsTrue(1 == result.size());
 
       //5-cycle
       graph = AdjacencyList(5);
@@ -164,14 +173,14 @@ namespace CPPaceTests {
       graph.add_edge(3, 4);
       graph.add_edge(4, 0);
 
-      stack<pair<int, int>> result = MinimumFillIn::minimum_fill_in(graph);
-      Assert::IsTrue(2 == result.size);      
+      result = MinimumFillIn::minimum_fill_in(graph);
+      Assert::IsTrue(2 == result.size());      
 
       //2 single nodes
       graph = AdjacencyList(2);
 
       result = MinimumFillIn::minimum_fill_in(graph);
-      Assert::IsTrue(0 == result.size);
+      Assert::IsTrue(0 == result.size());
 
       //2 4-cycles
       graph = AdjacencyList(8);
@@ -186,7 +195,7 @@ namespace CPPaceTests {
       graph.add_edge(7, 4);
 
       result = MinimumFillIn::minimum_fill_in(graph);
-      Assert::IsTrue(2, result.size);
+      Assert::IsTrue(2 == result.size());
 
       //10 cycle
       graph = AdjacencyList(10);
@@ -202,17 +211,7 @@ namespace CPPaceTests {
       graph.add_edge(9, 0);
 
       result = MinimumFillIn::minimum_fill_in(graph);
-      Assert::IsTrue(7, result.size);
+      Assert::IsTrue(7 == result.size());
     }
-
-    TEST_METHOD(FindMinFillBerryBordat) {
-      AdjacencyList graph = SampleGraphs::berry_bordat();
-      stack<pair<int, int>> edges = MinimumFillIn::minimum_fill_in(graph);
-      Assert::AreEqual(2, (int)edges.size());
-      Assert::IsTrue(edges.top().first == 4 && edges.top().second == 5 || edges.top().first == 5 && edges.top().second == 6);
-      edges.pop();
-      Assert::IsTrue(edges.top().first == 4 && edges.top().second == 5 || edges.top().first == 5 && edges.top().second == 6);
-    }
-
   };
 }
