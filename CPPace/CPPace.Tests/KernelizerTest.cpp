@@ -13,6 +13,15 @@ public:
       map<int, int> order = Kernelizer::MCS(graph);
       Assert::IsFalse(Kernelizer::is_chordal_given_order(graph, order));
 
+
+      //berry bordat optimally solved
+     /* graph = SampleGraphs::berry_bordat();
+      graph.add_edge(4, 5);
+      graph.add_edge(4, 6);
+      graph.add_edge(5, 6);
+      order = Kernelizer::MCS(graph);
+      Assert::IsTrue(Kernelizer::is_chordal_given_order(graph, order));
+*/
       LexBFS lex(graph.num_vertices);
       lex.order(graph);
       Assert::AreEqual(lex.is_chordal(graph), Kernelizer::is_chordal_given_order(graph, order));

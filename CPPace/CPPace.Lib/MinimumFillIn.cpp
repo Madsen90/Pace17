@@ -385,7 +385,11 @@ MinimumFillInResult minimum_fill_in_inner(AdjacencyList& graph, int k, int r, st
     MinimumFillInResult res_branch2 = minimum_fill_in_inner(graph, k - added_edges_counter, r, added, marked);
 
     //Reset
-    while (added_edges_counter--) added.pop();
+    while (added_edges_counter--) {
+      pair<int, int> edge = added.top();
+      graph.remove_edge(edge.first, edge.second);
+      added.pop();
+    }
     for (int n : changed_markings)
       marked.emplace(n);
 

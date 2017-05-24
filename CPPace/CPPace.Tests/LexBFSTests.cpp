@@ -22,6 +22,16 @@ namespace CPPaceTests {
       lex.order(graph);
 
       Assert::IsFalse(lex.is_chordal(graph));
+
+      //graph = SampleGraphs::berry_bordat();
+      //graph.add_edge(4, 5);
+      //graph.add_edge(4, 6);
+      //graph.add_edge(5, 6);
+      //lex = LexBFS(graph.num_vertices);
+      //lex.order(graph);
+      //Assert::IsTrue(lex.is_chordal(graph));
+
+
     }
 
     TEST_METHOD(IsChordal) {
@@ -174,6 +184,7 @@ namespace CPPaceTests {
       lex = LexBFS(graph.num_vertices);
       lex.order(graph);
       Assert::IsTrue(lex.is_chordal(graph));
+
     }
 
     TEST_METHOD(SubGraphIsChordal) {
