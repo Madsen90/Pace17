@@ -17,7 +17,7 @@ public:
   int position(int vertex);
 
 private:
-  // Array of vertices in lexicographic order
+ // Array of vertices in lexicographic order
   vector<int> ordering;
 
   // The inverse of ordering - positions[v] is vertex v's position in ordering

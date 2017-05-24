@@ -3,8 +3,8 @@
 #include "SetFunctions.h"
 #include <queue>
 #include <iterator>
-#include <climits>
 #include <algorithm>
+#include "LexBFS.h"
 
 static bool set_size_comparison(set<int> a, set<int> b) {
   return a.size() < b.size();
@@ -207,18 +207,20 @@ bool Kernelizer::phase3(AdjacencyList& graph, Kernel& phase2_kernel, Kernel& pha
 bool Kernelizer::find_chordless_cycle(AdjacencyList& graph, vector<int>& cycle) {
   //missing components
 
-  map<int, int> order = MCS(graph);
-  int i = 0;
-  for (auto kv : order) {
+  LexBFS lex(graph.num_vertices);
+  lex.order(graph);
+  for (int u = 0; u < graph.num_vertices; u < u++) {
+    if (!graph.vertices[u].active) continue;
+
 
     //find m_adjecent:
 
     set<int> m_adjacent;
-    set<int> neighbours = graph.edges(kv.first);
+    set<int> neighbours = graph.edges(u);
 
-    
     for(int n : neighbours) {
-      if (order[n] > kv.second)
+      if (!graph.vertices[n].active) continue;
+      if (lex.position(n) > lex.position(u))
         m_adjacent.emplace(n);
     }
     
@@ -237,7 +239,7 @@ bool Kernelizer::find_chordless_cycle(AdjacencyList& graph, vector<int>& cycle) 
 
           m_adjacent.erase(v);
           m_adjacent.erase(w);
-          m_adjacent.emplace(kv.first);
+          m_adjacent.emplace(u);
 
           graph.remove_vertices(m_adjacent);
           if(!graph.has_edge(v, w)) {
@@ -246,7 +248,7 @@ bool Kernelizer::find_chordless_cycle(AdjacencyList& graph, vector<int>& cycle) 
               for (int n : path) {
                 cycle.push_back(n);
               }
-              cycle.push_back(kv.first);
+              cycle.push_back(u);
               graph.add_vertices(m_adjacent);
               return true;
             }
@@ -254,45 +256,13 @@ bool Kernelizer::find_chordless_cycle(AdjacencyList& graph, vector<int>& cycle) 
           graph.add_vertices(m_adjacent);
           m_adjacent.emplace(v);
           m_adjacent.emplace(w);
-          m_adjacent.erase(kv.first);
+          m_adjacent.erase(u);
         }
       }
     }
-    i++;
   }
 
   return false;
-}
-
-map<int, int> Kernelizer::MCS(AdjacencyList& graph) {
-  map<int, int> order;
-  set<int> numbered;
-  map<int, int> weight;
-  for (int v = 0; v < graph.vertices.size(); v++) {
-    if(!graph.vertices[v].active) continue;
-    weight[v] = 0;
-  }
-
-
-  for(int i = weight.size()-1; i >= 0; i--) {
-    //maximum weighted unnumbered vertex:
-    int max_unnumbered = -1, value = INT_MIN;
-    for(map<int, int>::value_type& kv : weight) {
-      if(numbered.find(kv.first) == numbered.end() && kv.second > value) {
-        max_unnumbered = kv.first, value = kv.second;
-      }
-    }
-    order[max_unnumbered] = i;
-    numbered.emplace(max_unnumbered);
-
-    for(int v : graph.edges(max_unnumbered)) {
-      if (!graph.vertices[v].active) continue;
-      if(numbered.find(v) == numbered.end()) {
-        weight[v]++;
-      }
-    }
-  }
-  return order;
 }
 
 bool Kernelizer::BFS_path(AdjacencyList& graph, int start, int end, vector<int>& path) {
@@ -344,21 +314,4 @@ vector<pair<int, int>> Kernelizer::find_non_edges(AdjacencyList& graph)
     }
   }
   return non_edges;
-}
-
-bool Kernelizer::is_chordal_given_order(AdjacencyList& graph, map<int, int> order) {
-  for (int v = 0; v < order.size(); v++) {
-    int ordering = order[v];
-    set<int> higher_order_neighbours;
-    for (int n : graph.edges(v)) {
-      if (order.find(n) != order.end() && order[n] > ordering) {
-        higher_order_neighbours.emplace(n);
-      }
-    }
-
-    if (!graph.is_clique(higher_order_neighbours)) {
-      return false;
-    }
-  }
-  return true;
 }

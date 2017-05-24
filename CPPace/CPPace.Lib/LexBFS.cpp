@@ -7,15 +7,15 @@
 
 LexBFS::LexBFS(int num_vertices)
   : num_vertices(num_vertices),
-    ordering (vector<int>(num_vertices)),
-    positions(vector<int>(num_vertices)),
-    chordal(Chordal::Dirty)
+  ordering(vector<int>(num_vertices)),
+  positions(vector<int>(num_vertices)),
+  chordal(Chordal::Dirty)
 { }
 
 void LexBFS::order(AdjacencyList& graph) {
   list<set<int>> partitions;
-  int label = num_vertices-1;
-  
+  int label = num_vertices - 1;
+
   // Inital partition is single set of all vertices
   set<int> initial_partition;
   for (int i = 0; i < graph.num_vertices; i++)
@@ -30,7 +30,7 @@ void LexBFS::order(AdjacencyList& graph) {
     if (pf->empty()) {
       partitions.pop_front();
       continue;
-    }    
+    }
     pivot = *pf->begin();
 
     // Pivot's place in ordering found - remove pivot from search
@@ -86,9 +86,9 @@ bool LexBFS::is_chordal(AdjacencyList& graph) {
 }
 
 inline int LexBFS::vertex(int position) {
-  return positions[position];
+  return ordering[position];
 }
 
 inline int LexBFS::position(int vertex) {
-  return ordering[vertex];
+  return positions[vertex];
 }

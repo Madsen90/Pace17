@@ -187,6 +187,74 @@ namespace CPPaceTests {
 
     }
 
+    TEST_METHOD(DisconnectedGraph) {
+      //two disconnected nonchordal four cycles
+      AdjacencyList graph(8);
+      graph.add_edge(0, 1);
+      graph.add_edge(1, 2);
+      graph.add_edge(2, 3);
+      graph.add_edge(3, 0);
+
+      graph.add_edge(4, 5);
+      graph.add_edge(5, 6);
+      graph.add_edge(6, 7);
+      graph.add_edge(7, 4);
+      LexBFS lex(graph.num_vertices);
+      lex.order(graph);
+      Assert::IsFalse(lex.is_chordal(graph));
+
+      //two disconnected four cycles first is chordal
+      graph = AdjacencyList(8);
+      graph.add_edge(0, 1);
+      graph.add_edge(1, 2);
+      graph.add_edge(0, 2);
+      graph.add_edge(2, 3);
+      graph.add_edge(3, 0);
+
+      graph.add_edge(4, 5);
+      graph.add_edge(5, 6);
+      graph.add_edge(6, 7);
+      graph.add_edge(7, 4);
+      lex = LexBFS(graph.num_vertices);
+      lex.order(graph);
+      Assert::IsFalse(lex.is_chordal(graph));
+
+      //two disconnected four cycles second is chordal
+      graph = AdjacencyList(8);
+      graph.add_edge(0, 1);
+      graph.add_edge(1, 2);
+      graph.add_edge(2, 3);
+      graph.add_edge(3, 0);
+
+      graph.add_edge(4, 5);
+      graph.add_edge(5, 6);
+      graph.add_edge(4, 6);
+      graph.add_edge(6, 7);
+      graph.add_edge(7, 4);
+      lex = LexBFS(graph.num_vertices);
+      lex.order(graph);
+      Assert::IsFalse(lex.is_chordal(graph));
+
+
+      //two disconnected four cycles both chordal
+      graph = AdjacencyList(8);
+      graph.add_edge(0, 1);
+      graph.add_edge(1, 2);
+      graph.add_edge(0, 2);
+      graph.add_edge(2, 3);
+      graph.add_edge(3, 0);
+
+      graph.add_edge(4, 5);
+      graph.add_edge(5, 6);
+      graph.add_edge(4, 6);
+      graph.add_edge(6, 7);
+      graph.add_edge(7, 4);
+      lex = LexBFS(graph.num_vertices);
+      lex.order(graph);
+      Assert::IsTrue(lex.is_chordal(graph));
+    }
+
+
     TEST_METHOD(SubGraphIsChordal) {
       //4-cycle, exclude 1
       AdjacencyList graph(4);
@@ -248,6 +316,52 @@ namespace CPPaceTests {
       lex = LexBFS(graph.num_vertices);
       lex.order(graph);
       Assert::IsFalse(lex.is_chordal(graph));
+
+      //Empty graph
+      graph = AdjacencyList(4);
+      graph.add_edge(0, 1);
+      graph.add_edge(1, 2);
+      graph.add_edge(2, 3);
+      graph.add_edge(3, 0);
+      graph.remove_vertices(set<int> {0, 1, 2, 3});
+      lex = LexBFS(graph.num_vertices);
+      lex.order(graph);
+      Assert::IsTrue(lex.is_chordal(graph));
+
+      //last four vertices are deleted - non chordal
+      graph = AdjacencyList(8);
+      graph.add_edge(0, 1);
+      graph.add_edge(1, 2);
+      graph.add_edge(2, 3);
+      graph.add_edge(3, 0);
+
+      graph.add_edge(4, 5);
+      graph.add_edge(5, 6);
+      graph.add_edge(6, 7);
+      graph.add_edge(7, 4);
+      graph.remove_vertices(set<int> {4, 5, 6, 7});
+      lex = LexBFS(graph.num_vertices);
+      lex.order(graph);
+      Assert::IsFalse(lex.is_chordal(graph));
+
+
+      //last four vertices are deleted - chordal
+      graph = AdjacencyList(8);
+      graph.add_edge(0, 1);
+      graph.add_edge(1, 2);
+      graph.add_edge(0, 2);
+      graph.add_edge(2, 3);
+      graph.add_edge(3, 0);
+
+      graph.add_edge(4, 5);
+      graph.add_edge(5, 6);
+      graph.add_edge(6, 7);
+      graph.add_edge(7, 4);
+      graph.remove_vertices(set<int> {4, 5, 6, 7});
+      lex = LexBFS(graph.num_vertices);
+      lex.order(graph);
+      Assert::IsTrue(lex.is_chordal(graph));
+
     }
   };
 

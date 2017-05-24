@@ -148,6 +148,7 @@
     <ClInclude Include="Kernelizer.h" />
     <ClInclude Include="LexBFS.h" />
     <ClInclude Include="Log.h" />
+    <ClInclude Include="MCS.h" />
     <ClInclude Include="MinimumFillIn.h" />
     <ClInclude Include="SetFunctions.h" />
   </ItemGroup>
