@@ -212,6 +212,43 @@ namespace CPPaceTests {
 
       result = MinimumFillIn::minimum_fill_in(graph);
       Assert::IsTrue(7 == result.size());
+
+      //2 combined 4-cycles. Solvable with one.
+      graph = AdjacencyList(6);
+      graph.add_edge(0, 1);
+      graph.add_edge(1, 4);
+      graph.add_edge(0, 2);
+      graph.add_edge(0, 3);
+      graph.add_edge(3, 4);
+
+      result = MinimumFillIn::minimum_fill_in(graph);
+      Assert::IsTrue(1 == result.size());
+
+      //10 combined 4-cycles. Solvable with one
+      graph = AdjacencyList(12);
+      graph.add_edge(0, 1);
+      graph.add_edge(0, 2);
+      graph.add_edge(0, 3);
+      graph.add_edge(0, 5);
+      graph.add_edge(0, 6);
+      graph.add_edge(0, 7);
+      graph.add_edge(0, 8);
+      graph.add_edge(0, 9);
+      graph.add_edge(0, 10);
+      graph.add_edge(0, 11);
+      graph.add_edge(4, 1);
+      graph.add_edge(4, 2);
+      graph.add_edge(4, 3);
+      graph.add_edge(4, 5);
+      graph.add_edge(4, 6);
+      graph.add_edge(4, 7);
+      graph.add_edge(4, 8);
+      graph.add_edge(4, 9);
+      graph.add_edge(4, 10);
+      graph.add_edge(4, 11);
+
+      result = MinimumFillIn::minimum_fill_in(graph);
+      Assert::IsTrue(1 == result.size());
     }
   };
 }
