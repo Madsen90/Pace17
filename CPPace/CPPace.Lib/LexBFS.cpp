@@ -13,20 +13,25 @@ LexBFS::LexBFS(int num_vertices)
 { }
 
 void LexBFS::order(AdjacencyList& graph) {
-  list<set<int>*> partitions;
+  list<set<int>> partitions;
   int label = num_vertices-1;
   
   // Inital partition is single set of all vertices
-  set<int>* initial_partition = new set<int>();
+  set<int> initial_partition;
   for (int i = 0; i < graph.num_vertices; i++)
     if (graph.vertices[i].active)
-      initial_partition->emplace(i);
+      initial_partition.emplace(i);
   partitions.push_back(initial_partition);
 
   while (!partitions.empty()) {
     // Pivot is first vertex of first partition
-    set<int>* pf = partitions.front();
-    int pivot = *pf->begin();
+    auto pf = partitions.begin();
+    int pivot;
+    if (pf->empty()) {
+      partitions.pop_front();
+      continue;
+    }    
+    pivot = *pf->begin();
 
     // Pivot's place in ordering found - remove pivot from search
     pf->erase(pivot);
@@ -35,25 +40,24 @@ void LexBFS::order(AdjacencyList& graph) {
     label--;
 
     set<int> adjacency = graph.edges(pivot);
-    std::list<set<int>*>::iterator it = partitions.begin();
-    while (it != partitions.end()) {
-      set<int>* pi = *it;
-      set<int>* intersection = new set<int>();
+    std::list<set<int>>::iterator pi = partitions.begin();
+    while (pi != partitions.end()) {
+      set<int> intersection;
       std::set_intersection(
         adjacency.begin(), adjacency.end(),
         pi->begin(), pi->end(),
-        inserter(*intersection, intersection->begin()));
+        inserter(intersection, intersection.begin()));
 
-      if (!intersection->empty() && *intersection != *pi) {
-        for (int v : *intersection)
+      if (!intersection.empty() && intersection != *pi) {
+        for (int v : intersection)
           pi->erase(v);
 
         // Insert intersection before pi (it)
-        partitions.insert(it, intersection);
+        partitions.insert(pi, move(intersection));
       }
 
-      if (pi->empty()) it = partitions.erase(it);
-      else ++it;
+      if (pi->empty()) pi = partitions.erase(pi);
+      else ++pi;
     }
   }
 
