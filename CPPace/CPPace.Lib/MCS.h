@@ -1,7 +1,7 @@
 #pragma once
 
 #include <map>
-
+#include <climits>
 #include "AdjacencyList.h"
 
 using namespace std;
