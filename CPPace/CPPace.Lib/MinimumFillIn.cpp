@@ -564,17 +564,18 @@ stack<pair<int, int>> MinimumFillIn::minimum_fill_in(GraphIO::GraphContext conte
           k_failed = true;
           break;
         }
-        else //Failed, increment internal_k
-          internal_k++;
+
+        internal_k++;
       }
       if (k_failed) break;
-
-    if (!k_failed) { //Correct solution. Return added edges
-      Log::info("Solution found for k = %d", original_k);
+    }
+    if (!k_failed) {
+      Log::info("Solution found for k = %d", k);
       return acc_added;
     }
 
-  Log::info("No solution found for k = %d", original_k);
+    Log::info("No solution found for k = %d", k);
+
     //K-solution not found. Restore graph and increment k.
     for (pair<int, int> edge : k_kernel.essential_edges) {
       context.graph.remove_edge(edge.first, edge.second);
@@ -585,6 +586,7 @@ stack<pair<int, int>> MinimumFillIn::minimum_fill_in(GraphIO::GraphContext conte
       acc_added.pop();
       k++;
     }
+
     k++;
   }
 }
