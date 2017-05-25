@@ -17,6 +17,16 @@ struct Stats {
   int num_unmarked_missing_one_edge_moplexes = 0;
   int num_marked_moplexes = 0;
   int num_unmarked_moplexes = 0;
+
+  void log() {
+    Log::info("Branch statistics:");
+    Log::info("4-cycles: ....................... %d", num_four_cycles);
+    Log::info("Semi-marked moplexes: ........... %d", num_semi_marked_moplexes);
+    Log::info("Unmarked simplicial moplexes: ... %d", num_unmarked_simplicial_moplexes);
+    Log::info("Unmarked moplexes missing 1 edge: %d", num_unmarked_missing_one_edge_moplexes);
+    Log::info("Marked moplexes: ................ %d", num_marked_moplexes);
+    Log::info("Unmarked moplexes: .............. %d", num_unmarked_moplexes);
+  }
 };
 
 bool MinimumFillIn::is_path_chordless(AdjacencyList& graph, vector<int>& path) {
@@ -525,12 +535,14 @@ stack<pair<int, int>> MinimumFillIn::minimum_fill_in(GraphIO::GraphContext conte
 
     //Run algorithm on each component
     for (int i = 0; i < component_count; i++) {
+      Log::info("Solving for component: %d", i);
 
       stack<pair<int, int>> added; //Create new added stack
 
       int internal_k = 0; //Set Component k.
       if (components.size() == 1)
         internal_k = k; //If this is the only component in the graph, set it to k.
+      Stats stats;
 
       while (!k_failed) {
         context.graph.set_vertices(components[i]); //Set vertices        
@@ -538,20 +550,14 @@ stack<pair<int, int>> MinimumFillIn::minimum_fill_in(GraphIO::GraphContext conte
         set<int> marked;
         vector<set<int>> empty_moplex_set;
         set<pair<int, int>> empty_edge_set;
-        Stats stats;
 
         MinimumFillInResult res = minimum_fill_in_inner(context.graph, internal_k, internal_k * 2, added, marked, empty_moplex_set, empty_edge_set, stats);
 
-        Log::info("Branch statistics:");
-        Log::info("4-cycles: ....................... %d", stats.num_four_cycles);
-        Log::info("Semi-marked moplexes: ........... %d", stats.num_semi_marked_moplexes);
-        Log::info("Unmarked simplicial moplexes: ... %d", stats.num_unmarked_simplicial_moplexes);
-        Log::info("Unmarked moplexes missing 1 edge: %d", stats.num_unmarked_missing_one_edge_moplexes);
-        Log::info("Marked moplexes: ................ %d", stats.num_marked_moplexes);
-        Log::info("Unmarked moplexes: .............. %d", stats.num_unmarked_moplexes);
-
+        Log::info("=====================================");
         if (res.k != -1) {
-          //Component solved with k. Add result
+          Log::info("Component %d solved with k: %d", i, internal_k);
+          stats.log();
+            //Component solved with k. Add result
           while (!res.edges.empty()) {
             acc_added.push(res.edges.top());
             res.edges.pop();
@@ -564,17 +570,18 @@ stack<pair<int, int>> MinimumFillIn::minimum_fill_in(GraphIO::GraphContext conte
           k_failed = true;
           break;
         }
-
+        Log::info("Component %d not solved with k: %d", i, internal_k);
+        stats.log();
         internal_k++;
       }
       if (k_failed) break;
     }
     if (!k_failed) {
-      Log::info("Solution found for k = %d", k);
+      Log::info("Solution found for k = %d", original_k);
       return acc_added;
     }
 
-    Log::info("No solution found for k = %d", k);
+    Log::info("No solution found for k = %d", original_k);
 
     //K-solution not found. Restore graph and increment k.
     for (pair<int, int> edge : k_kernel.essential_edges) {
