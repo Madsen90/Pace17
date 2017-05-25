@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 2.8.11)
 project (mfi)
 
-set(CMAKE_CXX_FLAGS "-std=c++11 -O3 -D NOEXPORT")
+set(CMAKE_CXX_FLAGS "-std=c++11 -O3 -D NOEXPORT -D OPTIL")
 
 file(GLOB CPPACE_LIB_SOURCES CPPace/CPPace.Lib/*.cpp)
 file(GLOB CPPACE_LIB_HEADERS CPPace/CPPace.Lib/*.h)
