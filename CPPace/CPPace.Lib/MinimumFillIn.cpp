@@ -8,6 +8,7 @@
 #include "LexBFS.h"
 #include "Kernelizer.h"
 #include "MCS.h"
+#include <string>
 
 struct Stats {
   int num_four_cycles = 0;
@@ -267,12 +268,13 @@ set<int> add_edge_wrapper(AdjacencyList& graph, int x, int y, set<int>& marked, 
 
 MinimumFillInResult minimum_fill_in_inner(AdjacencyList& graph, int k, int r, stack<pair<int, int>>& added, set<int>& marked, vector<set<int>>& cached_moplexes, set<pair<int, int>>& parents_new_edges, Stats& stats) {
   if (k < 0 || r < -1) return MinimumFillInResult(-1, stack<pair<int, int>>());
-
+  
   if (k == 0) { // due to kernel and incrementing k, we know that there is only a potential solution when k == 0
     LexBFS lex(graph.num_vertices);
     lex.order(graph);
     if(lex.is_chordal(graph))
       return MinimumFillInResult(k, added);
+    return MinimumFillInResult(-1, stack<pair<int, int>>());
   }
 
   //CASE: Four cycles
@@ -456,6 +458,7 @@ MinimumFillInResult minimum_fill_in_inner(AdjacencyList& graph, int k, int r, st
 }
 
 stack<pair<int, int>> MinimumFillIn::minimum_fill_in(GraphIO::GraphContext context) {
+  
   Log::info("Initial kernelization...");
   Kernel kernel = Kernelizer::phase1(context.graph);
   Log::info("Kernelization phase 1 completed (lower bound k = %d)", kernel.kMin);
@@ -492,11 +495,15 @@ stack<pair<int, int>> MinimumFillIn::minimum_fill_in(GraphIO::GraphContext conte
       (float)removed_edges.size() / context.graph.num_edges * 100);
     Log::info("Essential edges: .... %d", k_kernel.essential_edges.size());
 
-    stack<pair<int, int>> added;
+    int acc_k = 0;
+    stack<pair<int, int>> acc_added;
+
     context.graph.remove_vertices(k_kernel.b);
+    
     for (pair<int, int> edge : k_kernel.essential_edges) {
       context.graph.add_edge(edge.first, edge.second);
-      added.push(edge);
+      acc_added.push(edge);
+      acc_k++;
       k--;
     }
     Log::info("Components in kernel: %d", context.graph.regenerate_connectivity());
@@ -506,29 +513,30 @@ stack<pair<int, int>> MinimumFillIn::minimum_fill_in(GraphIO::GraphContext conte
     for (int i = 0; i < context.graph.vertices.size(); i++)
       if(context.graph.vertices[i].active)
         components[context.graph.vertices[i].label].emplace(i);
-
-    int acc_k = 0;
-    stack<pair<int, int>> acc_added;
+/*
+    GraphIO::write_to_path(context,
+      "C:\\Users\\Jukom\\Source\\Pace17\\CPPace\\CPPace.Tests\\problem-instances\\50.dot", GraphIO::DOT);*/
 
     //Run algorithm on each component
     for (int i = 0; i < components.size(); i++) {
-      int internal_k;
+      
+      stack<pair<int, int>> added; //Create new added stack
+
+      int internal_k; //Set Component k.
       if (components.size() == 1)
-        internal_k = k;
+        internal_k = k; //If this is the only component in the graph, set it to k.
       else
-        internal_k = 0;
+        internal_k = 1; //Else start at 1
 
-      MinimumFillInResult res(-1, stack<pair<int, int>>());
-
-      while (acc_k <= k) {
-        context.graph.set_vertices(components[i]); //Set vertices
+      while (true) { 
+        context.graph.set_vertices(components[i]); //Set vertices        
 
         set<int> marked;
         vector<set<int>> empty_moplex_set;
         set<pair<int, int>> empty_edge_set;
         Stats stats;
 
-        res = minimum_fill_in_inner(context.graph, internal_k, internal_k * 2, added, marked, empty_moplex_set, empty_edge_set, stats);
+        MinimumFillInResult res = minimum_fill_in_inner(context.graph, internal_k, internal_k * 2, added, marked, empty_moplex_set, empty_edge_set, stats);
 
         Log::info("Branch statistics:");
         Log::info("4-cycles: ....................... %d", stats.num_four_cycles);
@@ -538,19 +546,18 @@ stack<pair<int, int>> MinimumFillIn::minimum_fill_in(GraphIO::GraphContext conte
         Log::info("Marked moplexes: ................ %d", stats.num_marked_moplexes);
         Log::info("Unmarked moplexes: .............. %d", stats.num_unmarked_moplexes);
 
-        if (res.k != -1) {//Component solved with k
-          acc_k += res.k;
+        if (res.k != -1) {
+          //Component solved with k. Add result
+          acc_k += res.edges.size();
           while (!res.edges.empty()) {
             acc_added.push(res.edges.top());
             res.edges.pop();
           }
-          break;
+          break; //Go to the next component
         }
-        else
+        else //Failed, increment internal_k
           internal_k++;
-      }
-      if (acc_k > k) //Failed to find solution with k. Restart
-        break;
+      }      
     }
     if(acc_k <= k) { //Correct solution. Return added edges
       Log::info("Solution found for k = %d", original_k);
@@ -559,11 +566,11 @@ stack<pair<int, int>> MinimumFillIn::minimum_fill_in(GraphIO::GraphContext conte
     Log::info("No solution found for k = %d", original_k);
 
     //K-solution not found. Restore graph and increment k.
-    context.graph.add_vertices(k_kernel.b);
+    /*context.graph.add_vertices(k_kernel.b);
     for (pair<int, int> edge : k_kernel.essential_edges) {
       context.graph.remove_edge(edge.first, edge.second);
       k++;
     }
-    k++;
+    k++;*/
   }
 }
