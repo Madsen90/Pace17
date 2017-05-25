@@ -83,15 +83,15 @@ set<int> SetFunctions::set_intersect_three(set<int>& s1, set<int>& s2, set<int>&
       s3_it++;
     }
     //An element is higher than the others. Increment others
-    else {      
+    else {
       if (*s1_it < *s3_it)
         s1_it++;
-      else if (*s3_it < *s1_it)
-        s3_it++;
       if (*s2_it < *s3_it)
         s2_it++;
-      else if (*s3_it < *s2_it)
-        s3_it++;      
+      if (s1_it != s1.end() && *s3_it < *s1_it)
+        s3_it++;
+      else if (s2_it != s2.end() && *s3_it < *s2_it)
+        s3_it++;
     }
   }
 
