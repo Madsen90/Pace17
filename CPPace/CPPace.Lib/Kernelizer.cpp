@@ -153,20 +153,18 @@ bool Kernelizer::phase3(AdjacencyList& graph, Kernel& phase2_kernel, Kernel& pha
 
   graph.remove_vertices(phase2_kernel.b);
   vector<pair<int, int>> non_edges = find_non_edges(graph);
+  graph.add_vertices(phase2_kernel.b);
 
   for (int i = 0; i < non_edges.size(); i++) {
     pair<int, int> non_edge = non_edges[i];
     int x = non_edge.first, y = non_edge.second;
-    graph.add_vertices(phase2_kernel.b);
     set<int> x_neighbourhood = graph.edges(x);
     set<int> y_neighbourhood = graph.edges(y);
-    graph.remove_vertices(phase2_kernel.b);
     set<int> x_y_b = SetFunctions::set_intersect_three(x_neighbourhood, y_neighbourhood, phase3_kernel.b);
 
     set<int> a_xy;
     for (int n : x_y_b) {
 
-      graph.add_vertices(phase2_kernel.b);
       set<int> n_neighbours = graph.edges(n);
       n_neighbours.erase(x);
       n_neighbours.erase(y);
@@ -180,7 +178,6 @@ bool Kernelizer::phase3(AdjacencyList& graph, Kernel& phase2_kernel, Kernel& pha
       
       graph.add_vertex(n);
       graph.add_vertices(n_neighbours);
-      graph.remove_vertices(phase2_kernel.b);
     }
 
     if(a_xy.size() > 2*max_k) {

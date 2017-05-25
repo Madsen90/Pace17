@@ -6,16 +6,27 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
   switch (argc) {
-  case 1: {
-    GraphIO::GraphContext context = GraphIO::read_from_stream(cin);
-    stack<pair<int, int>> edges = MinimumFillIn::minimum_fill_in(context);
-    while (!edges.empty()) {
-      pair<int, int> edge = edges.top();
-      edges.pop();
-      cout << context.vertex_name(edge.first) << " " << context.vertex_name(edge.second) << endl;
+  case 1:
+    {
+      GraphIO::GraphContext context = GraphIO::read_from_path("C:\\Users\\Frederik\\Downloads\\instances\\1.graph");
+      stack<pair<int, int>> edges = MinimumFillIn::minimum_fill_in(context);
+      while (!edges.empty()) {
+        pair<int, int> edge = edges.top();
+        edges.pop();
+        cout << context.vertex_name(edge.first) << " " << context.vertex_name(edge.second) << endl;
+      }
+      break;
     }
-    break;
-  }
+  //case 1: {
+  //  GraphIO::GraphContext context = GraphIO::read_from_stream(cin);
+  //  stack<pair<int, int>> edges = MinimumFillIn::minimum_fill_in(context);
+  //  while (!edges.empty()) {
+  //    pair<int, int> edge = edges.top();
+  //    edges.pop();
+  //    cout << context.vertex_name(edge.first) << " " << context.vertex_name(edge.second) << endl;
+  //  }
+  //  break;
+  //}
   case 2: {
     GraphIO::GraphContext context = GraphIO::read_from_path(argv[1]);
     Log::info("NAME: .......... %s", argv[1]);

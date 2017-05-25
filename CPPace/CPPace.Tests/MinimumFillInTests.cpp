@@ -4,6 +4,8 @@
 #include "../CPPace.Lib/LexBFS.h"
 #include "../CPPace.Lib/GraphGenerator.h"
 #include "StdUtils.h"
+#include "../CPPace.Lib/MCS.h"
+#include "../CPPace.Lib/Kernelizer.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -647,6 +649,27 @@ namespace CPPaceTests {
       Assert::AreEqual(3, solve_instance("50.graph"));
     }
 
+    TEST_METHOD(Instance50_test) {
+      GraphIO::GraphContext context = GraphIO::read_from_path("../../CPPace.Tests/problem-instances/50.graph");
+      set<pair<int, int>> result;
+      result.emplace(21, 26);
+      result.emplace(9, 20);
+      context.graph.add_edge(21, 26);
+      context.graph.add_edge(9, 20);
+      bool chordal = MCS::is_chordal(context.graph);
+      vector<int> cycle;
+      Kernelizer::find_chordless_cycle(context.graph, cycle);
+      int i;
+      if(chordal) {
+        i = 0 * 0;
+        i++;
+      }
+      else {
+        i = 1;
+        i++;
+      }
+    }
+
     TEST_METHOD(Instance74) {
       Assert::AreEqual(0, solve_instance("74.graph"));
     }
@@ -668,3 +691,4 @@ namespace CPPaceTests {
     }
   };
 }
+
