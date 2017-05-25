@@ -244,7 +244,7 @@ bool Kernelizer::find_chordless_cycle(AdjacencyList& graph, vector<int>& cycle) 
           graph.remove_vertices(m_adjacent);
           if(!graph.has_edge(v, w)) {
             vector<int> path;
-            if(BFS_path(graph, v, w, path) && path.size() >= 3) { //maybe redundant path size check
+            if(BFS_path(graph, v, w, path)) { 
               for (int n : path) {
                 cycle.push_back(n);
               }

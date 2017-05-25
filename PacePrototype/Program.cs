@@ -11,7 +11,7 @@ namespace PacePrototype
         static void Main(string[] args)
         {
             //TestGraphs.testAllGraphs();
-            //TestGraphs.Tests();
+            TestGraphs.Tests();
             //var graph1 = parse(args[0], true);
             //var graph2 = parseFile(args[0], false);
             //var graph = TestGraphs.TestGraph8();

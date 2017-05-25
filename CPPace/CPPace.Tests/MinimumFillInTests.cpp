@@ -437,6 +437,7 @@ namespace CPPaceTests {
       edges.clear();
       edges.emplace(0, 1);
       moplexes = MinimumFillIn::find_moplexes(graph, cache, edges);
+      std_sort(moplexes.begin(), moplexes.end(), moplex_order);
       Assert::IsTrue(result == moplexes);
 
 
@@ -451,6 +452,7 @@ namespace CPPaceTests {
 
       edges.clear();
       moplexes = MinimumFillIn::find_moplexes(graph, cache, edges);
+      std_sort(moplexes.begin(), moplexes.end(), moplex_order);
       Assert::IsTrue(result == moplexes);
 
       //everything cached but a new edge between 5 and 6, invalidating 6 as moplex
@@ -466,6 +468,7 @@ namespace CPPaceTests {
       edges.emplace(5, 6);
       graph.add_edge(5, 6);
       moplexes = MinimumFillIn::find_moplexes(graph, cache, edges);
+      std_sort(moplexes.begin(), moplexes.end(), moplex_order);
       Assert::IsTrue(result == moplexes);
     }
 

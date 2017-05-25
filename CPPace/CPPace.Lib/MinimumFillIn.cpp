@@ -1,12 +1,12 @@
+#include <algorithm>
+#include <iterator>
+#include <queue>
 #include "MinimumFillIn.h"
 #include "SetFunctions.h"
 #include "Log.h"
 #include "ConsList.h"
 #include "LexBFS.h"
 #include "Kernelizer.h"
-#include <algorithm>
-#include <iterator>
-#include <queue>
 #include "MCS.h"
 
 bool MinimumFillIn::is_path_chordless(AdjacencyList& graph, vector<int>& path) {
@@ -119,6 +119,7 @@ static bool moplex_has_edge_in_neighbourhood(AdjacencyList& graph, set<int>& mop
     if (edge.first == n) return true;
     if (edge.second == n) return true;
   }
+  return false;
 }
 
 vector<set<int>> MinimumFillIn::find_moplexes(AdjacencyList& graph, vector<set<int>>& previous_moplexes, set<pair<int, int>>& newly_added_edges) {
@@ -143,7 +144,7 @@ vector<set<int>> MinimumFillIn::find_moplexes(AdjacencyList& graph, vector<set<i
 
     // if moplex have been affected by a newly added edge, it must be recomputed, i.e. is not valid
     for (pair<int, int> new_edge : newly_added_edges) {
-      still_valid = moplex_has_edge_in_neighbourhood(graph, prev_moplex, new_edge);
+      still_valid = !moplex_has_edge_in_neighbourhood(graph, prev_moplex, new_edge);
       still_valid = still_valid && prev_moplex.find(new_edge.first) == prev_moplex.end();
       still_valid = still_valid && prev_moplex.find(new_edge.second) == prev_moplex.end();
       if (!still_valid) break;

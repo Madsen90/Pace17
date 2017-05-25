@@ -14,15 +14,6 @@ public:
     map<int, int> order = MCS::order(graph);
     Assert::IsFalse(MCS::is_chordal(graph, order));
 
-
-    //berry bordat optimally solved
-    /* graph = SampleGraphs::berry_bordat();
-    graph.add_edge(4, 5);
-    graph.add_edge(4, 6);
-    graph.add_edge(5, 6);
-    order = MCS::order(graph);
-    Assert::IsTrue(MCS::is_chordal(graph, order));
-    */
     LexBFS lex(graph.num_vertices);
     lex.order(graph);
     Assert::AreEqual(lex.is_chordal(graph), MCS::is_chordal(graph, order));
@@ -418,8 +409,6 @@ public:
     kernel = Kernelizer::phase1(graph);
     Assert::AreEqual(8, (int)kernel.a.size());
     Assert::AreEqual(0, (int)kernel.b.size());
-
-    //could probably use more testing
 
   }
 

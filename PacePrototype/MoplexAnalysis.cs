@@ -54,7 +54,7 @@ namespace PacePrototype
                 if(prevMoplexes != null)
                     foreach(var e in newlyAddedEdges)
                     {
-                        var validMoplexes = prevMoplexes.Where(moplex =>
+                        var validMoplexes = prevMoplexes.Where(moplex => //this should not work!?!?! We add moplexes if they are not effected by the first edge
                             e.Source != moplex.First()
                             && e.Target != moplex.First()
                             && graph.AdjacentEdges(moplex.First())
