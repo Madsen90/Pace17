@@ -497,6 +497,7 @@ stack<pair<int, int>> MinimumFillIn::minimum_fill_in(GraphIO::GraphContext conte
       continue;
     }
 
+#ifdef LOGGING
     set<pair<int, int>> removed_edges;
     for (int u : k_kernel.b)
       for (int v : context.graph.edges(u))
@@ -510,11 +511,10 @@ stack<pair<int, int>> MinimumFillIn::minimum_fill_in(GraphIO::GraphContext conte
       removed_edges.size(),
       (float)removed_edges.size() / context.graph.num_edges * 100);
     Log::info("Essential edges: .... %d", k_kernel.essential_edges.size());
+#endif
 
     stack<pair<int, int>> acc_added;
-
     context.graph.remove_vertices(k_kernel.b);
-
     for (pair<int, int> edge : k_kernel.essential_edges) {
       context.graph.add_edge(edge.first, edge.second);
       acc_added.push(edge);
