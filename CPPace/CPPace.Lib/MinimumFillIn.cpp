@@ -55,7 +55,7 @@ bool MinimumFillIn::find_four_cycle(AdjacencyList& graph, vector<int>& result) {
           if (u == w) continue;
           for (int x : graph.edges(w)) {
             if (x != t || graph.has_edge(t, v) || graph.has_edge(u, w)) continue;
-            result = vector<int>{ t, u, v, w };
+            result = vector<int> { t, u, v, w };
             return true;
           }
         }
@@ -133,8 +133,7 @@ set<int> get_neighbourhood_of_moplex(AdjacencyList& graph, set<int>& moplex) {
   return adjacent;
 }
 
-static bool moplex_has_edge_in_neighbourhood(AdjacencyList& graph, set<int>& moplex, pair<int, int>& edge)
-{
+static bool moplex_has_edge_in_neighbourhood(AdjacencyList& graph, set<int>& moplex, pair<int, int>& edge) {
   for (int n : get_neighbourhood_of_moplex(graph, moplex)) {
     if (edge.first == n) return true;
     if (edge.second == n) return true;
@@ -157,7 +156,7 @@ vector<set<int>> MinimumFillIn::find_moplexes(AdjacencyList& graph, vector<set<i
 
     // is_active check
     for (int v : prev_moplex) {
-      if (!(still_valid = !visited[v])) 
+      if (!(still_valid = !visited[v]))
         break;
     }
     if (!still_valid) continue;
@@ -169,9 +168,9 @@ vector<set<int>> MinimumFillIn::find_moplexes(AdjacencyList& graph, vector<set<i
       still_valid = still_valid && prev_moplex.find(new_edge.second) == prev_moplex.end();
       if (!still_valid) break;
     }
-    
+
     // the moplex does not need to be recomputed
-    if(still_valid) {
+    if (still_valid) {
       moplexes.push_back(prev_moplex);
       for (int v : prev_moplex) {
         visited[v] = true;
@@ -184,7 +183,7 @@ vector<set<int>> MinimumFillIn::find_moplexes(AdjacencyList& graph, vector<set<i
     if (visited[u]) continue;
     visited[u] = true;
 
-    set<int> potential_moplex{ u };
+    set<int> potential_moplex { u };
     set<int> u_edges = graph.edges(u); // Modified during loop
     for (int v : graph.edges(u)) {
       set<int> v_edges = graph.edges(v);
@@ -278,7 +277,7 @@ set<int> add_edge_wrapper(AdjacencyList& graph, int x, int y, set<int>& marked, 
 
 MinimumFillInResult minimum_fill_in_inner(AdjacencyList& graph, int k, int r, stack<pair<int, int>>& added, set<int>& marked, vector<set<int>>& cached_moplexes, set<pair<int, int>>& parents_new_edges, Stats& stats) {
   if (k < 0 || r < -1) return MinimumFillInResult(-1, stack<pair<int, int>>());
-  
+
   if (k == 0) { // due to kernel and incrementing k, we know that there is only a potential solution when k == 0
     LexBFS lex(graph.num_vertices);
     lex.order(graph);
@@ -296,13 +295,14 @@ MinimumFillInResult minimum_fill_in_inner(AdjacencyList& graph, int k, int r, st
     set<int> changed_markings = add_edge_wrapper(graph, four_cycle[0], four_cycle[2], marked, added);
     parents_new_edges.emplace(four_cycle[0], four_cycle[2]);
     MinimumFillInResult res_branch1 = minimum_fill_in_inner(graph, k - 1, r + changed_markings.size(), added, marked, cached_moplexes, parents_new_edges, stats);
-    
+
     //Reset
     graph.remove_edge(four_cycle[0], four_cycle[2]);
-    added.pop();    
-    // this should never fail, as new edges are never removed. Instead a new set is made, with the exception of four cycles, 
-    //where new edges are simply overridden.
-    parents_new_edges.erase(pair<int, int>(four_cycle[0], four_cycle[2])); 
+    added.pop();
+    // This should never fail, as new edges are never removed.
+    // Instead a new set is made, with the exception of four cycles, 
+    // where new edges are simply overridden.
+    parents_new_edges.erase(pair<int, int>(four_cycle[0], four_cycle[2]));
     marked = SetFunctions::set_union_two(marked, changed_markings);
 
     //Branch 2
@@ -404,10 +404,10 @@ MinimumFillInResult minimum_fill_in_inner(AdjacencyList& graph, int k, int r, st
           r++;
         r += add_edge_wrapper(graph, missing_edge.first, missing_edge.second, marked, added).size();
 
-        new_edges.insert(missing_edge); 
-        MinimumFillInResult result = minimum_fill_in_inner(graph, k-1, r, added, marked, moplexes, new_edges, stats);
+        new_edges.insert(missing_edge);
+        MinimumFillInResult result = minimum_fill_in_inner(graph, k - 1, r, added, marked, moplexes, new_edges, stats);
         graph.remove_edge(missing_edge.first, missing_edge.second);
-        added.pop(); 
+        added.pop();
         new_edges.erase(missing_edge);
         stats.num_unmarked_missing_one_edge_moplexes++;
         return result;
@@ -427,7 +427,7 @@ MinimumFillInResult minimum_fill_in_inner(AdjacencyList& graph, int k, int r, st
   //Branch 1
   marked = SetFunctions::set_union_two(marked, moplex);
   r -= moplex.size();
-  
+
   MinimumFillInResult res_branch1 = minimum_fill_in_inner(graph, k, r, added, marked, moplexes, new_edges, stats);
 
   //Reset
@@ -446,7 +446,7 @@ MinimumFillInResult minimum_fill_in_inner(AdjacencyList& graph, int k, int r, st
       if (n != m && !graph.has_edge(n, m)) {
         added_edges_counter++;
 
-        new_edges.emplace(n, m); 
+        new_edges.emplace(n, m);
         for (int mark : add_edge_wrapper(graph, n, m, marked, added))
           changed_markings.emplace(mark);
       }
@@ -484,7 +484,7 @@ stack<pair<int, int>> MinimumFillIn::minimum_fill_in(GraphIO::GraphContext conte
   int k = kernel.kMin;
   int original_k = k;
   Log::info("Kernelization phase 2 completed (lower bound k = %d)", kernel.kMin);
-  
+
   while (true) {
     context.graph.add_all_vertices();
     int original_k = k;
@@ -557,7 +557,7 @@ stack<pair<int, int>> MinimumFillIn::minimum_fill_in(GraphIO::GraphContext conte
         if (res.k != -1) {
           Log::info("Component %d solved with k: %d", i, internal_k);
           stats.log();
-            //Component solved with k. Add result
+          //Component solved with k. Add result
           while (!res.edges.empty()) {
             acc_added.push(res.edges.top());
             res.edges.pop();
