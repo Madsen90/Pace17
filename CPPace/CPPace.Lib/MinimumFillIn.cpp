@@ -281,8 +281,10 @@ MinimumFillInResult minimum_fill_in_inner(AdjacencyList& graph, int k, int r, st
   if (k == 0) { // due to kernel and incrementing k, we know that there is only a potential solution when k == 0
     LexBFS lex(graph.num_vertices);
     lex.order(graph);
-    if (lex.is_chordal(graph))
-      return MinimumFillInResult(k, added);
+    if (lex.is_chordal(graph)) {
+      stack<pair<int, int>>& res_edges(added);
+      return MinimumFillInResult(k, res_edges);
+    }
     return MinimumFillInResult(-1, stack<pair<int, int>>());
   }
 

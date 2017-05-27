@@ -1,6 +1,7 @@
 #include "../CPPace.Lib/Log.h"
 #include "../CPPace.Lib/GraphIO.h"
 #include "../CPPace.Lib/MinimumFillIn.h"
+#include "../CPPace.Lib/MCS.h"
 
 using namespace std;
 
@@ -24,7 +25,16 @@ int main(int argc, char *argv[]) {
     Log::info("NUM_VERTICES: .. %d", context.graph.num_vertices);
     Log::info("========================================");
     
-    stack<pair<int, int>> edges = MinimumFillIn::minimum_fill_in(context);
+    stack<pair<int, int>> edges = MinimumFillIn::minimum_fill_in(context);    
+    stack<pair<int, int>> test_edges(edges);
+    while(!test_edges.empty()) {
+      pair<int, int> edge = test_edges.top();
+      test_edges.pop();
+      context.graph.add_edge(edge.first, edge.second);
+    }
+    if (!MCS::is_chordal(context.graph)) {
+      Log::error("Error in result!");
+    }
     Log::info("Solution:");
     while (!edges.empty()) {
       pair<int, int> edge = edges.top();
