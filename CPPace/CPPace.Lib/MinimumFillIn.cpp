@@ -8,6 +8,7 @@
 #include "LexBFS.h"
 #include "Kernelizer.h"
 #include "MCS.h"
+#include <thread>
 
 struct Stats {
   int num_four_cycles = 0;
@@ -17,6 +18,7 @@ struct Stats {
   int num_marked_moplexes = 0;
   int num_unmarked_moplexes = 0;
 };
+
 
 bool MinimumFillIn::is_path_chordless(AdjacencyList& graph, vector<int>& path) {
   set<int> path_set;
@@ -265,7 +267,7 @@ set<int> add_edge_wrapper(AdjacencyList& graph, int x, int y, set<int>& marked, 
 }
 
 
-MinimumFillInResult minimum_fill_in_inner(AdjacencyList& graph, int k, int r, stack<pair<int, int>>& added, set<int>& marked, vector<set<int>>& cached_moplexes, set<pair<int, int>>& parents_new_edges, Stats& stats) {
+MinimumFillInResult minimum_fill_in_inner(AdjacencyList& graph, int k, int r, stack<pair<int, int>>& added, set<int>& marked, vector<set<int>>& cached_moplexes, set<pair<int, int>>& parents_new_edges, Stats& stats, Terminator* t) {
   if (k < 0 || r < -1) return MinimumFillInResult(-1, stack<pair<int, int>>());
 
   if (k == 0) { // due to kernel and incrementing k, we know that there is only a potential solution when k == 0
@@ -275,6 +277,9 @@ MinimumFillInResult minimum_fill_in_inner(AdjacencyList& graph, int k, int r, st
       return MinimumFillInResult(k, added);
   }
 
+  if (t->terminate) {
+    return MinimumFillInResult(-1, stack<pair<int, int>>());
+  }
   //CASE: Four cycles
   vector<int> four_cycle;
   if (MinimumFillIn::find_four_cycle(graph, four_cycle)) {
@@ -283,7 +288,7 @@ MinimumFillInResult minimum_fill_in_inner(AdjacencyList& graph, int k, int r, st
     //Branch 1
     set<int> changed_markings = add_edge_wrapper(graph, four_cycle[0], four_cycle[2], marked, added);
     parents_new_edges.emplace(four_cycle[0], four_cycle[2]);
-    MinimumFillInResult res_branch1 = minimum_fill_in_inner(graph, k - 1, r + changed_markings.size(), added, marked, cached_moplexes, parents_new_edges, stats);
+    MinimumFillInResult res_branch1 = minimum_fill_in_inner(graph, k - 1, r + changed_markings.size(), added, marked, cached_moplexes, parents_new_edges, stats, t);
     
     //Reset
     graph.remove_edge(four_cycle[0], four_cycle[2]);
@@ -294,7 +299,7 @@ MinimumFillInResult minimum_fill_in_inner(AdjacencyList& graph, int k, int r, st
     //Branch 2
     changed_markings = add_edge_wrapper(graph, four_cycle[1], four_cycle[3], marked, added);
     parents_new_edges.emplace(four_cycle[1], four_cycle[3]);
-    MinimumFillInResult res_branch2 = minimum_fill_in_inner(graph, k - 1, r + changed_markings.size(), added, marked, cached_moplexes, parents_new_edges, stats);
+    MinimumFillInResult res_branch2 = minimum_fill_in_inner(graph, k - 1, r + changed_markings.size(), added, marked, cached_moplexes, parents_new_edges, stats, t);
 
     //Reset
     graph.remove_edge(four_cycle[1], four_cycle[3]);
@@ -325,7 +330,7 @@ MinimumFillInResult minimum_fill_in_inner(AdjacencyList& graph, int k, int r, st
       marked = SetFunctions::set_union_two(marked, moplex);
       r -= moplex.size();
 
-      MinimumFillInResult result = minimum_fill_in_inner(graph, k, r, added, marked, moplexes, new_edges, stats);
+      MinimumFillInResult result = minimum_fill_in_inner(graph, k, r, added, marked, moplexes, new_edges, stats, t);
       for (int n : moplex) {
         marked.erase(n);
         r++;
@@ -354,7 +359,7 @@ MinimumFillInResult minimum_fill_in_inner(AdjacencyList& graph, int k, int r, st
       if (graph.is_clique(adjacent)) {
         graph.remove_vertices(moplexes[i]);
 
-        MinimumFillInResult result = minimum_fill_in_inner(graph, k, r, added, marked, moplexes, new_edges, stats);
+        MinimumFillInResult result = minimum_fill_in_inner(graph, k, r, added, marked, moplexes, new_edges, stats, t);
         graph.add_vertices(moplexes[i]);
         return result;
         stats.num_unmarked_simplicial_moplexes++;
@@ -390,7 +395,7 @@ MinimumFillInResult minimum_fill_in_inner(AdjacencyList& graph, int k, int r, st
           r++;
         r += add_edge_wrapper(graph, missing_edge.first, missing_edge.second, marked, added).size();
         new_edges.insert(missing_edge); 
-        MinimumFillInResult result = minimum_fill_in_inner(graph, k-1, r, added, marked, moplexes, new_edges, stats);
+        MinimumFillInResult result = minimum_fill_in_inner(graph, k-1, r, added, marked, moplexes, new_edges, stats, t);
         graph.remove_edge(missing_edge.first, missing_edge.second);
         added.pop(); 
         new_edges.erase(missing_edge);
@@ -414,7 +419,7 @@ MinimumFillInResult minimum_fill_in_inner(AdjacencyList& graph, int k, int r, st
   r -= moplex.size();
 
 
-  MinimumFillInResult res_branch1 = minimum_fill_in_inner(graph, k, r, added, marked, moplexes, new_edges, stats);
+  MinimumFillInResult res_branch1 = minimum_fill_in_inner(graph, k, r, added, marked, moplexes, new_edges, stats, t);
 
   //Reset
   for (int n : moplex) {
@@ -438,7 +443,7 @@ MinimumFillInResult minimum_fill_in_inner(AdjacencyList& graph, int k, int r, st
     }
   }
 
-  MinimumFillInResult res_branch2 = minimum_fill_in_inner(graph, k - added_edges_counter, r, added, marked, moplexes, new_edges, stats);
+  MinimumFillInResult res_branch2 = minimum_fill_in_inner(graph, k - added_edges_counter, r, added, marked, moplexes, new_edges, stats, t);
 
   //Reset
   while (added_edges_counter--) {
@@ -455,7 +460,7 @@ MinimumFillInResult minimum_fill_in_inner(AdjacencyList& graph, int k, int r, st
   return res_branch2;
 }
 
-stack<pair<int, int>> MinimumFillIn::minimum_fill_in(GraphIO::GraphContext context) {
+stack<pair<int, int>> MinimumFillIn::minimum_fill_in(GraphIO::GraphContext context, Terminator* t) {
   Log::info("Initial kernelization...");
   Kernel kernel = Kernelizer::phase1(context.graph);
   Log::info("Kernelization phase 1 completed (lower bound k = %d)", kernel.kMin);
@@ -469,6 +474,9 @@ stack<pair<int, int>> MinimumFillIn::minimum_fill_in(GraphIO::GraphContext conte
   Log::info("Kernelization phase 2 completed (lower bound k = %d)", kernel.kMin);
   
   while (true) {
+    if (t->terminate) {
+      return stack<pair<int, int>>();
+    }
     int original_k = k;
     Log::info("========================================");
     Log::info("Searching for solution (k = %d)", original_k);
@@ -505,7 +513,7 @@ stack<pair<int, int>> MinimumFillIn::minimum_fill_in(GraphIO::GraphContext conte
     vector<set<int>> empty_moplex_set;
     set<pair<int, int>> empty_edge_set;
     Stats stats;
-    MinimumFillInResult res = minimum_fill_in_inner(context.graph, k, k * 2, added, marked, empty_moplex_set, empty_edge_set, stats);
+    MinimumFillInResult res = minimum_fill_in_inner(context.graph, k, k * 2, added, marked, empty_moplex_set, empty_edge_set, stats, t);
     
     Log::info("Branch statistics:");
     Log::info("4-cycles: ....................... %d", stats.num_four_cycles);
