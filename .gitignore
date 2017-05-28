@@ -6,7 +6,7 @@ mfi.tgz
 # Latex
 *.aux
 Report/Report.pdf
-Report/Report.txt
+Report/Report.log
 
 
 # User-specific files
