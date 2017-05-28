@@ -15,14 +15,15 @@
 	The algorithm REFREF is concerned with finding four-cycles and certain substructures in the graph, called moplexes, which are defined as adhering to the following rules: \\
 
 	\begin{description}
-		\item[Clique] Every vertex in the moplex must know all other vertices.
+		\item[Clique] Every vertex in the moplex must be connected to all other vertices.
 		\item[Shared neighbourhood] Every vertex in the moplex must have the same neighbourhood.
 		\item[Maximally inclusive] If a vertex can be added to a moplex, without it not being a moplex anymore, that vertex must be included.
 	\end{description}
 
 	Furthermore, simplicial moplexes are moplexes where the neighbourhood of the moplex is also a clique.
 
-	MARKINGS
+	As an indicator that an edge will at some point need to be connected to another vertex, markings are used in this algorithm. 
+	A maximum of two times k markings are allowed, where k is the number of fill edges in the decision problem.
 
 		\subsection{Kernelization}
 		The kernelization algorithm used, REFREF, is split into three phases:
@@ -36,7 +37,6 @@
 		Since phase 3 is dependent on k, it has to be run for each k-value used by the algorithm...
 
 		\subsection{Cases} 
-		% Chordality and fail-cases
 		Once the graph has been kernelized, the algorithm is called with an initial k-value. The algorithm then tries to find a solution for the graph with the initial k-value.
 		If no solution with that k-value can be found, k is incremented and the algorithm is run again.
 		The algorithm is recursively called with a the k-value and in each iteration the first of six actions are performed, where the criteria of that case is met.
@@ -49,6 +49,8 @@
 			\item[Only marked moplexes] If all moplexes in the graph are marked, the algorithm fails.
 			\item[Any unmarked moplex] If there are any unmarked moplexes in the graph, the program branches into two. In one of the cases, every vertex in the moplex is marked. In the other case, every edge missing between the moplex and its neighbourhood is added.
 		\end{description}
+
+		At the start of each iteration, the graph is checked for chordality and if k has reached zero, the algorithm increments k and starts over.
 
 	\section{Optimizations}
 	The algorithm has been implemented in C++ to allow for greater optimization.
