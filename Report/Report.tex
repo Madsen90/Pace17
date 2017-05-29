@@ -48,7 +48,7 @@
 			\item[Four-cycle] If a four-cycle exists, the program branches on both possible resolution of the four-cycle.
 			\item[Moplex with marked and unmarked vertices] If a moplex containing marked and unmarked vertices exists in the graph, all vertices of the moplex are marked.
 			\item[Simplicial moplex with only unmarked edges] If \emph{any} simplicial moplexes containing only unmarked edges, exist in the graph, they are removed.
-			\item[Unmarked moplex with a neighbourhood missing only one edge] If a moplex containing only unmarked vertices and has a neighbourhood which is only missing one edge in order to be a clique, the missing edge is added.
+			\item[Unmarked moplex with a neighbourhood missing only one edge] If a moplex containing only unmarked vertices and which has a neighbourhood that is only missing one edge in order to be a clique, exists, the missing edge is added. In this case if a marked vertex, called $v_star$ fulfilling specific criteria is found, it is unmarked.
 			\item[Only marked moplexes] If all moplexes in the graph are marked, the algorithm fails.
 			\item[Any unmarked moplex] If there are any unmarked moplexes in the graph, the program branches into two. In one of the cases, every vertex in the moplex is marked. In the other case, every edge missing in the neighbourhood of the moplex is added.
 		\end{description}
@@ -83,6 +83,11 @@
 		\subsection{Moplexes}
 
 		\subsection{V-star}
+		$v_star$ is defined as the second to last vertex on each path between the two vertices, $x$ and $y$, which are missing an edge, as described in the case.
+		In order to find a potential $v_star$, a breadth-first search is run from $x$ and for each vertex a node is created and added to a linked-list, which will branch out once the paths start to diverge.
+		Once $y$ is added to the path, it is checked for chords.
+		Once all paths are found, the second to last node is compared for each path, first from $x$ to $y$, then from $y$ to $x$.
+		The complexity of this algorithm is $O(n^2)$, due to the check for chordlessness inside the BFS.
 
 	\section{Optimizations}
 	The algorithm has been implemented in C++ to allow for greater optimization.
