@@ -401,19 +401,17 @@ MinimumFillInResult minimum_fill_in_inner(AdjacencyList& graph, int k, int r, st
 
     if (!missing_more_than_one && missing_edge.first != missing_edge.second) {
       int v_star;
-      if (MinimumFillIn::find_v_star(graph, missing_edge.first, missing_edge.second, moplexes[unmarked_moplex_indices[i]], v_star)) {
-        if (marked.erase(v_star) != 0) //R might not need to be incremented for v_star
-          r++;
-        r += add_edge_wrapper(graph, missing_edge.first, missing_edge.second, marked, added).size();
+      if (MinimumFillIn::find_v_star(graph, missing_edge.first, missing_edge.second, moplexes[unmarked_moplex_indices[i]], v_star))
+        r++;
+      r += add_edge_wrapper(graph, missing_edge.first, missing_edge.second, marked, added).size();
 
-        new_edges.insert(missing_edge);
-        MinimumFillInResult result = minimum_fill_in_inner(graph, k - 1, r, added, marked, moplexes, new_edges, stats);
-        graph.remove_edge(missing_edge.first, missing_edge.second);
-        added.pop();
-        new_edges.erase(missing_edge);
-        stats.num_unmarked_missing_one_edge_moplexes++;
-        return result;
-      }
+      new_edges.insert(missing_edge);
+      MinimumFillInResult result = minimum_fill_in_inner(graph, k - 1, r, added, marked, moplexes, new_edges, stats);
+      graph.remove_edge(missing_edge.first, missing_edge.second);
+      added.pop();
+      new_edges.erase(missing_edge);
+      stats.num_unmarked_missing_one_edge_moplexes++;
+      return result;
     }
   }
 
