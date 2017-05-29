@@ -554,6 +554,32 @@ public:
     Assert::AreEqual(0, (int)phase3_kernel.b.size());
     Assert::AreEqual(1, phase3_kernel.kMin);
 
+    //test for understanding
+    ////five cycle, containg four cycle - the four cycle should not be part of the kernel
+    //graph = AdjacencyList(6);
+    //graph.add_edge(0, 1);
+    //graph.add_edge(0, 4);
+    //graph.add_edge(1, 2);
+    //graph.add_edge(2, 3);
+    //graph.add_edge(3, 4);
+    //graph.add_edge(1, 5);
+    //graph.add_edge(3, 5);
+    //kernel = Kernelizer::phase1(graph);
+    //Assert::AreEqual(5, (int)kernel.a.size());
+    //Assert::AreEqual(1, (int)kernel.b.size());
+    //Assert::AreEqual(2, kernel.kMin);
+    //Assert::IsTrue(Kernelizer::phase2(graph, kernel));
+    //Assert::AreEqual(5, (int)kernel.a.size());
+    //Assert::AreEqual(1, (int)kernel.b.size());
+    //Assert::AreEqual(2, kernel.kMin);
+    //phase3_kernel = Kernel();
+    //Assert::IsTrue(Kernelizer::phase3(graph, kernel, phase3_kernel, 2));
+    //Assert::AreEqual(5, (int)phase3_kernel.a.size());
+    //Assert::AreEqual(1, (int)phase3_kernel.b.size());
+    //Assert::AreEqual(2, phase3_kernel.kMin);
+    //Assert::AreEqual(1, (int)phase3_kernel.essential_edges.size());
+
+
     // 28 four-cycles, sharing the same two nodes
     graph = AdjacencyList(10);
     graph.add_edge(0, 2);

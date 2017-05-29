@@ -187,7 +187,7 @@ bool Kernelizer::phase3(AdjacencyList& graph, Kernel& phase2_kernel, Kernel& pha
       if (k_prime < 0) {
         phase3_cleanup(graph, phase2_kernel, phase3_kernel);
         return false;
-      }
+      } 
     } else {
       for (int v : a_xy) {
         phase3_kernel.a.emplace(v);
@@ -202,7 +202,6 @@ bool Kernelizer::phase3(AdjacencyList& graph, Kernel& phase2_kernel, Kernel& pha
 
 
 bool Kernelizer::find_chordless_cycle(AdjacencyList& graph, vector<int>& cycle) {
-  //missing components
 
   LexBFS lex(graph.num_vertices);
   lex.order(graph);
