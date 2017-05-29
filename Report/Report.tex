@@ -116,7 +116,7 @@ for every vertex (*\textbf{u}*) in (*\textbf{G}*):
 		add (*\textbf{M}*) to (*\textbf{moplexes}*)
 return (*\textbf{moplexes}*)
 		\end{lstlisting}
-		For every vertex in the graph we must potentially compare the neighborhood of each neighboring vertex to the neighborhood of the clique, making the time complexity $O(V*E^2)$.
+		For every vertex in the graph we must potentially compare the neighborhood of each neighboring vertex to the neighborhood of the clique, making the time complexity $O(VE^2)$.
 		As moplexes must be enumerated quite often, this algorithm accounts for a large part of the total running time.
 		An approach to minimizing the impact of finding moplexes is discussed in the optimization section.
 
@@ -125,7 +125,7 @@ return (*\textbf{moplexes}*)
 		In order to find a potential $v_{star}$, a breadth-first search is run from $x$ and for each vertex a node is created and added to a linked-list, which will branch out once the paths start to diverge.
 		Once $y$ is added to the path, it is checked for chords.
 		Once all paths are found, the second to last node is compared for each path, first from $x$ to $y$, then from $y$ to $x$.
-		The complexity of this algorithm is $O(V^2*E)$, due to the check for chordlessness inside the BFS.
+		The complexity of this algorithm is $O(EV^2)$, due to the check for chordlessness inside the BFS.
 
 	\section{Optimizations}
 	The algorithm has been implemented in C++ to allow for greater optimization.
