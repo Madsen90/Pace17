@@ -10,6 +10,9 @@
 		\hspace{-18pt}
 		\textit{June 2, 2017}
 		\thispagestyle{empty}
+		\vspace{\fill}
+		\section*{Abstract}
+		This article describes the implementation of the fixed-parameter algorithm for solving the minimum fill-in problem by Bodlaender et al. in \cite{algorithm} in C++. Concrete solutions for each subproblem in the algorithm is described and several optimizations are explored, with varying success.
 	\end{titlepage}
 	\clearpage
 
@@ -55,6 +58,7 @@
 		At the start of each iteration, the graph is checked for chordality and if k has reached zero, the algorithm increments k and starts over.
 
 	\section{Implementation challenges}
+	As the concrete solutions for each subproblem within the algorithm are unexplored in the original article, they are not trivially solved optimally.
 
 		\subsection{Data structure}
 		To efficiently store the graph in memory an adjacency list is used.
@@ -151,11 +155,18 @@
 	\section{Comparison}
 
 	\section{Conclusion}
+	The algorithm functions adequately and has solved graphs with a k-value of up to 46.
+	It is unclear whether or not this implementation is optimal with regards to this specific algorithm, but it is unlikely that it can be optimized to a degree where it can solve graphs with a k-value that is significantly larger than what has been achieved in this implementation, due to the running time of the algorithm, $O(3^k)$.
+	It might be possible to improve the segmentation of the kernelizer or to recognize specific patterns in the kernel that can be solved polynomially.
 
 	\pagebreak
 	\addcontentsline{toc}{section}{References}	
 	\bibliographystyle{plain}
-	\begin{thebibliography}{99}
+	\begin{thebibliography}{9}
+
+		\bibitem{algorithm}
+		Bodlaender, Hans L., Heggernes, Pinar and Villanger, Yngve
+		\textit{Faster parameterized algorithms for Minimum Fill-In}
 
 		\bibitem{kernel}
 		Kaplan, H., Shamir, R. and Tarjan, R. E. 
@@ -168,9 +179,9 @@
  		SIAM J. COMPUT., Vol. 30, No. 4, pp. 1067--1079
 
 		\bibitem{finding-even-cycles}
-		Raphael Yuster and Uri Zwick
+		Yuster, Raphael and Zwick, Uri
 		\textit{Finding Even Cycles Even Faster}.
-		SIAM J. Discrete Math., 10(2), pp. 209--222.
+		SIAM J. Discrete Math., 10(2), pp. 209--222.		
 		
 	\end{thebibliography}
 
