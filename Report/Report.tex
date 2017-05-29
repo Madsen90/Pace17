@@ -17,8 +17,11 @@
 	\end{titlepage}
 	\clearpage
 
+	\section{Introduction}
+	In an effort to implement an efficient version of the fixed-parameter algorithm for solving the minimum fill-in problem by Bodlaender et al. in \cite{algorithm} as a submission for the Pace challenge 2017 track B\footnote{https://pacechallenge.wordpress.com/pace-2017/track-b-minimum-fill-in/}, a program has been implemented in C\# and then ported to C++.
+
 	\section{Algorithm}
-	The algorithm\cite{algorithm} is concerned with finding four-cycles and certain substructures in the graph, called moplexes, which are defined as adhering to the following rules: \\
+	The algorithm is concerned with finding four-cycles and certain substructures in the graph, called moplexes, which are defined as adhering to the following rules: \\
 
 	\begin{description}
 		\item[Clique] Every vertex in the moplex must be connected to all other vertices.
@@ -169,6 +172,8 @@ return (*\textbf{moplexes}*)
 		This is most likely due to the details of each implementation and not something we have investigated further.
 		We therefore changed the use of MCS to LexBFS in every case, most notably in the kernelizer.
 
+		\subsection{Comparison}
+
 	\section{Failed optimizations}
 	In addition to the actual optimizations listed above, several other things were tried.
 
@@ -186,8 +191,6 @@ return (*\textbf{moplexes}*)
 		An attempt to improve on this squashes a subgraph into a minimal representation containing only included vertices and edges.
 		Metadata about the original graph, like vertex names, must be preserved in the squashed graph, complicating the operation.
 		In practice this optimization attempt is also equivalent to cloning the relevant part of the graph whenever a subgraph is needed. This optimization did not improve the overall running time of the algorithm, likely because the overhead of checking subgraph flags is negligible compared to the computation done on the subgraph data.
-
-	\section{Comparison}
 
 	\section{Conclusion}
 	The algorithm functions adequately and has solved graphs with a k-value of up to 46.
