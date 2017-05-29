@@ -1,5 +1,7 @@
 \documentclass{article}
 
+\usepackage{placeins}
+
 \begin{document}
 
 \begin{titlepage}
@@ -104,19 +106,19 @@
 
 		\subsection{Maximum cardinality search}
 		\label{subsec:maximum-cardinality-search}
-		As a part of finding chordless cycles in the graph for phase 1 of the kenerlization algorithm, it is recommended in REFKAPLANREF that the maximum cardinality search (MCS) is used.
+		As a part of finding chordless cycles in the graph for phase 1 of the kenerlization algorithm, it is recommended in the paper describing the algorithm\cite{kernel} that the maximum cardinality search (MCS) is used.
 		MCS is very closely related to the LexBFS algorithm already used for REFREF, with the main difference being that LexBFS stores the processed neighbours by a list of names, where MCS instead maintains the count of processed neighbours.
 
-		\begin{table}
+		\begin{table}[!ht]
 			\begin{tabular}{| l | r | r |}
 			\hline
-											& MCS & LexBFS \\ \hline
-			2000-fully connected subgraph	& 43 s  & 39 s \\ \hline
-			1000-fully connected 			& 23 s & 23 s \\ \hline
-			1000-fully connected subgraph	& 4 s   & 4 s \\ \hline
-			10000-cycle 					& 4 s   & 0.161 s \\ \hline 
-			500-fully connected 			& 2 s   & 2 s \\ \hline 
-			500-fully connected subgraph 	& 0.31 s & 0.284 s \\ \hline 
+											& MCS 		& LexBFS 	\\ \hline
+			2000-fully connected subgraph	& 43 s  	& 39 s 		\\ \hline
+			1000-fully connected 			& 23 s 		& 23 s 		\\ \hline
+			1000-fully connected subgraph	& 4 s   	& 4 s 		\\ \hline
+			10000-cycle 					& 4 s   	& 0.161 s 	\\ \hline 
+			500-fully connected 			& 2 s   	& 2 s 		\\ \hline 
+			500-fully connected subgraph 	& 0.31 s 	& 0.284 s 	\\ \hline 
 			\end{tabular}
 			\label{table:maximum-cardinality-search}
 		\end{table}
