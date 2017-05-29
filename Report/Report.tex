@@ -29,11 +29,11 @@
 		\subsection{Kernelization}
 		The kernelization algorithm used, REFREF, is split into three phases:
 
-		\begin{enumerate}
-			\item .
-			\item .
-			\item .
-		\end{enumerate}
+		\begin{description}
+			\item[Phase 1]
+			\item[Phase 2]
+			\item[Phase 3]
+		\end{description}
 
 		Since phase 3 is dependent on k, it has to be run for each k-value used by the algorithm...
 
@@ -56,7 +56,11 @@
 	\section{Implementation challenges}
 
 		\subsection{Data structure}
-		% Matrix vs adjacencylist
+		To efficiently store the graph in memory an adjacency list is used.
+		In practice this is implemented as a vector of binary search tree sets.
+		While asserting if two vertices share an edge is possible in constant time using hash sets, the size of the edge sets are generally not large enough to outweigh the ability to compare sets.
+
+		Other graph representations, like the adjacency matrix, were attempted, but as the algorithm relies heavily on iterating vertex neighborhoods, the less efficient edge list access worsened the overall efficiency of the algorithm severely.
 
 		\subsection{Chordality}
 
@@ -102,9 +106,27 @@
 		The optimized set functionality did not, however, have any effect on the running time of the program, but it was decided that they should be kept due to the brevity of their parameters and ease of use in the case of the union of three sets.
 		
 		\subsection{Graph squashing}
+		As the subgraph implementation relies on flags determining if a vertex is part of the graph, vertices and edges not included in the graph must be checked by all graph operations.
+		An attempt to improve on this squashes a subgraph into a minimal representation containing only included vertices and edges.
+		Metadata about the original graph, like vertex names, must be preserved in the squashed graph, complicating the operation.
+		In practice this optimization attempt is also equivalent to cloning the relevant part of the graph whenever a subgraph is needed. This optimization did not improve the overall running time of the algorithm, likely because the overhead of checking subgraph flags is negligible compared to the computation done on the subgraph data.
 
 	\section{Comparison}
 
 	\section{Conclusion}
+
+	\pagebreak
+	\addcontentsline{toc}{section}{References}	
+	\bibliographystyle{plain}
+	\begin{thebibliography}{99}
+
+		\bibitem{kernel}
+		Kaplan, H., Shamir, R. and Tarjan, R. E. 
+		\textit{Tractability of Parameterized Completion Problems on Chordal, Strongly Chordal, and Proper Interval Graphs}. 
+		SIAM J. OF COMPUTING, Vol. 28, No. 5, pp. 1906--1922
+
+	\end{thebibliography}
+
+	\clearpage
 
 \end{document}
