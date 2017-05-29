@@ -65,6 +65,18 @@
 		\subsection{Chordality}
 
 		\subsection{Four-cycles}
+		As the algorithm branches on chordal completions of four-cycles, an efficient approach to finding these in the graph is needed.
+		It must be possible to either find one four-cycle or report that none exist.
+		This is accomplished using a depth-first search to a maximum depth of four, checking for lesser cycles along the way.
+		If no lesser cycles are present and the starting vertex is found at a depth of four, a four-cycle is reported.
+		If no four-cycles are found starting the search in every vertex of the graph, none are present in the graph.
+		The time complexity of this approach is $O(VE^4)$ as it is potentially necessary to check every edge in the graph in all four depths for every vertex.
+
+		Yuster and Zwick\cite{finding-even-cycles} describes an algorithm to detect four-cycles in $O(n^2)$ time, but requiring $O(n)$ extra space.
+		The algorithm uses an empty adjacency matrix the size of the graph and turns the neighborhood of each vertex in the original graph into a clique in the matrix.
+		If an edge is added to the matrix twice, a four-cycle is present and can be extracted in linear time.
+		This algorithm was attempted in the C\# prototype but turned out to be much slower than depth-first search, likely due to the memory overhead.
+		With an optimal implementation, perhaps using bit-vectors and the AVX instruction set, this algorithm might be worthwhile, but time constraints prevented such attempts.
 
 		\subsection{Moplexes}
 
@@ -124,6 +136,11 @@
 		Kaplan, H., Shamir, R. and Tarjan, R. E. 
 		\textit{Tractability of Parameterized Completion Problems on Chordal, Strongly Chordal, and Proper Interval Graphs}. 
 		SIAM J. OF COMPUTING, Vol. 28, No. 5, pp. 1906--1922
+
+		\bibitem{finding-even-cycles}
+		Raphael Yuster and Uri Zwick
+		\textit{Finding Even Cycles Even Faster}.
+		SIAM J. Discrete Math., 10(2), pp. 209--222.
 
 	\end{thebibliography}
 
