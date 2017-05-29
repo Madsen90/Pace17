@@ -123,6 +123,7 @@
 			\label{table:maximum-cardinality-search}
 		\end{table}
 		Intuitively, the MCS algorithm should be atleast as fast as the LexBFS algorithm, however we discovered a considerable speed-up when handling large cycles with LexBFS rather than MCS, without losing speed in other cases, as can be seen in our test results in table \ref{table:maximum-cardinality-search}.
+		This is most likely due to the details of each implementation and not something we have investigated further.
 		We therefore changed the use of MCS to LexBFS in every case, most notably in the kernelizer.
 
 	\section{Failed optimizations}
