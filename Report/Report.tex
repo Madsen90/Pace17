@@ -55,7 +55,11 @@
 	\section{Implementation challenges}
 
 		\subsection{Data structure}
-		% Matrix vs adjacencylist
+		To efficiently store the graph in memory an adjacency list is used.
+		In practice this is implemented as a vector of binary search tree sets.
+		While asserting if two vertices share an edge is possible in constant time using hash sets, the size of the edge sets are generally not large enough to outweigh the ability to compare sets.
+
+		Other graph representations, like the adjacency matrix, were attempted, but as the algorithm relies heavily on iterating vertex neighborhoods, the less efficient edge list access worsened the overall efficiency of the algorithm severely.
 
 		\subsection{Chordality}
 
@@ -92,6 +96,7 @@
 		\subsection{Set functions}
 
 		\subsection{Graph squashing}
+		
 
 	\section{Comparison}
 
