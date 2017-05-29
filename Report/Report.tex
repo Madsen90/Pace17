@@ -1,4 +1,5 @@
 \documentclass{article}
+\usepackage{listings}
 
 \usepackage{placeins}
 
@@ -84,6 +85,40 @@
 		With an optimal implementation, perhaps using bit-vectors and the AVX instruction set, this algorithm might be worthwhile, but time constraints prevented such attempts.
 
 		\subsection{Moplexes}
+		Multiple branches of the algorithm rely on enumerating all moplexes in the graph.
+		Recall a moplex is a clique sharing a minimal separator as its neighborhood.
+		This means that a single vertex can only be part of a single moplex.
+		This also means that cliques can be expanded greedily, as any vertex which shares neighbor set with the clique must be included in the clique.
+		The approach to finding moplexes is then as follows:
+		\begin{lstlisting}[tabsize=2, escapeinside={(*}{*)}]
+(*\textbf{visited}*) := empty
+(*\textbf{moplexes}*) := empty
+for every vertex (*\textbf{u}*) in (*\textbf{G}*):
+	(*\textbf{M}*) := { (*\textbf{u}*) }
+	if (*\textbf{u}*) is in (*\textbf{visited}*):
+		continue
+	for every neighbor (*\textbf{v}*) of (*\textbf{u}*) in (*\textbf{G}*):
+		if (*\textbf{v}*) is in (*\textbf{visited}*):
+			continue
+		if (*\textbf{u}*) and (*\textbf{v}*) has shared neighborhood (except (*\textbf{u}*) and (*\textbf{v}*)) in (*\textbf{G}*):
+			add (*\textbf{v}*) to (*\textbf{M}*)
+			add (*\textbf{v}*) to (*\textbf{visited}*)
+	add (*\textbf{u}*) to (*\textbf{visited}*)
+
+	(*\textbf{S}*) := neighborhood of (*\textbf{M}*)
+	(*$\mathbf{G'}$*) := (*\textbf{G}*)\(*\textbf{S}*)
+	(*$\mathbf{M_{valid}}$*) := true
+	for every vertex (*\textbf{s}*) in (*\textbf{S}*):
+		if (*\textbf{s}*) is not connected to every connected component of (*$\mathbf{G'}$*):
+			(*$\mathbf{M_{valid}}$*) := false // Seperator not minimal
+			break
+	if (*$\mathbf{M_{valid}}$*):
+		add (*\textbf{M}*) to (*\textbf{moplexes}*)
+return (*\textbf{moplexes}*)
+		\end{lstlisting}
+		For every vertex in the graph we must potentially compare the neighborhood of each neighboring vertex to the neighborhood of the clique, making the time complexity $O(V*E^2)$.
+		As moplexes must be enumerated quite often, this algorithm accounts for a large part of the total running time.
+		An approach to minimizing the impact of finding moplexes is discussed in the optimization section.
 
 		\subsection{V-star}
 		The vertex $v_{star}$ is defined as the second to last vertex on each path between the two vertices, $x$ and $y$, which are missing an edge, as described in the case.
