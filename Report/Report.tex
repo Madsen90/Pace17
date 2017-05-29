@@ -96,7 +96,10 @@
 		\subsection{Set functions}
 
 		\subsection{Graph squashing}
-		
+		As the subgraph implementation relies on flags determining if a vertex is part of the graph, vertices and edges not included in the graph must be checked by all graph operations.
+		An attempt to improve on this squashes a subgraph into a minimal representation containing only included vertices and edges.
+		Metadata about the original graph, like vertex names, must be preserved in the squashed graph, complicating the operation.
+		In practice this optimization attempt is also equivalent to cloning the relevant part of the graph whenever a subgraph is needed. This optimization did not improve the overall running time of the algorithm, likely because the overhead of checking subgraph flags is negligible compared to the computation done on the subgraph data.
 
 	\section{Comparison}
 
