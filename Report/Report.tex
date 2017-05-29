@@ -99,7 +99,7 @@
 		A very large part of the algorithm is in locating every moplex in the graph, since this is used in every case of the algorithm, excluding the case where a four-cycle is found.
 		Because the moplexes change fairly little in each iteration of the algorithm, these are cached in order to reduce the amount of time wasted on finding already found moplexes.
 
-		It is accomplished by...
+		It is accomplished by keeping track of which moplexes were found in the last iteration and which of these might have been effected by a change in the graph.
 
 		\subsection{Component splitting}
 		Since the graph is possibly divided into smaller kernels by the kernelization algorithm, the problem can potentially reduced to several instances with a lower k each, the performance of the program should greatly increase.
