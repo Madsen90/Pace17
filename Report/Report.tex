@@ -1,5 +1,7 @@
 \documentclass{article}
 
+\usepackage{placeins}
+
 \begin{document}
 
 \begin{titlepage}
@@ -17,6 +19,7 @@
 	\begin{description}
 		\item[Clique] Every vertex in the moplex must be connected to all other vertices.
 		\item[Shared neighbourhood] Every vertex in the moplex must have the same neighbourhood.
+		\item[Minimal separator neighbourhood] The neighbourhood of the moplex is a minimal separator, meaning that if the neighbourhood is removed from the graph, the graph is split into multiple parts. Removal of any proper subset of the neighbourhood must not split the graph, hence it is minimal.
 		\item[Maximally inclusive] If a vertex can be added to a moplex, without it not being a moplex anymore, that vertex must be included.
 	\end{description}
 
@@ -54,11 +57,27 @@
 	\section{Implementation challenges}
 
 		\subsection{Data structure}
-		% Matrix vs adjacencylist
+		To efficiently store the graph in memory an adjacency list is used.
+		In practice this is implemented as a vector of binary search tree sets.
+		While asserting if two vertices share an edge is possible in constant time using hash sets, the size of the edge sets are generally not large enough to outweigh the ability to compare sets.
+
+		Other graph representations, like the adjacency matrix, were attempted, but as the algorithm relies heavily on iterating vertex neighborhoods, the less efficient edge list access worsened the overall efficiency of the algorithm severely.
 
 		\subsection{Chordality}
 
 		\subsection{Four-cycles}
+		As the algorithm branches on chordal completions of four-cycles, an efficient approach to finding these in the graph is needed.
+		It must be possible to either find one four-cycle or report that none exist.
+		This is accomplished using a depth-first search to a maximum depth of four, checking for lesser cycles along the way.
+		If no lesser cycles are present and the starting vertex is found at a depth of four, a four-cycle is reported.
+		If no four-cycles are found starting the search in every vertex of the graph, none are present in the graph.
+		The time complexity of this approach is $O(VE^4)$ as it is potentially necessary to check every edge in the graph in all four depths for every vertex.
+
+		Yuster and Zwick\cite{finding-even-cycles} describes an algorithm to detect four-cycles in $O(n^2)$ time, but requiring $O(n)$ extra space.
+		The algorithm uses an empty adjacency matrix the size of the graph and turns the neighborhood of each vertex in the original graph into a clique in the matrix.
+		If an edge is added to the matrix twice, a four-cycle is present and can be extracted in linear time.
+		This algorithm was attempted in the C\# prototype but turned out to be much slower than depth-first search, likely due to the memory overhead.
+		With an optimal implementation, perhaps using bit-vectors and the AVX instruction set, this algorithm might be worthwhile, but time constraints prevented such attempts.
 
 		\subsection{Moplexes}
 
@@ -84,13 +103,44 @@
 		Since copying or deleting and recreating the graph is expensive, a cheap way to specificy which parts of the graph are currently "active" would be useful.
 		This is a accomplished with a boolean value for each vertex, indicating whether or not it should be regarded.
 
-		\subsection{Minimum cardinality search}
+		\subsection{Maximum cardinality search}
+		\label{subsec:maximum-cardinality-search}
+		As a part of finding chordless cycles in the graph for phase 1 of the kenerlization algorithm, it is recommended in the paper describing the algorithm\cite{kernel} that the maximum cardinality search (MCS) is used.
+		MCS is very closely related to the LexBFS algorithm already used for REFREF, with the main difference being that LexBFS stores the processed neighbours by a list of names, where MCS instead maintains the count of processed neighbours.
+
+		\begin{table}[!ht]
+			\begin{tabular}{| l | r | r |}
+			\hline
+											& MCS 		& LexBFS 	\\ \hline
+			2000-fully connected subgraph	& 43 s  	& 39 s 		\\ \hline
+			1000-fully connected 			& 23 s 		& 23 s 		\\ \hline
+			1000-fully connected subgraph	& 4 s   	& 4 s 		\\ \hline
+			10000-cycle 					& 4 s   	& 0.161 s 	\\ \hline 
+			500-fully connected 			& 2 s   	& 2 s 		\\ \hline 
+			500-fully connected subgraph 	& 0.31 s 	& 0.284 s 	\\ \hline 
+			\end{tabular}
+			\label{table:maximum-cardinality-search}
+		\end{table}
+		Intuitively, the MCS algorithm should be atleast as fast as the LexBFS algorithm, however we discovered a considerable speed-up when handling large cycles with LexBFS rather than MCS, without losing speed in other cases, as can be seen in our test results in table \ref{table:maximum-cardinality-search}.
+		We therefore changed the use of MCS to LexBFS in every case, most notably in the kernelizer.
 
 	\section{Failed optimizations}
+	In addition to the actual optimizations listed above, several other things were tried.
 
 		\subsection{Set functions}
+		As there are some very specific requirements for set functionality in the algorithm, which the default C++ set library does not support, implementation and optimization of this functionality was attempted.
+		Set union for two and three sets is used, along with set intersects for two sets.
+		Except for a union of three sets, these methods all exist in the C++ library, and the union of three sets, $s_1$, $s_2$ and $s_3$, can be replaced by two unions: $(s_1 \cup s_2) \cup s_3$.
+		This does however have some theoretical overhead, in that the unions would not be able to function in-place and would need an auxillary set, due to the structure of the C++ set library.
 
+		It was also not immediately apparent that the C++ implementation was optimal, since elements in a set are contained in a sorted order and unions and intersects can be done in time complexity of the total number of elements in the given sets.
+		The optimized set functionality did not, however, have any effect on the running time of the program, but it was decided that they should be kept due to the brevity of their parameters and ease of use in the case of the union of three sets.
+		
 		\subsection{Graph squashing}
+		As the subgraph implementation relies on flags determining if a vertex is part of the graph, vertices and edges not included in the graph must be checked by all graph operations.
+		An attempt to improve on this squashes a subgraph into a minimal representation containing only included vertices and edges.
+		Metadata about the original graph, like vertex names, must be preserved in the squashed graph, complicating the operation.
+		In practice this optimization attempt is also equivalent to cloning the relevant part of the graph whenever a subgraph is needed. This optimization did not improve the overall running time of the algorithm, likely because the overhead of checking subgraph flags is negligible compared to the computation done on the subgraph data.
 
 	\section{Comparison}
 
@@ -110,6 +160,12 @@
 		Natanzon, A., Shamir, A., Sharan R.,
 		\textit{A Polynomial Approximation Algorithm for the Minimum Fill-In Problem}. 
  		SIAM J. COMPUT., Vol. 30, No. 4, pp. 1067--1079
+
+		\bibitem{finding-even-cycles}
+		Raphael Yuster and Uri Zwick
+		\textit{Finding Even Cycles Even Faster}.
+		SIAM J. Discrete Math., 10(2), pp. 209--222.
+		
 	\end{thebibliography}
 
 	\clearpage
