@@ -52,6 +52,19 @@
 
 		At the start of each iteration, the graph is checked for chordality and if k has reached zero, the algorithm increments k and starts over.
 
+	\section{Implementation challenges}
+
+		\subsection{Data structure}
+		% Matrix vs adjacencylist
+
+		\subsection{Chordality}
+
+		\subsection{Four-cycles}
+
+		\subsection{Moplexes}
+
+		\subsection{V-star}
+
 	\section{Optimizations}
 	The algorithm has been implemented in C++ to allow for greater optimization.
 
@@ -71,5 +84,17 @@
 		Since the algorithm is depth-first, meaning each branch is explored exhaustively before the next branch is considered, the changes made must be easily reversible.
 		Since copying or deleting and recreating the graph is expensive, a cheap way to specificy which parts of the graph are currently "active" would be useful.
 		This is a accomplished with a boolean value for each vertex, indicating whether or not it should be regarded.
+
+		\subsection{Minimum cardinality search}
+
+	\section{Failed optimizations}
+
+		\section{Set functions}
+
+		\section{Graph squashing}
+
+	\section{Comparison}
+
+	\section{Conclusion}
 
 \end{document}
