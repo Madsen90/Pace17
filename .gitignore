@@ -7,7 +7,7 @@ mfi.tgz
 *.aux
 Report/Report.pdf
 Report/Report.log
-
+Report/Report.synctex.gz
 
 # User-specific files
 *.suo
