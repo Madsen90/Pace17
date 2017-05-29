@@ -17,6 +17,7 @@
 	\begin{description}
 		\item[Clique] Every vertex in the moplex must be connected to all other vertices.
 		\item[Shared neighbourhood] Every vertex in the moplex must have the same neighbourhood.
+		\item[Minimal separator neighbourhood] The neighbourhood of the moplex is a minimal separator, meaning that if the neighbourhood is removed from the graph, the graph is split into multiple parts. Removal of any proper subset of the neighbourhood must not split the graph, hence it is minimal.
 		\item[Maximally inclusive] If a vertex can be added to a moplex, without it not being a moplex anymore, that vertex must be included.
 	\end{description}
 
@@ -85,12 +86,21 @@
 		Since copying or deleting and recreating the graph is expensive, a cheap way to specificy which parts of the graph are currently "active" would be useful.
 		This is a accomplished with a boolean value for each vertex, indicating whether or not it should be regarded.
 
-		\subsection{Minimum cardinality search}
+		\subsection{Maximum cardinality search}
+		\label{subsec:maximum-cardinality-search}
 
 	\section{Failed optimizations}
+	In addition to the actual optimizations listed above, several other things were tried.
 
 		\subsection{Set functions}
+		As there are some very specific requirements for set functionality in the algorithm, which the default C++ set library does not support, implementation and optimization of this functionality was attempted.
+		Set union for two and three sets is used, along with set intersects for two sets.
+		Except for a union of three sets, these methods all exist in the C++ library, and the union of three sets, $s_1$, $s_2$ and $s_3$, can be replaced by two unions: $(s_1 \cup s_2) \cup s_3$.
+		This does however have some theoretical overhead, in that the unions would not be able to function in-place and would need an auxillary set, due to the structure of the C++ set library.
 
+		It was also not immediately apparent that the C++ implementation was optimal, since elements in a set are contained in a sorted order and unions and intersects can be done in time complexity of the total number of elements in the given sets.
+		The optimized set functionality did not, however, have any effect on the running time of the program, but it was decided that they should be kept due to the brevity of their parameters and ease of use in the case of the union of three sets.
+		
 		\subsection{Graph squashing}
 
 	\section{Comparison}
