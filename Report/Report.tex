@@ -47,7 +47,7 @@
 			\item[Simplicial moplex with only unmarked edges] If \emph{any} simplicial moplexes containing only unmarked edges, exist in the graph, they are removed.
 			\item[Unmarked moplex with a neighbourhood missing only one edge] If a moplex containing only unmarked vertices and has a neighbourhood which is only missing one edge in order to be a clique, the missing edge is added.
 			\item[Only marked moplexes] If all moplexes in the graph are marked, the algorithm fails.
-			\item[Any unmarked moplex] If there are any unmarked moplexes in the graph, the program branches into two. In one of the cases, every vertex in the moplex is marked. In the other case, every edge missing between the moplex and its neighbourhood is added.
+			\item[Any unmarked moplex] If there are any unmarked moplexes in the graph, the program branches into two. In one of the cases, every vertex in the moplex is marked. In the other case, every edge missing in the neighbourhood of the moplex is added.
 		\end{description}
 
 		At the start of each iteration, the graph is checked for chordality and if k has reached zero, the algorithm increments k and starts over.
@@ -89,9 +89,9 @@
 
 	\section{Failed optimizations}
 
-		\section{Set functions}
+		\subsection{Set functions}
 
-		\section{Graph squashing}
+		\subsection{Graph squashing}
 
 	\section{Comparison}
 
