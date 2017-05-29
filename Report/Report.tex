@@ -92,6 +92,24 @@
 
 		\subsection{Maximum cardinality search}
 		\label{subsec:maximum-cardinality-search}
+		As a part of finding chordless cycles in the graph for phase 1 of the kenerlization algorithm, it is recommended in REFKAPLANREF that the maximum cardinality search (MCS) is used.
+		MCS is very closely related to the LexBFS algorithm already used for REFREF, with the main difference being that LexBFS stores the processed neighbours by a list of names, where MCS instead maintains the count of processed neighbours.
+
+		\begin{table}
+			\begin{tabular}{| l | r | r |}
+			\hline
+											& MCS & LexBFS \\ \hline
+			2000-fully connected subgraph	& 43 s  & 39 s \\ \hline
+			1000-fully connected 			& 23 s & 23 s \\ \hline
+			1000-fully connected subgraph	& 4 s   & 4 s \\ \hline
+			10000-cycle 					& 4 s   & 0.161 s \\ \hline 
+			500-fully connected 			& 2 s   & 2 s \\ \hline 
+			500-fully connected subgraph 	& 0.31 s & 0.284 s \\ \hline 
+			\end{tabular}
+			\label{table:maximum-cardinality-search}
+		\end{table}
+		Intuitively, the MCS algorithm should be atleast as fast as the LexBFS algorithm, however we discovered a considerable speed-up when handling large cycles with LexBFS rather than MCS, without losing speed in other cases, as can be seen in our test results in table \ref{table:maximum-cardinality-search}.
+		We therefore changed the use of MCS to LexBFS in every case, most notably in the kernelizer.
 
 	\section{Failed optimizations}
 	In addition to the actual optimizations listed above, several other things were tried.
