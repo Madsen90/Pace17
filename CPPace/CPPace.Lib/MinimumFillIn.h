@@ -14,6 +14,7 @@ public:
   bool terminate = false;
 };
 
+
 class DLLEXPORT MinimumFillIn {
 public:
   static bool is_path_chordless(AdjacencyList& graph, vector<int>& path);

@@ -37,13 +37,14 @@ int main(int argc, char *argv[]) {
     
     clock_t begin = clock();
     GraphIO::GraphContext context = GraphIO::read_from_path(path + (a.path().filename().string()));
+    GraphIO::write_to_path(context, "C:\\Users\\Frederik\\Dropbox\\Uni\\Pace\\Pace17\\CPPace\\x64\\Release\\9.dot", GraphIO::DOT);
     Terminator* term = new Terminator();
     promise<bool> pf;
     promise<stack<pair<int, int>>> pe;
     auto edges = pe.get_future();
     thread t = thread(&thread_version, context, term, move(pe));
     while (edges.wait_for(1min) != future_status::ready) {
-      if ((clock() - begin) / CLOCKS_PER_SEC > 600) {
+      if ((clock() - begin) / CLOCKS_PER_SEC > 241) {
         printf("Aborting thread due to time limit.\n");
         term->terminate = true;
         break;
