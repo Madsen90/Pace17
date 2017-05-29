@@ -26,15 +26,14 @@
 	A maximum of two times k markings are allowed, where k is the number of fill edges in the decision problem.
 
 		\subsection{Kernelization}
-		The kernelization algorithm used, REFREF, is split into three phases:
+		The kernelization algorithm used, described in \cite{kernel}, is split into three phases. Even though the kernelization algorithm is fixed-parameter tractable, it turns out that Phase 1 and 2 can be run with $k=\infty$, and only Phase 3 needs a fixed-parameter $k$, see \cite{polynomial-approx}. The kernelization produces a set of vertices relevant to the minimum fill-in algorithm, set $A$, a set of vertices which are not relevant, set $B$, and a set of essential edge which must be part of solution to the minimum fill-in problem, if one exists of size $k$. 
 
+		The three phases are:
 		\begin{description}
-			\item[Phase 1]
-			\item[Phase 2]
-			\item[Phase 3]
+			\item[Phase 1] finds independent chordless cycles in the graph, by utilizing the fact that non-chordal graphs does not have a perfect elimination order (PEO). After a chordless cycle is found, it is removed from the graph, in order to find all independent chordless cycles. The vertices in the chordless cycles are added to set $A$, and removed from set $B$.
+			\item[Phase 2] finds chordless cycles that share one or more vertices with another cycle. It uses the sets $A$ and $B$ produced by Phase 1, to find cycles that have vertices in both sets. As in phase 1, the vertices in cycles are added to $A$ and removed from $B$.
+			\item[Phase 3] finds essential edges for a solution of size $k$, by evaluating all non-edges in the graph. If it finds a non-essential non-edge in a chordless cycle not containing an essential edge, it adds all the vertices of the cycle to $A$ and removes them from $B$, thus ensuring that all chordless cycles are present in $A$.
 		\end{description}
-
-		Since phase 3 is dependent on k, it has to be run for each k-value used by the algorithm...
 
 		\subsection{Cases} 
 		Once the graph has been kernelized, the algorithm is called with an initial k-value. The algorithm then tries to find a solution for the graph with the initial k-value.
@@ -105,8 +104,12 @@
 		\bibitem{kernel}
 		Kaplan, H., Shamir, R. and Tarjan, R. E. 
 		\textit{Tractability of Parameterized Completion Problems on Chordal, Strongly Chordal, and Proper Interval Graphs}. 
-		SIAM J. OF COMPUTING, Vol. 28, No. 5, pp. 1906--1922
+		SIAM J. COMPUT., Vol. 28, No. 5, pp. 1906--1922
 
+		\bibitem{polynomial-approx}
+		Natanzon, A., Shamir, A., Sharan R.,
+		\textit{A Polynomial Approximation Algorithm for the Minimum Fill-In Problem}. 
+ 		SIAM J. COMPUT., Vol. 30, No. 4, pp. 1067--1079
 	\end{thebibliography}
 
 	\clearpage
