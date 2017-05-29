@@ -173,6 +173,25 @@ return (*\textbf{moplexes}*)
 		We therefore changed the use of MCS to LexBFS in every case, most notably in the kernelizer.
 
 		\subsection{Comparison}
+		In order to compare the C\# and C++ implementations with each other, a number of graphs of solvable sizes have been selected.
+		These have been run without the kernelizer (as there is no functioning kernelizer implementation in C\#).
+
+		\begin{table}[!ht]
+			\begin{tabular}{| l | r | r |}
+			\hline
+			Instance 	& C\# (ms)	& C++ (ms) 	\\ \hline
+			12 			& 			& 			\\ \hline
+			20 			& 			& 			\\ \hline
+			43 			& 			& 			\\ \hline
+			5  			& 			& 			\\ \hline 
+			50 			& 			& 			\\ \hline 
+			74 			& 			& 			\\ \hline 
+			84 			& 			& 			\\ \hline 
+			\end{tabular}
+			\label{table:implementation-comparison}
+		\end{table}
+
+		From these results...
 
 	\section{Failed optimizations}
 	In addition to the actual optimizations listed above, several other things were tried.
