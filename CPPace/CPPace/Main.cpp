@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
     
     clock_t begin = clock();
     GraphIO::GraphContext context = GraphIO::read_from_path(path + (a.path().filename().string()));
-    GraphIO::write_to_path(context, "C:\\Users\\Frederik\\Dropbox\\Uni\\Pace\\Pace17\\CPPace\\x64\\Release\\9.dot", GraphIO::DOT);
+    GraphIO::write_to_path(context, "C:\\Users\\Frederik\\Downloads\\instances1\\9.dot", GraphIO::DOT);
     Terminator* term = new Terminator();
     promise<bool> pf;
     promise<stack<pair<int, int>>> pe;
@@ -69,6 +69,8 @@ int main(int argc, char *argv[]) {
       }
       else {
         printf("ERROR! Got wrong solution to %s\n", (a.path().filename().string()));
+        GraphIO::write_to_path(context, "C:\\Users\\Frederik\\Downloads\\instances1\\9-done.dot", GraphIO::DOT);
+
       }
     }
     fflush(stdout);
