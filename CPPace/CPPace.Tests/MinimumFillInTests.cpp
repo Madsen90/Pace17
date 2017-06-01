@@ -630,7 +630,7 @@ namespace CPPaceTests {
     }
 
     TEST_METHOD(Instance9) {
-      Assert::AreEqual(7, solve_instance("9.graph"));
+      Assert::AreEqual(9, solve_instance("9.graph"));
     }
 
     TEST_METHOD(Instance12) {
