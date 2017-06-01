@@ -1,72 +1,71 @@
 \documentclass{article}
 \usepackage{listings}
-
 \usepackage{placeins}
+\usepackage{hyperref}
 
 \begin{document}
 
 \begin{titlepage}
 		\noindent{\huge Minimum Fill-In} \\ \\
-		Mikkel Gaub, \\ Malthe Ettrup Kirkbro, \\ \& Mads Frederik Madsen	\\ \\
+		Mikkel Gaub, \\ Malthe Ettrup Kirkbro  \& \\ Mads Frederik Madsen	\\ \\
 		\hspace{-18pt}
-		\textit{June 2, 2017}
+		\textit{\today}
 		\thispagestyle{empty}
 		\vspace{\fill}
 		\section*{Abstract}
-		This article describes the implementation in C++ of a fixed-parameter algorithm for solving the minimum fill-in problem by Bodlaender et al. in \cite{algorithm}. Concrete solutions for each subproblem in the algorithm is described and several optimizations are explored, with varying success.
+		This article describes a C++ implementation of a $O^*(3.0793^k)$ fixed-parameter tractable algorithm for solving the minimum fill-in problem, also known as chordal completion or triangulation, by Bodlaender et al. in \cite{algorithm}.
+		Concrete solutions for each subproblem in the algorithm are described and several optimizations are explored, with varying success.
 	\end{titlepage}
 	\clearpage
 
 	\section{Introduction}
-	In an effort to implement an efficient version of the fixed-parameter algorithm for solving the minimum fill-in problem by Bodlaender et al. in \cite[section 4]{algorithm} as a submission for the Pace challenge 2017 track B\footnote{https://pacechallenge.wordpress.com/pace-2017/track-b-minimum-fill-in/}, a program has been implemented in C\# and then ported to C++.\footnote{The github repository containing the source code can be found at: https://github.com/Madsen90/Pace17}
+	In an effort to implement an efficient version of the $O^*(3.0793^k)$ fixed-parameter tractable algorithm for solving the minimum fill-in problem by Bodlaender et al. in \cite[section 4]{algorithm} as a submission for the Pace challenge 2017 track B\footnote{https://pacechallenge.wordpress.com/pace-2017/track-b-minimum-fill-in/}, a program has been prototyped in C\# and fully implemented C++.\footnote{The github repository containing the source code can be found at: \url{https://github.com/Madsen90/Pace17}}
 
 	\section{Algorithm}
-	The algorithm is concerned with finding four-cycles and certain substructures in the graph, called moplexes, which are defined as adhering to the following rules: \\
+	The algorithm is concerned with finding four-cycles and substructures in the graph, called moplexes, which are defined as adhering to the following rules: \\
 
 	\begin{description}
-		\item[Clique] Every vertex in the moplex must be connected to all other vertices.
-		\item[Shared neighborhood] Every vertex in the moplex must have the same neighborhood.
+		\item[Clique] Every vertex in the moplex must be connected to all other vertices in the moplex.
+		\item[Shared neighborhood] Every vertex in the moplex must have the same neighborhood excluding the vertex itself.
 		\item[Minimal separator neighborhood] The neighborhood of the moplex is a minimal separator, meaning that if the neighborhood is removed from the graph, the graph is split into multiple parts. Removal of any proper subset of the neighborhood must not split the graph, hence it is minimal.
-		\item[Maximally inclusive] If a vertex can be added to a moplex, without it not being a moplex anymore, that vertex must be included.
+		\item[Maximally inclusive] If a vertex can be added to a moplex, with it still being a moplex, that vertex must be included.
 	\end{description}
 
-	Furthermore, simplicial moplexes are moplexes where the neighborhood of the moplex is also a clique.
+	Furthermore, a simplicial moplex is a moplex where the neighborhood of the moplex is also a clique.
 
-	As an indicator that an edge will at some point need to be connected to another vertex, \emph{markings} are used in this algorithm. 
-	A maximum of two times k markings are allowed, where k is the number of fill edges in the decision problem.
+	As an indicator that an edge will at some point need to be connected to another vertex, \emph{markings} are used in the algorithm. 
+	A maximum of $2k$ markings are allowed, where $k$ is the number of fill edges in the decision problem.
 
 		\subsection{Kernelization}
-
 		The kernelization algorithm used, described in \cite{kernel}, is split into three phases. 
-		Even though the kernelization algorithm is fixed-parameter tractable, it turns out that Phase 1 and 2 can be run with $k=\infty$, and only Phase 3 needs a fixed-parameter $k$, see \cite{polynomial-approx}. 
+		Even though the kernelization algorithm is fixed-parameter tractable, it turns out that phase 1 and 2 can be run with $k=\infty$, and only phase 3 needs a fixed-parameter $k$ (see \cite{polynomial-approx}). 
 		The kernelization produces a set of vertices which might be relevant to the minimum fill-in algorithm, set $A$, a set of vertices which are definitely not relevant, set $B$, and a set of essential edges which must be part of a solution to the minimum fill-in problem, if one exists of size $k$. 
 
 		The three phases are:
 		\begin{description}
-			\item[Phase 1] finds independent chordless cycles in the graph, by utilizing the fact that non-chordal graphs do not have a perfect elimination order (PEO). After a chordless cycle is found, it is removed from the graph, in order to ensure that it is independent from the other chordless cycles found. The vertices in the chordless cycles are added to set $A$, and removed from set $B$.
-			\item[Phase 2] finds chordless cycles which share one or more vertices with another cycle. It uses the sets $A$ and $B$ produced by Phase 1, to find cycles that have vertices in both sets. As in phase 1, the vertices in cycles are added to $A$ and removed from $B$.
-			\item[Phase 3] finds essential edges for a solution of size $k$, by evaluating all non-edges in the graph. If it finds a non-essential non-edge in a chordless cycle not containing an essential edge, it adds all the vertices of the cycle to $A$ and removes them from $B$, thus ensuring that all chordless cycles are present in $A$.
+			\item[Phase 1] finds independent chordless cycles in the graph. After a chordless cycle is found, it is removed from the graph, in order to ensure that it is independent from the other chordless cycles found. The vertices in the chordless cycles are added to set $A$, and removed from set $B$.
+			\item[Phase 2] finds chordless cycles which share one or more vertices with another cycle. It uses the sets $A$ and $B$ produced by phase 1, to find cycles that have vertices in both sets. As in phase 1, the vertices in found cycles are added to $A$ and removed from $B$.
+			\item[Phase 3] finds essential edges for a solution of size $k$, by evaluating all non-edges in the graph. If it finds a non-edge in a chordless cycle it adds the endpoints to $A$ and removes them from $B$, thus ensuring that all chordless cycles are present in $A$.
 		\end{description}
 
-		Furthermore, a lower bound for the minimum fill-in solution, $k_{min}$, can calculated by the size and number of Phase 1 cycles, and the length of the subpaths in the Phase 2 cycles. 
-		For further information study, please see \cite{kernel, polynomial-approx}.   
-
+		Furthermore, a lower bound for the minimum fill-in solution, $k_{min}$, can calculated by the size and number of phase 1 cycles, and the length of the subpaths in the phase 2 cycles. 
+		For further study, see \cite{kernel, polynomial-approx}.
 
 		\subsection{Cases} 
-		Once the graph has been kernelized, the algorithm is called with an initial k-value. The algorithm then tries to find a solution for the graph with the initial k-value.
-		If no solution with the given k-value can be found, $k$ is incremented and the algorithm is run again.
-		The algorithm is recursively called with a the k-value and in each iteration the first of six actions are performed, where the criteria of that case is met.
+		Once the graph has been kernelized, the algorithm is called with an initial $k$-value. The algorithm then tries to find a solution for the graph with the initial $k$-value.
+		If no solution with the given $k$-value can be found, $k$ is incremented and the algorithm is run again.
+		The algorithm is recursively called with a the $k$-value and in each iteration the first of six actions, where the criteria of that case are met, is performed.
 		These cases are, in order:
 		\begin{description}
-			\item[Four-cycle] If a four-cycle exists, the program branches on both possible resolutions of the four-cycle.
-			\item[Moplex with marked and unmarked vertices] If a moplex containing marked and unmarked vertices exists in the graph, all vertices of the moplex are marked.
-			\item[Simplicial moplex with only unmarked edges] If \emph{any} simplicial moplexes containing only unmarked edges, exist in the graph, they are removed.
-			\item[Unmarked moplex with a neighborhood missing only one edge] If a moplex containing only unmarked vertices and which has a neighborhood that is only missing one edge in order to be a clique, exists, the missing edge is added. In this case if a marked vertex, called $v_{star}$ fulfilling specific criteria is found, it is unmarked.
-			\item[Only marked moplexes] If all moplexes in the graph are marked, no solution with the given k-value exists.
-			\item[Any unmarked moplex] If there are any unmarked moplexes in the graph, the program branches into two. In the first branch, every vertex in the moplex is marked. In the other branch, every edge missing in the neighborhood of the moplex is added.
+			\item[Four-cycle] If a four-cycle exists, the program branches on both possible chordal completions of the four-cycle.
+			\item[Moplex with marked and unmarked vertices] If a moplex containing marked and unmarked vertices exists in the graph, all vertices of that moplex are marked.
+			\item[Simplicial moplex with only unmarked vertices] If any simplicial moplex, containing only unmarked vertices, exists in the graph, they are removed.
+			\item[Unmarked moplex with a neighborhood missing only one edge] If a moplex containing only unmarked vertices and which has a neighborhood that is only missing one edge in order to be a clique, exists, the missing edge is added. In this case if a marked vertex, called $v^*$ fulfilling specific criteria is found, it is unmarked.
+			\item[Only marked moplexes] If all moplexes in the graph are marked, no solution with the given $k$-value exists.
+			\item[Any unmarked moplex] If there are any unmarked moplexes in the graph, the program branches. In the first branch, every vertex in the moplex is marked. In the other branch, every edge missing in the neighborhood of the moplex is added.
 		\end{description}
 
-		At the start of each iteration, the graph is checked for chordality and if k has reached zero, the algorithm increments k and starts over.
+		At the start of each iteration, the graph is checked for chordality and if $k$ has reached zero, $k$ is incremented and the algorithm starts over.
 
 	\section{Implementation challenges}
 	As the concrete solutions for each subproblem within the algorithm are unexplored in the original article, they are not trivially solved optimally.
@@ -74,41 +73,41 @@
 		\subsection{Data structure}
 		To efficiently store the graph in memory an adjacency list is used.
 		In practice this is implemented as a vector of binary search tree sets.
-		While asserting whether or not two vertices share an edge, is possible in constant time using hash sets, the size of the edge sets are generally not large enough to outweigh the ability to compare sets.
+		While asserting whether or not two vertices share an edge is possible in constant time using hash sets, the size of the edge sets are generally not large enough to outweigh the ability to compare sets.
 
-		Other graph representations, like the adjacency matrix, were attempted, but as the algorithm relies heavily on iterating over vertex neighborhoods, the less efficient edge list access worsened the overall efficiency of the algorithm severely.
+		Other graph representations, like the adjacency matrix, were tested, but as the algorithm relies heavily on iterating over vertex neighborhoods, the less efficient edge list access worsened the overall efficiency of the algorithm severely.
 
 		\subsection{Chordality}
-		To check if the graph is chordal, the implementation utilizes the fact that a graph is chordal iff. there is a perfect elimination order (PEO) of the graph. 
-		A PEO is an ordering of the vertices in a graph, such that a vertex $v$, and $v$'s neighbours that are positioned later in the order, form a clique.
-		In other words, if the vertices are eliminated in order, then at the moment of removing $v$, the neighbourhood of $v$ is a clique.
+		To check if the graph is chordal, the implementation utilizes the fact that a graph is chordal iff. there exists a perfect elimination order (PEO) of the graph. 
+		A PEO is an ordering of the vertices in a graph, such that a vertex $v$, and $v$'s neighbors that are positioned later in the order, form a clique.
+		In other words, if the vertices are eliminated in order, then at the moment of removing $v$, the neighborhood of $v$ is a clique.
 
-		The algorithm Lexicographical Breadth-First-Search (LexBFS) produces a PEO, if one exists, see \cite{separability-generalizes-diracs-theorem, algorithmic-aspects-of-vertex-elimination-on-directed-graphs}. 
-		A LexBFS is a BFS, where the tie-breaking between vertices is resolved by choosing the one that has the earliest already visited neighbour.
-		This is done by numbering the vertices by the order in which they are visited, and appending this number to each of the unvisited neighbours of the vertex.
+		The algorithm Lexicographical Breadth-First-Search (LexBFS) produces a PEO, if one exists (see \cite{separability-generalizes-diracs-theorem, algorithmic-aspects-of-vertex-elimination-on-directed-graphs}).
+		A LexBFS is a BFS, where the tie-breaking between vertices is resolved by choosing the one that has the earliest already visited neighbor.
+		This is accomplished by numbering the vertices by the order in which they are visited, and appending this number to a list in each of the unvisited neighbors of the vertex.
 		LexBFS runs in linear time \cite{separability-generalizes-diracs-theorem}.
 
-		To check if a graph is chordal, the implementation runs a LexBFS, and checks that each vertex's higher-ordered neighbourhood is a clique.
+		To check if a graph is chordal, the implementation runs a LexBFS, and checks that each vertex's higher-ordered neighborhood is a clique.
 		This has a running time of $O(V^3)$
 
 		\subsection{Four-cycles}
 		As the algorithm branches on chordal completions of four-cycles, an efficient approach to finding these in the graph is needed.
 		It must be possible to either find one four-cycle or report that none exist.
-		This is accomplished using a depth-first search to a maximum depth of four, checking for lesser cycles along the way.
-		If no lesser cycles are present and the starting vertex is found at a depth of four, a four-cycle is reported.
+		This is accomplished using a depth-first search to a maximum depth of four, checking for chords along the way.
+		If no chords are present and the starting vertex is found at a depth of four, a four-cycle is reported.
 		If no four-cycles are found starting the search in every vertex of the graph, none are present in the graph.
 		The time complexity of this approach is $O(VE^4)$ as it is potentially necessary to check every edge in the graph in all four depths for every vertex.
 
-		Yuster and Zwick\cite{finding-even-cycles} describes an algorithm to detect four-cycles in $O(n^2)$ time, but requiring $O(n)$ extra space.
+		Yuster and Zwick\cite{finding-even-cycles} describes an algorithm to detect four-cycles in $O(V^2)$ time, but requiring $O(V^2)$ extra space.
 		The algorithm uses an empty adjacency matrix the size of the graph and turns the neighborhood of each vertex in the original graph into a clique in the matrix.
-		If an edge is added to the matrix twice, a four-cycle is present and can be extracted in linear time.
+		If an edge is added to the matrix twice, a potentially chordless four-cycle is present, can be extracted in linear time.
 		This algorithm was attempted in the C\# prototype but turned out to be much slower than depth-first search, likely due to the memory overhead.
 		With an optimal implementation, perhaps using bit-vectors and the AVX instruction set, this algorithm might be worthwhile, but time constraints prevented such attempts.
 
 		\subsection{Moplexes}
 		Multiple branches of the algorithm rely on enumerating all moplexes in the graph.
 		Recall a moplex is a clique sharing a minimal separator as its neighborhood.
-		This means that a single vertex can only be part of a single moplex.
+		This means that a vertex can only be part of a single moplex.
 		This also means that cliques can be expanded greedily, as any vertex which shares neighbor set with the clique must be included in the clique.
 		The approach to finding moplexes is then as follows:
 		\begin{lstlisting}[tabsize=2, escapeinside={(*}{*)}]
@@ -137,43 +136,44 @@ for every vertex (*\textbf{u}*) in (*\textbf{G}*):
 		add (*\textbf{M}*) to (*\textbf{moplexes}*)
 return (*\textbf{moplexes}*)
 		\end{lstlisting}
-		For every vertex in the graph we must potentially compare the neighborhood of each neighboring vertex to the neighborhood of the clique, making the time complexity $O(VE^2)$.
+		For every vertex in the graph we must potentially compare the neighborhood of each neighboring vertex to the neighborhood of the potential moplex, making the time complexity $O(VE^2)$.
 		As moplexes must be enumerated quite often, this algorithm accounts for a large part of the total running time.
 		An approach to minimizing the impact of finding moplexes is discussed in the optimization section.
 
-		\subsection{V-star}
-		The vertex $v_{star}$ is defined as the second to last vertex on each path between the two vertices, $x$ and $y$, which are missing an edge, as described in the case.
-		In order to find a potential $v_{star}$, a breadth-first search is run from $x$ and for each vertex a node is created and added to a linked-list, which will branch out once the paths start to diverge.
+		\subsection{v*}
+		The vertex $v^*$ is defined as the second to last vertex on each chordless path between the two vertices, $x$ and $y$, which are missing an edge, as described in the case.
+		In order to find a potential $v^*$, a breadth-first search is run from $x$ and for each vertex a node is created and added to a linked-list, which will branch out once the paths start to diverge.
 		Once $y$ is added to the path, it is checked for chords.
-		Once all paths are found, the second to last node is compared for each path, first from $x$ to $y$, then from $y$ to $x$.
-		The complexity of this algorithm is $O(EV^2)$, due to the check for chordlessness inside the BFS.
+		Once all chordless paths are found, the second to last node is compared for each path, first from $x$ to $y$, then from $y$ to $x$.
+		The complexity of this algorithm is $O(EV^2)$, due to the check for chordality of the path, inside the BFS.
 
 	\section{Optimizations}
-	The algorithm has been implemented in C++ to allow for greater optimization.
+	The algorithm has been implemented in C++ to allow for more efficient memory control.
 
 		\subsection{Moplex caching}
-		A very large part of the algorithm is in locating every moplex in the graph, since this is used in every case of the algorithm, excluding the case where a four-cycle is found.
+		A very large part of the running time of the algorithm is spent enumerating moplexes in the graph, since this is used in every case of the algorithm, excluding the case where a four-cycle is found.
 		Because the moplexes change fairly little in each iteration of the algorithm, these are cached in order to reduce the amount of time wasted on finding already found moplexes.
 
 		It is accomplished by keeping track of which moplexes were found in the last iteration and which of these might have been effected by a change in the graph.
 
 		\subsection{Component splitting}
-		Since the graph is possibly divided into smaller kernels by the kernelization algorithm, the problem can potentially reduced to several instances with a lower k each, the performance of the program should greatly increase.
+		Since the graph is possibly divided into smaller kernels by the kernelization algorithm, the problem can potentially be reduced to several instances with a lower $k$ each, the performance of the program should greatly increase.
 
-		This is accomplished by running the core of the algorithm on each found component of the graph, with an initial k-value of 0, or the k returned by the kernelization, if only one component exists in the graph.
+		This is accomplished by running the core of the algorithm on each found component of the graph, with an initial $k$-value of 0, or the $k_{min}$ returned by the kernelization, if only one component exists in the graph.
 
 		\subsection{Subgraphs}
 		Many functions used by the algorithm requires subgraphs to be considered, such as the kernelization and the deletion of simplicial moplexes.
-		Since the algorithm is depth-first, meaning each branch is explored exhaustively before the next branch is considered, the changes made must be easily reversible.
-		Since copying or deleting and recreating the graph is expensive, a cheap way to specify which parts of the graph are currently "active" would be useful.
-		This is a accomplished with a boolean value for each vertex, indicating whether or not it should be regarded.
+		Because the algorithm is depth-first, meaning each path in a branch is explored exhaustively before the next path is considered, the changes made must be easily reversible.
+		Since copying or deleting and recreating the graph is expensive, a cheap way to specify which parts of the graph are currently included would be useful.
+		This is a accomplished with a boolean value for each vertex, indicating whether or not it should be regarded as part of the graph.
 
 		\subsection{Maximum cardinality search}
 		\label{subsec:maximum-cardinality-search}
 		As a part of finding chordless cycles in the graph for phase 1 of the kernelization algorithm, it is recommended in the paper describing the algorithm\cite{kernel} that the maximum cardinality search (MCS) is used.
-		MCS is very closely related to the LexBFS algorithm already used for REFREF, with the main difference being that LexBFS stores the processed neighbors by a list of names, where MCS instead maintains the count of processed neighbors.
+		MCS is very closely related to the LexBFS algorithm already used for checking chordality, with the main difference being that LexBFS stores the processed neighbors by a list of names, where MCS instead maintains the count of processed neighbors.
 
 		\begin{table}[!ht]
+			\centering
 			\begin{tabular}{| l | r | r |}
 			\hline
 											& MCS 		& LexBFS 	\\ \hline
@@ -184,9 +184,10 @@ return (*\textbf{moplexes}*)
 			500-fully connected 			& 2 s   	& 2 s 		\\ \hline 
 			500-fully connected subgraph 	& 0.31 s 	& 0.284 s 	\\ \hline 
 			\end{tabular}
+			\caption{Running time comparison between MCS and LexBFS.}
 			\label{table:maximum-cardinality-search}
 		\end{table}
-		Intuitively, the MCS algorithm should be at least as fast as the LexBFS algorithm, however we discovered a considerable speed-up when handling large cycles with LexBFS rather than MCS, without losing speed in other cases, as can be seen in our test results in table \ref{table:maximum-cardinality-search}.
+		Intuitively, the MCS algorithm should be at least as fast as the LexBFS algorithm, however, we discovered a considerable speed-up when handling large cycles with LexBFS rather than MCS, without losing speed in other cases, as can be seen in our test results in table \ref{table:maximum-cardinality-search}.
 		This is most likely due to the details of each implementation and not something we have investigated further.
 		We therefore changed the use of MCS to LexBFS in every case, most notably in the kernelizer.
 
@@ -195,23 +196,23 @@ return (*\textbf{moplexes}*)
 
 		\subsection{Set functions}
 		As there are some very specific requirements for set functionality in the algorithm, which the default C++ set library does not support, implementation and optimization of this functionality was attempted.
-		Set union for two and three sets is used, along with set intersects for two sets.
-		Except for a union of three sets, these methods all exist in the C++ library, and the union of three sets, $s_1$, $s_2$ and $s_3$, can be replaced by two unions: $(s_1 \cup s_2) \cup s_3$.
-		This does however have some theoretical overhead, in that the unions would not be able to function in-place and would need an auxiliary set, due to the structure of the C++ set library.
+		Set intersects for two and three sets is used, along with set union for two sets.
+		Except for a intersection of three sets, these methods all exist in the C++ library, and the intersection of three sets, $s_1$, $s_2$ and $s_3$, can be replaced by two intersects: $(s_1 \cap s_2) \cap s_3$.
+		This does however have some theoretical overhead, in that the intersections would not be able to function in-place and would need an auxiliary set, due to the structure of the C++ set library.
 
-		It was also not immediately apparent that the C++ implementation was optimal, since elements in a set are contained in a sorted order and unions and intersects can be done in time complexity of the total number of elements in the given sets.
-		The optimized set functionality did not, however, have any effect on the running time of the program, but it was decided that they should be kept due to the brevity of their parameters and ease of use in the case of the union of three sets.
+		It was also not immediately apparent that the C++ implementation was optimal, since elements in a set are contained in a sorted order and unions and intersects can be done in time complexity linear in the total number of elements in the given sets.
+		The optimized set functionality did not, however, have any effect on the running time of the program, but was kept due to the brevity of their parameters and ease of use in the case of the intersection of three sets.
 		
 		\subsection{Graph squashing}
 		As the subgraph implementation relies on flags determining if a vertex is part of the graph, vertices and edges not included in the graph must be checked by all graph operations.
 		An attempt to improve on this squashes a subgraph into a minimal representation containing only included vertices and edges.
 		Metadata about the original graph, like vertex names, must be preserved in the squashed graph, complicating the operation.
-		In practice this optimization attempt is also equivalent to cloning the relevant part of the graph whenever a subgraph is needed. This optimization did not improve the overall running time of the algorithm, likely because the overhead of checking subgraph flags is negligible compared to the computation done on the subgraph data.
+		In practice this optimization attempt is also equivalent to cloning the relevant part of the graph whenever a subgraph is needed. This optimization did not improve the overall running time of the algorithm, likely because the overhead of checking subgraph flags is negligible compared to the computation done on the subgraph data, and as frequent memory allocation is slow.
 
 	\section{Conclusion}
-	The algorithm functions adequately and has solved graphs with a k-value of up to 46.
-	It is unclear whether or not this implementation is optimal with regards to this specific algorithm, but it is unlikely that it can be optimized to a degree where it can solve graphs with a k-value that is significantly larger than what has been achieved in this implementation, due to the running time of the algorithm, $O(3^k)$.
-	It might be possible to improve the segmentation of the kernelizer or to recognize specific patterns in the kernel that can be solved polynomially.
+	The algorithm functions adequately and has solved graphs with a $k$-value of up to 46.
+	It is unclear whether or not this implementation is optimal with regards to this specific algorithm, but it is unlikely that it can be optimized to a degree where it can solve graphs with a $k$-value that is significantly larger than what has been achieved in this implementation, due to the running time of the algorithm, $O^*(3.0793^k)$.
+	It might be possible to improve the segmentation of the kernelizer or to recognize specific patterns in the graph that can be solved in polynomial time.
 
 	\pagebreak
 	\addcontentsline{toc}{section}{References}	
