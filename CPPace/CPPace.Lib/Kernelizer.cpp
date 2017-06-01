@@ -151,9 +151,7 @@ bool Kernelizer::phase3(AdjacencyList& graph, Kernel& phase2_kernel, Kernel& pha
   phase3_kernel.b = set<int>(phase2_kernel.b);
   phase3_kernel.kMin = phase2_kernel.kMin;
 
-  //graph.remove_vertices(phase2_kernel.b);
   vector<pair<int, int>> non_edges = find_non_edges(graph);
-  //graph.add_vertices(phase2_kernel.b);
 
   for (int i = 0; i < non_edges.size(); i++) {
     pair<int, int> non_edge = non_edges[i];
