@@ -44,7 +44,7 @@ int main(int argc, char *argv[]) {
     auto edges = pe.get_future();
     thread t = thread(&thread_version, context, term, move(pe));
     while (edges.wait_for(1min) != future_status::ready) {
-      if ((clock() - begin) / CLOCKS_PER_SEC > 241) {
+      if ((clock() - begin) / CLOCKS_PER_SEC > 121) {
         printf("Aborting thread due to time limit.\n");
         term->terminate = true;
         break;
