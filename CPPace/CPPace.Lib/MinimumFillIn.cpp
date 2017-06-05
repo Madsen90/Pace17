@@ -550,6 +550,9 @@ stack<pair<int, int>> MinimumFillIn::minimum_fill_in(GraphIO::GraphContext conte
       Stats stats;
 
       while (!k_failed) {
+        if (t->terminate) {
+          return stack<pair<int, int>>();
+        }
         context.graph.set_vertices(components[i]); //Set vertices        
 
         set<int> marked;

@@ -37,14 +37,13 @@ int main(int argc, char *argv[]) {
     
     clock_t begin = clock();
     GraphIO::GraphContext context = GraphIO::read_from_path(path + (a.path().filename().string()));
-    GraphIO::write_to_path(context, "C:\\Users\\Frederik\\Downloads\\instances1\\9.dot", GraphIO::DOT);
     Terminator* term = new Terminator();
     promise<bool> pf;
     promise<stack<pair<int, int>>> pe;
     auto edges = pe.get_future();
     thread t = thread(&thread_version, context, term, move(pe));
-    while (edges.wait_for(1min) != future_status::ready) {
-      if ((clock() - begin) / CLOCKS_PER_SEC > 121) {
+    while (edges.wait_for(10s) != future_status::ready) {
+      if ((clock() - begin) / CLOCKS_PER_SEC > 29) {
         printf("Aborting thread due to time limit.\n");
         term->terminate = true;
         break;
@@ -69,7 +68,6 @@ int main(int argc, char *argv[]) {
       }
       else {
         printf("ERROR! Got wrong solution to %s\n", (a.path().filename().string()));
-        GraphIO::write_to_path(context, "C:\\Users\\Frederik\\Downloads\\instances1\\9-done.dot", GraphIO::DOT);
 
       }
     }
